@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { 
   Heart, Calendar, User, LogOut, Settings, 
-  Activity, ShieldCheck, ClipboardList, Users, Menu, X 
+  Activity, ShieldCheck, ClipboardList, Users, Menu, X, Video 
 } from 'lucide-react';
 
 import Footer from '@/components/Footer';
@@ -44,6 +44,7 @@ export default function DashboardLayout({ children }) {
       { name: 'Overview', icon: <Activity size={20} />, path: '/dashboard/doctor' },
       { name: 'Patients', icon: <Users size={20} />, path: '#' },
       { name: 'Schedule', icon: <Calendar size={20} />, path: '#' },
+      { name: 'Meetings', icon: <Video size={20} />, path: '/dashboard/doctor/meetings' },
       { name: 'Settings', icon: <Settings size={20} />, path: '/dashboard/settings' },
     ],
     admin: [
