@@ -63,15 +63,15 @@ export default function PrescriptionReader() {
     }
   };
 
-  if (loading || !user) return <div className="text-slate-400 p-10">Loading profile...</div>;
+  if (loading || !user) return <div className="text-slate-600 dark:text-slate-400 p-10">Loading profile...</div>;
 
   return (
     <div className="animate-[fadeIn_0.5s_ease-out] w-full max-w-4xl mx-auto">
       <header className="mb-8">
-        <h2 className="text-4xl font-extrabold bg-gradient-to-br from-white to-slate-400 bg-clip-text text-transparent mb-1">
+        <h2 className="text-4xl font-extrabold text-slate-800 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-white dark:to-slate-400 mb-1">
           Prescription Reader
         </h2>
-        <p className="text-slate-400 text-sm">Upload medical notes or prescriptions for offline locally parsed text nodes.</p>
+        <p className="text-slate-600 dark:text-slate-400 text-sm">Upload medical notes or prescriptions for offline locally parsed text nodes.</p>
       </header>
 
       {error && (
@@ -87,7 +87,7 @@ export default function PrescriptionReader() {
             <Upload size={20} /> Upload Image
           </h3>
 
-          <div className="border-2 border-dashed border-white/10 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-indigo-500/50 transition-colors relative h-64">
+          <div className="border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-indigo-500/50 transition-colors relative h-64">
             <input 
               type="file" 
               accept="image/*" 
@@ -133,7 +133,7 @@ export default function PrescriptionReader() {
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 border ${
                   copied 
                     ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" 
-                    : "bg-white/5 hover:bg-white/10 text-slate-300 border-white/10"
+                    : "bg-white/5 hover:bg-white/10 text-slate-300 border-slate-200 dark:border-white/10"
                 }`}
               >
                 {copied ? <Check size={14} /> : <Copy size={14} />}
@@ -143,13 +143,13 @@ export default function PrescriptionReader() {
           </div>
 
           {ocrText ? (
-            <div className="bg-slate-950/50 border border-white/5 rounded-xl p-4 flex-1 overflow-auto max-h-[350px]">
+            <div className="bg-slate-950/50 border border-slate-200 dark:border-white/5 rounded-xl p-4 flex-1 overflow-auto max-h-[350px]">
               <pre className="text-slate-300 text-sm font-['Outfit'] whitespace-pre-wrap">
                 {ocrText}
               </pre>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-slate-600 text-sm gap-2 bg-slate-950/20 rounded-xl border border-dashed border-white/5 p-10 h-64">
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-600 text-sm gap-2 bg-slate-950/20 rounded-xl border border-dashed border-slate-200 dark:border-white/5 p-10 h-64">
               <ClipboardList size={32} className="opacity-40" />
               <p>Extracted raw prescription contents appear here.</p>
             </div>

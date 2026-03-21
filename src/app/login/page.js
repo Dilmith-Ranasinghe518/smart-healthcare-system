@@ -34,7 +34,7 @@ export default function Login() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950">
+    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
       <Navbar />
       <div className="flex-1 flex items-center justify-center py-12 px-4">
         <div className="glass-panel w-full max-w-[450px] animate-[fadeIn_0.5s_ease-out]">
@@ -42,10 +42,10 @@ export default function Login() {
             <div className="mx-auto mb-4 w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center">
               <Activity size={24} className="text-indigo-400" />
             </div>
-            <h2 className="text-3xl font-bold bg-gradient-to-br from-white to-slate-400 bg-clip-text text-transparent mb-2">
+            <h2 className="text-3xl font-bold bg-gradient-to-br from-slate-800 dark:from-white to-slate-500 dark:to-slate-400 bg-clip-text text-transparent mb-2">
               Welcome Back
             </h2>
-            <p className="text-slate-400 text-sm">Sign in to access your portal node.</p>
+            <p className="text-slate-600 dark:text-slate-400 text-sm">Sign in to access your portal node.</p>
           </div>
 
           {error && (
@@ -79,7 +79,7 @@ export default function Login() {
               />
               <button 
                 type="button" 
-                className="absolute right-3 top-3.5 text-slate-500 hover:text-white transition-colors"
+                className="absolute right-3 top-3.5 text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}

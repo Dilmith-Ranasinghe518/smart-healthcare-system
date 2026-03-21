@@ -65,15 +65,15 @@ export default function MeetingsPage() {
     joinCall(newId);
   };
 
-  if (loading || !user) return <div className="text-slate-400 p-10">Loading consultations...</div>;
+  if (loading || !user) return <div className="text-slate-600 dark:text-slate-400 p-10">Loading consultations...</div>;
 
   return (
     <div className="animate-[fadeIn_0.5s_ease-out] w-full max-w-5xl mx-auto">
       <header className="mb-8">
-        <h2 className="text-4xl font-extrabold bg-gradient-to-br from-white to-slate-400 bg-clip-text text-transparent mb-1">
+        <h2 className="text-4xl font-extrabold text-slate-800 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-white dark:to-slate-400 mb-1">
           Video Consultations
         </h2>
-        <p className="text-slate-400 text-sm">Host or join HIPAA compliant stream consultation nodes.</p>
+        <p className="text-slate-600 dark:text-slate-400 text-sm">Host or join HIPAA compliant stream consultation nodes.</p>
       </header>
 
       {error && (
@@ -114,7 +114,7 @@ export default function MeetingsPage() {
       )}
 
       {client && call && (
-        <div className="rounded-2xl overflow-hidden shadow-2xl bg-slate-950 border border-white/5 animate-[scaleIn_0.3s_ease-out] h-[600px] w-full flex flex-col relative">
+        <div className="rounded-2xl overflow-hidden shadow-2xl bg-slate-950 border border-slate-200 dark:border-white/5 animate-[scaleIn_0.3s_ease-out] h-[600px] w-full flex flex-col relative">
           <StreamVideo client={client}>
             <StreamCall call={call}>
               <StreamTheme>

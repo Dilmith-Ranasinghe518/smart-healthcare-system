@@ -6,13 +6,13 @@
 
 @layer base {
   body {
-    @apply font-['Outfit'] bg-slate-950 text-slate-50 min-h-screen flex flex-col overflow-x-hidden;
+    @apply font-['Outfit'] bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 min-h-screen flex flex-col overflow-x-hidden transition-colors duration-300;
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply bg-slate-900/70 backdrop-blur-md border border-white/10 rounded-2xl p-8 shadow-lg;
+    @apply bg-white/80 dark:bg-slate-900/70 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-2xl p-8 shadow-md dark:shadow-none;
   }
   
   .btn {
@@ -24,19 +24,19 @@
   }
   
   .btn-secondary {
-    @apply bg-transparent text-slate-100 border border-white/10 hover:bg-white/10;
+    @apply bg-transparent text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10;
   }
   
   .input-field {
-    @apply w-full px-4 py-3 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-50 text-base transition-all duration-300 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 mb-4;
+    @apply w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/60 text-slate-800 dark:text-slate-50 text-sm transition-all duration-300 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 mb-4;
   }
 
   .badge {
     @apply px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider;
   }
-  .badge-admin { @apply bg-rose-500/20 text-rose-300 border border-rose-500/30; }
-  .badge-doctor { @apply bg-emerald-500/20 text-emerald-300 border border-emerald-500/30; }
-  .badge-user { @apply bg-indigo-500/20 text-indigo-300 border border-indigo-500/30; }
+  .badge-admin { @apply bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-300 border border-rose-500/20 dark:border-rose-500/30; }
+  .badge-doctor { @apply bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/20 dark:border-emerald-500/30; }
+  .badge-user { @apply bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 dark:border-indigo-500/30; }
 }
 
 @keyframes floatUp {

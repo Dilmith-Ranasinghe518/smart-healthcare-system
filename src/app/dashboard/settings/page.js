@@ -59,10 +59,10 @@ export default function SettingsPage() {
   return (
     <div className="animate-[fadeIn_0.5s_ease-out] w-full max-w-2xl mx-auto">
       <header className="mb-8">
-        <h2 className="text-4xl font-extrabold bg-gradient-to-br from-white to-slate-400 bg-clip-text text-transparent mb-1">
+        <h2 className="text-4xl font-extrabold text-slate-800 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-white dark:to-slate-400 mb-1">
           Account Settings
         </h2>
-        <p className="text-slate-400 text-sm">Update your profile parameters and security presets.</p>
+        <p className="text-slate-600 dark:text-slate-400 text-sm">Update your profile parameters and security presets.</p>
       </header>
 
       {message && (
@@ -78,20 +78,20 @@ export default function SettingsPage() {
       )}
 
       <div className="glass-panel p-6 md:p-8 flex flex-col gap-6">
-        <div className="flex items-center gap-4 border-b border-white/5 pb-6">
+        <div className="flex items-center gap-4 border-b border-slate-200 dark:border-white/5 pb-6">
           <div className="w-16 h-16 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-xl font-bold uppercase border border-indigo-500/20">
             {user?.name[0]}
           </div>
           <div>
             <h4 className="text-lg font-bold text-white">{user?.name}</h4>
-            <p className="text-xs text-slate-400 capitalize">{user?.role} Account</p>
+            <p className="text-xs text-slate-600 dark:text-slate-400 capitalize">{user?.role} Account</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-slate-400 mb-1.5 block font-medium">Full Name</label>
+              <label className="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">Full Name</label>
               <div className="relative">
                 <User size={16} className="absolute left-3 top-3 text-slate-500" />
                 <input 
@@ -105,7 +105,7 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="text-xs text-slate-400 mb-1.5 block font-medium">Email Address</label>
+              <label className="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">Email Address</label>
               <div className="relative">
                 <Mail size={16} className="absolute left-3 top-3 text-slate-500" />
                 <input 
@@ -119,14 +119,14 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="border-t border-white/5 pt-5 mt-2">
-            <h4 className="text-sm font-semibold text-slate-200 mb-4 flex items-center gap-2">
+          <div className="border-t border-slate-200 dark:border-white/5 pt-5 mt-2">
+            <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
               <Lock size={16} className="text-indigo-400" /> Security Preset
             </h4>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-slate-400 mb-1.5 block">New Password</label>
+                <label className="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block">New Password</label>
                 <div className="relative">
                   <input 
                     type={showPassword ? "text" : "password"} 
@@ -146,7 +146,7 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="text-xs text-slate-400 mb-1.5 block">Confirm New Password</label>
+                <label className="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block">Confirm New Password</label>
                 <div className="relative">
                   <input 
                     type={showConfirmPassword ? "text" : "password"} 

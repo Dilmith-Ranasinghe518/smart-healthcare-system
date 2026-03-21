@@ -1,4 +1,5 @@
 import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import "./globals.css";
 
 export const metadata = {
@@ -13,11 +14,13 @@ export default function RootLayout({ children }) {
         <link href="/stream-styles.css" rel="stylesheet" />
       </head>
       <body className="hero-gradient">
-        <AuthProvider>
-          <main className="main-content">
-            {children}
-          </main>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <main className="main-content">
+              {children}
+            </main>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

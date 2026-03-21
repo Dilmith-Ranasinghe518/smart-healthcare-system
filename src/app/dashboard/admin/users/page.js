@@ -78,15 +78,15 @@ export default function ManageUsersPage() {
     }
   };
 
-  if (loading || !user) return <div className="flex items-center justify-center p-10 h-full text-slate-400">Loading users...</div>;
+  if (loading || !user) return <div className="flex items-center justify-center p-10 h-full text-slate-600 dark:text-slate-400">Loading users...</div>;
 
   return (
     <div className="animate-[fadeIn_0.5s_ease-out] w-full">
       <header className="mb-8">
-        <h2 className="text-4xl font-extrabold bg-gradient-to-br from-white to-slate-400 bg-clip-text text-transparent mb-1">
+        <h2 className="text-4xl font-extrabold text-slate-800 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-white dark:to-slate-400 mb-1">
           User Management
         </h2>
-        <p className="text-slate-400 text-sm">View, update, and manage system access nodes.</p>
+        <p className="text-slate-600 dark:text-slate-400 text-sm">View, update, and manage system access nodes.</p>
       </header>
 
       {error && (
@@ -105,7 +105,7 @@ export default function ManageUsersPage() {
         
         <table className="w-full text-left border-collapse min-w-[600px]">
           <thead>
-            <tr className="border-b border-white/5 text-slate-400 text-sm">
+            <tr className="border-b border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-400 text-sm">
               <th className="pb-3 font-semibold">Name</th>
               <th className="pb-3 font-semibold">Email</th>
               <th className="pb-3 font-semibold">Role</th>
@@ -114,11 +114,11 @@ export default function ManageUsersPage() {
           </thead>
           <tbody>
             {users.map((u) => (
-              <tr key={u._id} className="border-b border-white/5 last:border-none text-sm hover:bg-white/2 transition-all">
-                <td className="py-4 font-medium text-slate-200">
+              <tr key={u._id} className="border-b border-slate-200 dark:border-white/5 last:border-none text-sm hover:bg-white/2 transition-all">
+                <td className="py-4 font-medium text-slate-800 dark:text-slate-200">
                   {u.name} {u._id === user._id && <span className="text-xs text-slate-500">(You)</span>}
                 </td>
-                <td className="py-4 text-slate-400">{u.email}</td>
+                <td className="py-4 text-slate-600 dark:text-slate-400">{u.email}</td>
                 <td className="py-4">
                   <span className={`badge ${
                     u.role === 'admin' ? 'badge-admin' : u.role === 'doctor' ? 'badge-doctor' : 'badge-user'
@@ -151,16 +151,16 @@ export default function ManageUsersPage() {
       {/* Edit User Modal */}
       {editingUser && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-[fadeIn_0.2s_ease-out]">
-          <div className="glass-panel w-full max-w-md p-6 bg-slate-900 border-white/10 shadow-2xl relative flex flex-col gap-4">
-            <button className="absolute top-4 right-4 text-slate-400 hover:text-white" onClick={() => setEditingUser(null)}>
+          <div className="glass-panel w-full max-w-md p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shadow-2xl relative flex flex-col gap-4">
+            <button className="absolute top-4 right-4 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white" onClick={() => setEditingUser(null)}>
               <X size={20} />
             </button>
             
-            <h3 className="text-xl font-bold text-white mb-2">Edit User Profile</h3>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Edit User Profile</h3>
             
             <form onSubmit={handleUpdate} className="flex flex-col gap-3">
               <div>
-                <label className="text-xs text-slate-400 mb-1 block">Full Name</label>
+                <label className="text-xs text-slate-600 dark:text-slate-400 mb-1 block">Full Name</label>
                 <input 
                   type="text" 
                   className="input-field mb-0" 
@@ -171,7 +171,7 @@ export default function ManageUsersPage() {
               </div>
 
               <div>
-                <label className="text-xs text-slate-400 mb-1 block">Email</label>
+                <label className="text-xs text-slate-600 dark:text-slate-400 mb-1 block">Email</label>
                 <input 
                   type="email" 
                   className="input-field mb-0" 
@@ -182,7 +182,7 @@ export default function ManageUsersPage() {
               </div>
 
               <div>
-                <label className="text-xs text-slate-400 mb-1 block">Role</label>
+                <label className="text-xs text-slate-600 dark:text-slate-400 mb-1 block">Role</label>
                 <select 
                   className="input-field mb-0 appearance-none cursor-pointer" 
                   value={editingUser.role} 
