@@ -38,6 +38,7 @@ export default function DashboardLayout({ children }) {
     user: [
       { name: 'Health Vitals', icon: <Heart size={20} />, path: '/dashboard/user' },
       { name: 'Appointments', icon: <Calendar size={20} />, path: '#' },
+      { name: 'Prescription Scan', icon: <ClipboardList size={20} />, path: '/dashboard/user/prescription' },
       { name: 'Settings', icon: <Settings size={20} />, path: '/dashboard/settings' },
     ],
     doctor: [
