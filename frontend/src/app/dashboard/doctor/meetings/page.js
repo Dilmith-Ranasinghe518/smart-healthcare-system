@@ -15,7 +15,7 @@ export default function MeetingsPage() {
   useEffect(() => {
     if (!loading && user) {
       // Fetch Stream Token from Backend
-      fetch(`${API_URL}/users/stream-token`, {
+      fetch(`${API_URL}/telemedicine/stream-token`, {
         headers: { Authorization: `Bearer ${user.token}` }
       })
       .then(res => {

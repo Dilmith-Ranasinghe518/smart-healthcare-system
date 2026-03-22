@@ -54,6 +54,31 @@ services:
     networks:
       - healthcare-network
 
+  telemedicine-service:
+    build:
+      context: ./backend/services/telemedicine-service
+      dockerfile: Dockerfile
+    container_name: smart-healthcare-telemedicine-service
+    ports:
+      - "${TELEMEDICINE_PORT}:${TELEMEDICINE_PORT}"
+    env_file:
+      - .env
+    networks:
+      - healthcare-network
+
+  prescription-service:
+    build:
+      context: ./backend/services/prescription-service
+      dockerfile: Dockerfile
+    container_name: smart-healthcare-prescription-service
+    ports:
+      - "${PRESCRIPTION_PORT}:${PRESCRIPTION_PORT}"
+    env_file:
+      - .env
+    networks:
+      - healthcare-network
+
+
 
   frontend:
     build:

@@ -1,12 +1,15 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+const roles = process.env.SUPPORTED_ROLES ? process.env.SUPPORTED_ROLES.split(',') : ['user', 'admin', 'doctor'];
+
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['user', 'admin', 'doctor'], default: 'user' }
+  role: { type: String, enum: roles, default: process.env.DEFAULT_ROLE || 'user' }
 }, { timestamps: true });
+
 
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
