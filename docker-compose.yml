@@ -86,7 +86,7 @@ services:
       dockerfile: Dockerfile
     container_name: smart-healthcare-frontend
     ports:
-      - "3001:3000"
+      - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:5005/api
     depends_on:
