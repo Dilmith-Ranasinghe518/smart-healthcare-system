@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prescription-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prescription-service
+  template:
+    metadata:
+      labels:
+        app: prescription-service
+    spec:
+      containers:
+      - name: prescription-service
+        image: smart-healthcare/prescription-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5004
+        envFrom:
+        - configMapRef:
+            name: smart-healthcare-config
+        - secretRef:
+            name: smart-healthcare-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prescription-service
+spec:
+  ports:
+  - port: 5004
+    targetPort: 5004
+  selector:
+    app: prescription-service

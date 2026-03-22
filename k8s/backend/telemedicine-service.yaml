@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telemedicine-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: telemedicine-service
+  template:
+    metadata:
+      labels:
+        app: telemedicine-service
+    spec:
+      containers:
+      - name: telemedicine-service
+        image: smart-healthcare/telemedicine-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5003
+        envFrom:
+        - configMapRef:
+            name: smart-healthcare-config
+        - secretRef:
+            name: smart-healthcare-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: telemedicine-service
+spec:
+  ports:
+  - port: 5003
+    targetPort: 5003
+  selector:
+    app: telemedicine-service

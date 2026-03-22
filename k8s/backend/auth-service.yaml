@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+      - name: auth-service
+        image: smart-healthcare/auth-service:latest
+        imagePullPolicy: Never # Loads local builds
+        ports:
+        - containerPort: 5001
+        envFrom:
+        - configMapRef:
+            name: smart-healthcare-config
+        - secretRef:
+            name: smart-healthcare-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+spec:
+  ports:
+  - port: 5001
+    targetPort: 5001
+  selector:
+    app: auth-service
