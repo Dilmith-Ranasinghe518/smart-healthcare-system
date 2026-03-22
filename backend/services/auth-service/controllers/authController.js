@@ -2,8 +2,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 const generateToken = (id, role) => {
-  return jwt.sign({ id, role }, process.env.JWT_SECRET || 'supersecretjwtkey123', {
-    expiresIn: '30d',
+  return jwt.sign({ id, role }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRATION,
   });
 };
 
@@ -20,7 +20,7 @@ const registerUser = async (req, res) => {
       name,
       email,
       password,
-      role: role || 'user',
+      role: role || process.env.DEFAULT_ROLE,
     });
 
     if (user) {

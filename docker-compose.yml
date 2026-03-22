@@ -11,21 +11,49 @@ services:
     networks:
       - healthcare-network
 
-  backend:
+  api-gateway:
     build:
-      context: ./backend
+      context: ./backend/services/api-gateway
       dockerfile: Dockerfile
-    container_name: smart-healthcare-backend
+    container_name: smart-healthcare-api-gateway
     ports:
-      - "5001:5000"
+      - "5005:${GATEWAY_PORT}"
     env_file:
-      - ./backend/.env
+      - .env
+    depends_on:
+      - auth-service
+      - user-service
+    networks:
+      - healthcare-network
+
+  auth-service:
+    build:
+      context: ./backend/services/auth-service
+      dockerfile: Dockerfile
+    container_name: smart-healthcare-auth-service
+    ports:
+      - "${AUTH_PORT}:${AUTH_PORT}"
+    env_file:
+      - .env
     depends_on:
       - mongodb
     networks:
       - healthcare-network
-    volumes:
-      - ./backend:/app
+
+  user-service:
+    build:
+      context: ./backend/services/user-service
+      dockerfile: Dockerfile
+    container_name: smart-healthcare-user-service
+    ports:
+      - "${USER_PORT}:${USER_PORT}"
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+    networks:
+      - healthcare-network
+
 
   frontend:
     build:
@@ -35,15 +63,16 @@ services:
     ports:
       - "3001:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:5001/api
+      - NEXT_PUBLIC_API_URL=http://localhost:5005/api
     depends_on:
-      - backend
+      - api-gateway
     networks:
       - healthcare-network
     volumes:
       - ./frontend:/app
       - /app/node_modules
       - /app/.next
+
 
 volumes:
   mongodb_data:
