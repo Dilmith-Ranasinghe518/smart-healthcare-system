@@ -1,5 +1,6 @@
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import AiSymptomProvider from "@/components/ai/AiSymptomProvider";
 import "./globals.css";
 
 export const metadata = {
@@ -18,6 +19,7 @@ export default function RootLayout({ children }) {
           <AuthProvider>
             <main className="main-content">
               {children}
+              <AiSymptomProvider />
             </main>
           </AuthProvider>
         </ThemeProvider>

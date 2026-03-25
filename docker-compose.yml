@@ -23,6 +23,9 @@ services:
     depends_on:
       - auth-service
       - user-service
+      - telemedicine-service
+      - prescription-service
+      - ai-symptom-service
     networks:
       - healthcare-network
 
@@ -78,7 +81,17 @@ services:
     networks:
       - healthcare-network
 
-
+  ai-symptom-service:
+    build:
+      context: ./backend/services/ai-symptom-service
+      dockerfile: Dockerfile
+    container_name: smart-healthcare-ai-symptom-service
+    ports:
+      - "5006:5006"
+    env_file:
+      - ./backend/services/ai-symptom-service/.env
+    networks:
+      - healthcare-network
 
   frontend:
     build:
@@ -97,7 +110,6 @@ services:
       - ./frontend:/app
       - /app/node_modules
       - /app/.next
-
 
 volumes:
   mongodb_data:
