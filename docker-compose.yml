@@ -92,6 +92,20 @@ services:
       - ./backend/services/ai-symptom-service/.env
     networks:
       - healthcare-network
+  
+  doctor-service:
+    build:
+      context: ./backend/services/doctor-service
+      dockerfile: Dockerfile
+    container_name: smart-healthcare-doctor-service
+    ports:
+      - "${DOCTOR_PORT}:${DOCTOR_PORT}"
+    env_file:
+      - .env
+    networks:
+      - healthcare-network
+    volumes:
+      - ./backend/services/user-service:/app/user-service
 
   frontend:
     build:
@@ -113,6 +127,7 @@ services:
 
 volumes:
   mongodb_data:
+
 
 networks:
   healthcare-network:
