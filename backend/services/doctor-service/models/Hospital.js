@@ -16,16 +16,13 @@ const hospitalSchema = new mongoose.Schema({
     required: [true, 'A hospital must have an address'],
     trim: true
   },
-  // GeoJSON Point for geospatial queries — coordinates: [longitude, latitude]
   location: {
     type: {
       type: String,
-      default: 'Point',
       enum: ['Point']
     },
     coordinates: {
-      type: [Number], // [longitude, latitude]
-      default: undefined
+      type: [Number] // [longitude, latitude]
     }
   },
   isActive: {

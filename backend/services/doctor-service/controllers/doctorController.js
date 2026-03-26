@@ -177,7 +177,7 @@ exports.manageLocations = catchAsync(async (req, res, next) => {
     return next(new AppError('You can only update your own locations', 403));
   }
 
-  const { hospitalId } = req.body;
+  const { hospitalId, consultationFee } = req.body;
 
   if (!hospitalId) {
     return next(new AppError('Please provide a hospitalId', 400));
@@ -208,6 +208,7 @@ exports.manageLocations = catchAsync(async (req, res, next) => {
     doctor.locations[locationIndex].hospitalName = hospital.name;
     doctor.locations[locationIndex].city = hospital.city;
     doctor.locations[locationIndex].address = hospital.address;
+    if (consultationFee !== undefined) doctor.locations[locationIndex].consultationFee = consultationFee;
   } else {
     // Add new location entry
     const newLocation = {
@@ -215,6 +216,7 @@ exports.manageLocations = catchAsync(async (req, res, next) => {
       hospitalName: hospital.name,
       city: hospital.city,
       address: hospital.address,
+      consultationFee: consultationFee || 0,
       availability: []
     };
     if (locationPoint) newLocation.locationPoint = locationPoint;
@@ -304,6 +306,7 @@ exports.setAvailability = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     message: 'Availability updated successfully',
+    doctor,
     availability: location.availability
   });
 });
@@ -311,7 +314,7 @@ exports.setAvailability = catchAsync(async (req, res, next) => {
 // Add a single availability slot to a specific location
 exports.addAvailabilitySlot = catchAsync(async (req, res, next) => {
   const { locationId } = req.params;
-  const { day, startTime, endTime } = req.body;
+  const { day, startTime, endTime, patientLimit, isAvailable } = req.body;
 
   if (!day || !startTime || !endTime) {
     return next(new AppError('Please provide day, startTime, and endTime', 400));
@@ -341,7 +344,13 @@ exports.addAvailabilitySlot = catchAsync(async (req, res, next) => {
     return next(new AppError('This availability slot already exists', 409));
   }
 
-  location.availability.push({ day, startTime, endTime });
+  location.availability.push({ 
+    day, 
+    startTime, 
+    endTime,
+    patientLimit: patientLimit || 10,
+    isAvailable: isAvailable !== undefined ? isAvailable : true
+  });
 
   await doctor.save({ validateBeforeSave: true });
 
