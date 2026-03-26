@@ -4,29 +4,44 @@ const hospitalSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'A hospital must have a name'],
-    trim: true,
+    trim: true
   },
   city: {
     type: String,
     required: [true, 'A hospital must belong to a city'],
-    trim: true,
+    trim: true
   },
   address: {
     type: String,
     required: [true, 'A hospital must have an address'],
+    trim: true
   },
+  // GeoJSON Point for geospatial queries — coordinates: [longitude, latitude]
   location: {
-    // GeoJSON for future scalability
     type: {
       type: String,
       default: 'Point',
       enum: ['Point']
     },
-    coordinates: [Number] // [longitude, latitude]
+    coordinates: {
+      type: [Number], // [longitude, latitude]
+      default: undefined
+    }
+  },
+  isActive: {
+    type: Boolean,
+    default: true
   }
 }, {
   timestamps: true
 });
+
+// Sparse 2dsphere index on hospital location
+hospitalSchema.index({ location: '2dsphere' }, { sparse: true });
+
+// Prevent exact duplicates — same name + city + address
+// Same hospital chain CAN have multiple branches (different address) in the same city
+hospitalSchema.index({ name: 1, city: 1, address: 1 }, { unique: true });
 
 const Hospital = mongoose.model('Hospital', hospitalSchema);
 

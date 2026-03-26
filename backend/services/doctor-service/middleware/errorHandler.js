@@ -6,9 +6,18 @@ const handleCastErrorDB = err => {
 };
 
 const handleDuplicateFieldsDB = err => {
-  const value = err.errmsg ? err.errmsg.match(/(["'])(\\?.)*?\1/)[0] : 'duplicate';
-  const message = `Duplicate field value: ${value}. Please use another value!`;
-  return new AppError(message, 400);
+  // Use keyValue (modern drivers) with errmsg as fallback
+  let field = 'value';
+  if (err.keyValue && Object.keys(err.keyValue).length) {
+    const pairs = Object.entries(err.keyValue)
+      .map(([k, v]) => `${k}: "${v}"`)
+      .join(', ');
+    field = pairs;
+  } else if (err.errmsg) {
+    const match = err.errmsg.match(/(["'])(\\?.)*?\1/);
+    if (match) field = match[0];
+  }
+  return new AppError(`Duplicate entry (${field}). This record already exists.`, 409);
 };
 
 const handleValidationErrorDB = err => {
@@ -26,32 +35,27 @@ const sendErrorDev = (err, res) => {
 };
 
 const sendErrorProd = (err, res) => {
-  // Operational, trusted error: send message to client
   if (err.isOperational) {
-    res.status(err.statusCode).json({
-      message: err.message
-    });
-
+    res.status(err.statusCode).json({ message: err.message });
   } else {
     console.error('ERROR - ', err);
-    res.status(500).json({
-      message: 'Something went very wrong!'
-    });
+    res.status(500).json({ message: 'Something went very wrong!' });
   }
 };
 
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
 
+  // Normalize known DB errors regardless of environment
+  // so they are always handled cleanly (not just in production)
+  let error = err;
+  if (error.name === 'CastError') error = handleCastErrorDB(error);
+  if (error.code === 11000) error = handleDuplicateFieldsDB(error);
+  if (error.name === 'ValidationError') error = handleValidationErrorDB(error);
+
   if (process.env.NODE_ENV === 'development') {
-    sendErrorDev(err, res);
+    sendErrorDev(error, res);
   } else {
-    let error = err;
-
-    if (error.name === 'CastError') error = handleCastErrorDB(error);
-    if (error.code === 11000) error = handleDuplicateFieldsDB(error);
-    if (error.name === 'ValidationError') error = handleValidationErrorDB(error);
-
     sendErrorProd(error, res);
   }
 };
