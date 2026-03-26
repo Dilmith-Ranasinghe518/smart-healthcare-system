@@ -29,5 +29,5 @@ app.all(/(.*)/, (req, res, next) => {
 // Global Error Handler
 app.use(globalErrorHandler);
 
-const PORT = process.env.DOCTOR_PORT || 5006;
+const PORT = process.env.DOCTOR_PORT || 5007;
 app.listen(PORT, () => console.log(`Doctor Service running on port ${PORT}`));

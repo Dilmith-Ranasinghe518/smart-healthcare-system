@@ -6,18 +6,14 @@ const router = express.Router();
 
 router.route('/')
   .get(hospitalController.getAllHospitals)
-  .post(
-    protect,
-    restrictTo('admin'),
-    hospitalController.createHospital
-  );
+  .post(protect, restrictTo('admin'), hospitalController.createHospital);
 
 router.route('/:id')
   .get(hospitalController.getHospital)
-  .put(
-    protect,
-    restrictTo('admin'),
-    hospitalController.updateHospital
-  );
+  .put(protect, restrictTo('admin'), hospitalController.updateHospital);
+
+// Toggle hospital active/inactive
+router.route('/:id/toggle-status')
+  .patch(protect, restrictTo('admin'), hospitalController.toggleHospitalStatus);
 
 module.exports = router;
