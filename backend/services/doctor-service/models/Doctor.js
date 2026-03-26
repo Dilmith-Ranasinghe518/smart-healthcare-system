@@ -32,6 +32,16 @@ const availabilitySlotSchema = new mongoose.Schema({
       values: VALID_TIMES,
       message: '{VALUE} is not a valid end time'
     }
+  },
+  isAvailable: {
+    type: Boolean,
+    default: true
+  },
+  patientLimit: {
+    type: Number,
+    required: [true, 'A slot must have a patient limit'],
+    default: 5,
+    min: [1, 'Patient limit must be at least 1']
   }
 }, { _id: true });
 
@@ -53,16 +63,19 @@ const locationSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  // GeoJSON Point copied from hospital.location — used for geospatial queries
+  consultationFee: {
+    type: Number,
+    required: [true, 'A location must specify a consultation fee'],
+    default: 0,
+    min: [0, 'Fee cannot be negative']
+  },
   locationPoint: {
     type: {
       type: String,
-      enum: ['Point'],
-      default: 'Point'
+      enum: ['Point']
     },
     coordinates: {
-      type: [Number], // [longitude, latitude]
-      default: undefined
+      type: [Number] // [longitude, latitude]
     }
   },
   availability: [availabilitySlotSchema]
