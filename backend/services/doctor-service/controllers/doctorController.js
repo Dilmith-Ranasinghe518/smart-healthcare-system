@@ -88,6 +88,16 @@ exports.getDoctorById = catchAsync(async (req, res, next) => {
   });
 });
 
+// Get my profile — for authenticated doctors
+exports.getMyProfile = catchAsync(async (req, res, next) => {
+  const doctor = await Doctor.findOne({ userId: String(req.user._id) });
+
+  res.status(200).json({
+    message: doctor ? 'Doctor profile retrieved successfully' : 'Profile not configured yet',
+    doctor: doctor || null
+  });
+});
+
 // Update doctor profile (basic fields only — not locations)
 exports.updateProfile = catchAsync(async (req, res, next) => {
   const doctor = await Doctor.findById(req.params.id);
