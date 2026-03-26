@@ -41,8 +41,4 @@ router.route('/:id/locations/:locationId/availability')
 router.route('/:id/locations/:locationId/availability/:slotId')
   .delete(protect, restrictTo('doctor', 'admin'), doctorController.removeAvailabilitySlot);
 
-// Called by Appointment Service to mark a slot booked (false) or released (true)
-router.route('/:id/locations/:locationId/availability/:slotId/status')
-  .patch(protect, restrictTo('admin', 'appointment-service'), doctorController.updateSlotAvailability);
-
 module.exports = router;

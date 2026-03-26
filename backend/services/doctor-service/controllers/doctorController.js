@@ -451,35 +451,3 @@ exports.getDoctorsNear = catchAsync(async (req, res, next) => {
   });
 });
 
-// Slot Availability — called by Appointment Service
-exports.updateSlotAvailability = catchAsync(async (req, res, next) => {
-  const { locationId, slotId } = req.params;
-  const { isAvailable } = req.body;
-
-  if (typeof isAvailable !== 'boolean') {
-    return next(new AppError('Please provide a boolean value for isAvailable', 400));
-  }
-
-  const doctor = await Doctor.findById(req.params.id);
-  if (!doctor) {
-    return next(new AppError('No doctor found with that ID', 404));
-  }
-
-  const location = doctor.locations.id(locationId);
-  if (!location) {
-    return next(new AppError('No location found with that ID on this doctor', 404));
-  }
-
-  const slot = location.availability.id(slotId);
-  if (!slot) {
-    return next(new AppError('No availability slot found with that ID', 404));
-  }
-
-  slot.isAvailable = isAvailable;
-  await doctor.save();
-
-  res.status(200).json({
-    message: `Slot marked as ${isAvailable ? 'available' : 'unavailable'}`,
-    slot
-  });
-});

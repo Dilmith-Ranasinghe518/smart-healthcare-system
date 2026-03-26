@@ -32,11 +32,6 @@ const availabilitySlotSchema = new mongoose.Schema({
       values: VALID_TIMES,
       message: '{VALUE} is not a valid end time'
     }
-  },
-  // Managed by Appointment Service — false when a booking exists for this slot
-  isAvailable: {
-    type: Boolean,
-    default: true
   }
 }, { _id: true });
 
