@@ -20,6 +20,9 @@ router.route('/options/availability')
   .get(doctorController.getAvailabilityOptions);
 
 // Doctor profile 
+router.route('/me')
+  .get(protect, restrictTo('doctor'), doctorController.getMyProfile);
+
 router.route('/:id')
   .get(doctorController.getDoctorById)
   .put(protect, restrictTo('doctor', 'admin'), doctorController.updateProfile)
