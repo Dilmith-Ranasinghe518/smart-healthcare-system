@@ -118,7 +118,7 @@ exports.updateProfile = catchAsync(async (req, res, next) => {
   if (experience !== undefined) updateData.experience = experience;
 
   const updatedDoctor = await Doctor.findByIdAndUpdate(req.params.id, updateData, {
-    new: true,
+    returnDocument: 'after',
     runValidators: true
   });
 
@@ -150,7 +150,7 @@ exports.verifyDoctor = catchAsync(async (req, res, next) => {
   const doctor = await Doctor.findByIdAndUpdate(
     req.params.id,
     { isVerified },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
 
   if (!doctor) {
