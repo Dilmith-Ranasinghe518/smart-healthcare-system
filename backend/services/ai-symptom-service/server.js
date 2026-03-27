@@ -27,7 +27,7 @@ app.use("/api/symptoms", symptomRoutes);
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5006;
+const PORT = process.env.SYMP_PORT;
 
 app.listen(PORT, () => {
   console.log(`AI Symptom Service running on port ${PORT}`);

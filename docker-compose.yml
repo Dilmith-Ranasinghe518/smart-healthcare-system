@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   mongodb:
@@ -89,7 +88,7 @@ services:
     ports:
       - "5006:5006"
     env_file:
-      - ./backend/services/ai-symptom-service/.env
+      - .env
     networks:
       - healthcare-network
   
