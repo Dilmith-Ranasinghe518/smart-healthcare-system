@@ -1,6 +1,7 @@
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { Toaster } from "react-hot-toast";
+import AiSymptomProvider from "@/components/ai/AiSymptomProvider";
 import "./globals.css";
 
 export const metadata = {
@@ -37,6 +38,7 @@ export default function RootLayout({ children }) {
             />
             <main className="main-content">
               {children}
+              <AiSymptomProvider />
             </main>
           </AuthProvider>
         </ThemeProvider>

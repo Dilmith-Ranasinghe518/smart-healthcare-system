@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: doctor-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: doctor-service
+  template:
+    metadata:
+      labels:
+        app: doctor-service
+    spec:
+      containers:
+      - name: doctor-service
+        image: smart-healthcare/doctor-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5007
+        envFrom:
+        - configMapRef:
+            name: smart-healthcare-config
+        - secretRef:
+            name: smart-healthcare-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: doctor-service
+spec:
+  ports:
+  - port: 5007
+    targetPort: 5007
+  selector:
+    app: doctor-service
