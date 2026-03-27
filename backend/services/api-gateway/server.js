@@ -13,6 +13,7 @@ const USER_SERVICE_URL = process.env.USER_SERVICE_URL;
 const TELEMEDICINE_SERVICE_URL = process.env.TELEMEDICINE_SERVICE_URL;
 const PRESCRIPTION_SERVICE_URL = process.env.PRESCRIPTION_SERVICE_URL;
 const DOCTOR_SERVICE_URL = process.env.DOCTOR_SERVICE_URL;
+const APPOINTMENT_SERVICE_URL = process.env.APPOINTMENT_SERVICE_URL;
 
 console.log(`Gateway: Proxying /api/auth to ${AUTH_SERVICE_URL}`);
 console.log(`Gateway: Proxying /api/users to ${USER_SERVICE_URL}`);
@@ -21,6 +22,7 @@ console.log(`Gateway: Proxying /api/prescriptions to ${PRESCRIPTION_SERVICE_URL}
 console.log(`Gateway: Proxying /api/dashboard to ${USER_SERVICE_URL}`);
 console.log(`Gateway: Proxying /api/doctors to ${DOCTOR_SERVICE_URL}`);
 console.log(`Gateway: Proxying /api/hospitals to ${DOCTOR_SERVICE_URL}`);
+console.log(`Gateway: Proxying /api/appointments to ${APPOINTMENT_SERVICE_URL}`);
 
 // Route Auth requests
 app.use('/api/auth', proxy(AUTH_SERVICE_URL, {
@@ -66,6 +68,11 @@ app.use('/api/hospitals', proxy(DOCTOR_SERVICE_URL, {
   }
 }));
 
+app.use('/api/appointments', proxy(APPOINTMENT_SERVICE_URL, {
+  proxyReqPathResolver: (req) => {
+    return `/api/appointments${req.url}`;
+  }
+}));
 
 const PORT = process.env.GATEWAY_PORT;
 app.listen(PORT, () => console.log(`API Gateway running on port ${PORT}`));
