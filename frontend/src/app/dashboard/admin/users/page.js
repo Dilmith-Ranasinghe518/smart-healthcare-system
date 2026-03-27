@@ -4,6 +4,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { Users, ShieldCheck, Edit, Trash2, X } from "lucide-react";
 import { API_URL } from "@/utils/api";
+import Sel from "@/components/Sel";
+import Pagination from "@/components/Pagination";
 
 export default function ManageUsersPage() {
   const { user, loading } = useAuth();
@@ -11,6 +13,12 @@ export default function ManageUsersPage() {
   const [users, setUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
   const [error, setError] = useState("");
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+  const totalPages = Math.ceil(users.length / itemsPerPage);
+  const paginatedUsers = users.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "admin")) {
@@ -113,7 +121,7 @@ export default function ManageUsersPage() {
             </tr>
           </thead>
           <tbody>
-            {users.map((u) => (
+            {paginatedUsers.map((u) => (
               <tr key={u._id} className="border-b border-slate-200 dark:border-white/5 last:border-none text-sm hover:bg-white/2 transition-all">
                 <td className="py-4 font-medium text-slate-800 dark:text-slate-200">
                   {u.name} {u._id === user._id && <span className="text-xs text-slate-500">(You)</span>}
@@ -146,6 +154,12 @@ export default function ManageUsersPage() {
             ))}
           </tbody>
         </table>
+
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {/* Edit User Modal */}
@@ -183,8 +197,8 @@ export default function ManageUsersPage() {
 
               <div>
                 <label className="text-xs text-slate-600 dark:text-slate-400 mb-1 block">Role</label>
-                <select 
-                  className="input-field mb-0 appearance-none cursor-pointer" 
+                <Sel 
+                  className="mb-0" 
                   value={editingUser.role} 
                   onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
                   disabled={editingUser._id === user._id}
@@ -192,7 +206,7 @@ export default function ManageUsersPage() {
                   <option value="user" className="bg-slate-900">Patient (User)</option>
                   <option value="doctor" className="bg-slate-900">Doctor</option>
                   <option value="admin" className="bg-slate-900">Administrator</option>
-                </select>
+                </Sel>
                 {editingUser._id === user._id && <p className="text-xs text-slate-500 mt-1">You cannot change your own role.</p>}
               </div>
 
