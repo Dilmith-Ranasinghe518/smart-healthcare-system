@@ -97,7 +97,7 @@ exports.updateHospital = catchAsync(async (req, res, next) => {
   let hospital;
   try {
     hospital = await Hospital.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true
     });
   } catch (err) {
