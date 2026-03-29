@@ -3,10 +3,7 @@ const { generateSymptomAdvice } = require("../utils/geminiClient");
 
 function tryParseJson(text) {
   try {
-    const cleaned = text
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
+    const cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
     return JSON.parse(cleaned);
   } catch (error) {
     return null;
@@ -20,13 +17,12 @@ const checkSymptoms = async (req, res) => {
     if (!symptoms || !symptoms.trim()) {
       return res.status(400).json({
         success: false,
-        message: "Symptoms are required"
+        message: "Symptoms are required",
       });
     }
 
     const prompt = buildSymptomPrompt(symptoms);
     const rawText = await generateSymptomAdvice(prompt);
-
     const parsed = tryParseJson(rawText);
 
     if (!parsed) {
@@ -39,21 +35,22 @@ const checkSymptoms = async (req, res) => {
           urgency: "doctor soon",
           selfCare: [],
           disclaimer:
-            "This AI response is for preliminary guidance only and is not a medical diagnosis."
-        }
+            "This AI response is for preliminary guidance only and is not a medical diagnosis.",
+        },
       });
     }
 
     return res.status(200).json({
       success: true,
-      data: parsed
+      data: parsed,
     });
   } catch (error) {
     console.error("AI symptom check error full:", error);
 
     return res.status(500).json({
       success: false,
-      message: "Failed to generate symptom suggestions"
+      message: "Failed to generate symptom suggestions",
+      error: error.message,
     });
   }
 };

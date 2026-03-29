@@ -79,6 +79,7 @@ services:
       - .env
     networks:
       - healthcare-network
+ 
 
   ai-symptom-service:
     build:
@@ -86,9 +87,13 @@ services:
       dockerfile: Dockerfile
     container_name: smart-healthcare-ai-symptom-service
     ports:
-      - "5006:5006"
+      - "${AI_SYMPTOM_PORT}:${AI_SYMPTOM_PORT}"
     env_file:
       - .env
+    environment:
+      - AI_SYMPTOM_PORT=${AI_SYMPTOM_PORT}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=${GEMINI_MODEL}
     networks:
       - healthcare-network
   

@@ -8,10 +8,12 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors({
-  origin: process.env.FRONTEND_URL || "*",
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "*",
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
@@ -19,7 +21,7 @@ app.get("/health", (req, res) => {
   res.status(200).json({
     success: true,
     service: "ai-symptom-service",
-    status: "running"
+    status: "running",
   });
 });
 
@@ -27,8 +29,8 @@ app.use("/api/symptoms", symptomRoutes);
 
 app.use(errorHandler);
 
-const PORT = process.env.SYMP_PORT;
+const PORT = process.env.AI_SYMPTOM_PORT || 5006;
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`AI Symptom Service running on port ${PORT}`);
 });
