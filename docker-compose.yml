@@ -118,6 +118,14 @@ services:
     container_name: smart-healthcare-appointment-service
     ports:
       - "${APPOINTMENT_PORT}:${APPOINTMENT_PORT}"
+
+  payment-service:
+    build:
+      context: ./backend/services/payment-service
+      dockerfile: Dockerfile
+    container_name: smart-healthcare-payment-service
+    ports:
+      - "${PAYMENT_PORT}:${PAYMENT_PORT}"
     env_file:
       - .env
     depends_on:
@@ -125,6 +133,7 @@ services:
     networks:
       - healthcare-network
 
+  
   frontend:
     build:
       context: ./frontend
