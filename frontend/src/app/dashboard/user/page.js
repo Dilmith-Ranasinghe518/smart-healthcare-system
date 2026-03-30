@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Heart, Activity, User, Calendar, Plus } from "lucide-react";
 import { API_URL } from "@/utils/api";
 
+
 export default function UserDashboard() {
   const { user, logout, loading } = useAuth();
   const router = useRouter();
@@ -12,7 +13,7 @@ export default function UserDashboard() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!loading && (!user || user.role !== "user")) {
+    if (!loading && (!user || (user.role && user.role !== "user")))  {
       router.push("/login");
       return;
     }
@@ -36,6 +37,30 @@ export default function UserDashboard() {
   }, [user, loading, router, logout]);
 
   if (loading || !user) return <div className="flex items-center justify-center p-10 h-full text-slate-600 dark:text-slate-400">Loading dashboard...</div>;
+
+  const handlePayment = async () => {
+  try {
+    const res = await fetch(`${API_URL}/payment/create`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    amount: 1000,
+  }),
+});
+
+    const data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      console.error("Payment URL not returned", data);
+    }
+  } catch (error) {
+    console.error("Payment error:", error);
+  }
+};
 
   return (
     <div className="animate-[fadeIn_0.5s_ease-out] w-full">
@@ -109,6 +134,12 @@ export default function UserDashboard() {
                 </button>
                 <button className="btn btn-secondary w-full justify-start gap-2 text-sm py-3 px-4">
                   <Calendar size={20} /> View Medical Reports
+                </button>
+                <button
+                  onClick={handlePayment}
+                  className="btn btn-primary w-full justify-start gap-2 text-sm py-3 px-4 bg-green-600"
+                >
+                  💳 Pay Now
                 </button>
               </div>
             </div>
