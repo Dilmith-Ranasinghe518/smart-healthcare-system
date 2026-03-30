@@ -15,6 +15,7 @@ const PRESCRIPTION_SERVICE_URL = process.env.PRESCRIPTION_SERVICE_URL;
 const AI_SYMPTOM_SERVICE_URL = process.env.AI_SYMPTOM_SERVICE_URL;
 const DOCTOR_SERVICE_URL = process.env.DOCTOR_SERVICE_URL;
 const APPOINTMENT_SERVICE_URL = process.env.APPOINTMENT_SERVICE_URL;
+const PAYMENT_SERVICE_URL = process.env.PAYMENT_SERVICE_URL;
 
 console.log(`Gateway: Proxying /api/auth to ${AUTH_SERVICE_URL}`);
 console.log(`Gateway: Proxying /api/users to ${USER_SERVICE_URL}`);
@@ -25,6 +26,7 @@ console.log(`Gateway: Proxying /api/ai-symptoms to ${AI_SYMPTOM_SERVICE_URL}`);
 console.log(`Gateway: Proxying /api/doctors to ${DOCTOR_SERVICE_URL}`);
 console.log(`Gateway: Proxying /api/hospitals to ${DOCTOR_SERVICE_URL}`);
 console.log(`Gateway: Proxying /api/appointments to ${APPOINTMENT_SERVICE_URL}`);
+console.log(`Gateway: Proxying /api/payment to ${PAYMENT_SERVICE_URL}`);
 
 // Route Auth requests
 app.use('/api/auth', proxy(AUTH_SERVICE_URL, {
@@ -80,6 +82,12 @@ app.use('/api/hospitals', proxy(DOCTOR_SERVICE_URL, {
 app.use('/api/appointments', proxy(APPOINTMENT_SERVICE_URL, {
   proxyReqPathResolver: (req) => {
     return `/api/appointments${req.url}`;
+  }
+  }));
+  
+app.use('/api/payment', proxy(PAYMENT_SERVICE_URL, {
+  proxyReqPathResolver: (req) => {
+    return `/api/payment${req.url}`;
   }
 }));
 
