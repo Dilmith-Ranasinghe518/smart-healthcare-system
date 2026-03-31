@@ -18,8 +18,8 @@ exports.createPayment = async (req, res) => {
         unit_amount: amount, 
       }, quantity: 1, 
     }, ],
-      success_url: "http://localhost:3000/payment/success?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: "http://localhost:3000/payment/cancel",
+      success_url: `${process.env.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.FRONTEND_URL}/payment/cancel?session_id={CHECKOUT_SESSION_ID}`,
     });
 
     const payment = new Payment({
