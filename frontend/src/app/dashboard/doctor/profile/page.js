@@ -57,7 +57,6 @@ export default function DoctorProfilePage() {
   const handleSaved = (savedDoc) => {
     setDoctor(savedDoc);
     setModalOpen(false);
-    toast.success(savedDoc ? "Profile updated successfully!" : "Profile created!");
   };
 
   if (loading || !user) return <div className="flex items-center justify-center h-64 text-slate-500">Loading...</div>;

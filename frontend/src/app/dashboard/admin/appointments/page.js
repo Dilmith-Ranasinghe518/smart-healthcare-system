@@ -144,7 +144,7 @@ export default function AdminAppointmentsPage() {
     const dateStr = (app.date || "").toLowerCase();
     const timeStr = `${app.timeSlot?.startTime || ""} ${app.timeSlot?.endTime || ""}`.toLowerCase();
 
-    const matchSearch = String(app._id).toLowerCase().includes(q) || pName.includes(q) || dName.includes(q) || hName.includes(q) || dateStr.includes(q) || timeStr.includes(q);
+    const matchSearch = String(app.appointmentId || app._id).toLowerCase().includes(q) || pName.includes(q) || dName.includes(q) || hName.includes(q) || dateStr.includes(q) || timeStr.includes(q);
     const matchStatus = statusFilter === "all" || app.status === statusFilter;
     const matchDoctor = doctorFilter === "all" || app.doctorId === doctorFilter;
     return matchSearch && matchStatus && matchDoctor;
@@ -267,7 +267,12 @@ export default function AdminAppointmentsPage() {
                           <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-1">
                             {app.timeSlot?.startTime} - {app.timeSlot?.endTime}
                           </p>
-                          <p className="text-[10px] text-slate-400 font-mono mt-1">ID: {app._id.slice(-6)}</p>
+                          <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                            <p className="text-[10px] text-slate-400 font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">ID: {app.appointmentId || app._id.slice(-6)}</p>
+                            {app.appointmentType && (
+                              <p className="text-[10px] text-indigo-400 font-medium bg-indigo-500/10 px-1.5 py-0.5 rounded">{app.appointmentType}</p>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </td>

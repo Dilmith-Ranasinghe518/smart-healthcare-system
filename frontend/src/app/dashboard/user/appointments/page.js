@@ -176,15 +176,29 @@ export default function UserAppointmentsPage() {
 
                 <div className="flex items-start justify-between mb-4 pl-2">
                   {getStatusBadge(app.status)}
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                    ID: {app._id.slice(-6)}
-                  </span>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-[10px] font-mono text-slate-400 tracking-wider bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                      ID: {app.appointmentId || app._id.slice(-6)}
+                    </span>
+                    {app.queueNo && (
+                      <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                        Queue: {app.queueNo}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="pl-2 flex-1">
-                  <h3 className="font-extrabold text-xl text-slate-800 dark:text-white mb-1">
-                    {docInfo ? docInfo.name : "Loading Doctor..."}
-                  </h3>
+                  <div className="flex justify-between items-start mb-1">
+                    <h3 className="font-extrabold text-xl text-slate-800 dark:text-white">
+                      {docInfo ? docInfo.name : "Loading Doctor..."}
+                    </h3>
+                    {app.appointmentType && (
+                      <span className="text-[10px] text-indigo-500 font-semibold bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20 mt-1">
+                        {app.appointmentType}
+                      </span>
+                    )}
+                  </div>
                   {docInfo && <p className="text-indigo-500 dark:text-indigo-400 text-xs font-semibold mb-5">{docInfo.specialization}</p>}
 
                   <div className="flex flex-col gap-3">

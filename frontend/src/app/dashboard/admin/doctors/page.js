@@ -264,8 +264,11 @@ export default function ManageDoctorsPage() {
                                 <tr key={doc._id} className="border-b border-slate-200 dark:border-white/5 last:border-none text-sm hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-all">
 
                                     <td className="py-4 pr-4">
-                                        <p className="font-semibold text-slate-800 dark:text-slate-100">{doc.name}</p>
-                                        <p className="text-xs text-slate-500 mt-0.5 max-w-[180px] truncate">
+                                        <div className="flex items-center gap-2 mb-0.5">
+                                            <p className="font-semibold text-slate-800 dark:text-slate-100">{doc.name}</p>
+                                            <span className="text-[10px] font-mono text-slate-400 bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded">{doc.doctorId || doc._id.slice(-6)}</span>
+                                        </div>
+                                        <p className="text-xs text-slate-500 max-w-[180px] truncate">
                                             {(doc.qualifications || []).join(", ") || "—"}
                                         </p>
                                     </td>

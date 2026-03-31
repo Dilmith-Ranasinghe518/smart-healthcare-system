@@ -127,7 +127,7 @@ export default function DoctorAppointmentsPage() {
   // Filtered appointments
   const filteredAppointments = appointments.filter(app => {
     const q = search.toLowerCase();
-    const matchSearch = String(app.patientId).toLowerCase().includes(q) || (app.notes || "").toLowerCase().includes(q) || String(app._id).toLowerCase().includes(q);
+    const matchSearch = String(app.patientId).toLowerCase().includes(q) || (app.notes || "").toLowerCase().includes(q) || String(app.appointmentId || app._id).toLowerCase().includes(q);
     const matchHospital = filterHospital === "all" || app.location.hospitalName === filterHospital;
     const matchDate = !filterDate || app.date === filterDate;
     const timeSlotStr = app.timeSlot ? `${app.timeSlot.startTime} - ${app.timeSlot.endTime}` : "";
@@ -290,16 +290,32 @@ export default function DoctorAppointmentsPage() {
 
                 <div className="flex items-start justify-between mb-4 pl-2">
                   {getStatusBadge(app.status)}
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                    {app._id.slice(-6)}
-                  </span>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-[10px] font-mono text-slate-400 tracking-wider bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                      {app.appointmentId || app._id.slice(-6)}
+                    </span>
+                    {app.queueNo && (
+                      <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                        Queue: {app.queueNo}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="pl-2 flex-1 mb-6">
-                  <h3 className="font-extrabold text-lg text-slate-800 dark:text-white mb-0.5">
-                    Patient ID
-                  </h3>
-                  <p className="text-slate-400 text-[10px] font-mono mb-4">{app.patientId}</p>
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="font-extrabold text-lg text-slate-800 dark:text-white mb-0.5">
+                        Patient ID
+                      </h3>
+                      <p className="text-slate-400 text-[10px] font-mono">{app.patientId}</p>
+                    </div>
+                    {app.appointmentType && (
+                      <span className="text-[10px] text-indigo-500 font-semibold bg-indigo-500/10 px-2 py-0.5 rounded-full mt-1 border border-indigo-500/20">
+                        {app.appointmentType}
+                      </span>
+                    )}
+                  </div>
 
                   <div className="flex flex-col gap-3">
                     <div className="flex items-start gap-3 bg-slate-50 dark:bg-white/5 p-3 rounded-xl border border-slate-100 dark:border-white/5">

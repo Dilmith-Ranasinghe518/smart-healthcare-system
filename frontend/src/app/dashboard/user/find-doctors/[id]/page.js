@@ -7,6 +7,7 @@ import {
   Stethoscope, Clock, Calendar, Users, CheckCircle, X, CircleDollarSign, Info
 } from "lucide-react";
 import toast from "react-hot-toast";
+import Sel from "@/components/Sel";
 
 const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL || "http://localhost:5007";
 const APPOINTMENT_API = process.env.NEXT_PUBLIC_APPOINTMENT_API_URL || "http://localhost:5070";
@@ -52,6 +53,7 @@ export default function DoctorDetailsPage() {
   // Booking confirmation dialog
   const [bookingSlot, setBookingSlot] = useState(null); // { date, dateLabel, slot, location }
   const [bookingNote, setBookingNote] = useState("");
+  const [appointmentType, setAppointmentType] = useState("General Checkup");
   const [bookingSubmitting, setBookingSubmitting] = useState(false);
 
   useEffect(() => {
@@ -137,6 +139,7 @@ export default function DoctorDetailsPage() {
           locationId: location._id,
           slotId: slot._id,
           date,
+          appointmentType,
           notes: bookingNote,
         })
       });
@@ -146,6 +149,7 @@ export default function DoctorDetailsPage() {
       toast.success("Appointment booked! Payment received. Redirecting...");
       setBookingSlot(null);
       setBookingNote("");
+      setAppointmentType("General Checkup");
 
       // Refresh counts for that date
       setBookedCounts(prev => {
@@ -380,6 +384,22 @@ export default function DoctorDetailsPage() {
                   </div>
                 </div>
               )}
+            </div>
+
+            <div className="mb-4">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Appointment Type</label>
+              <Sel 
+                value={appointmentType} 
+                onChange={e => setAppointmentType(e.target.value)} 
+                className="w-full bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 py-3"
+              >
+                <option value="General Checkup">General Checkup</option>
+                <option value="First Time Consultation">First Time Consultation</option>
+                <option value="Follow-up">Follow-up</option>
+                <option value="Report Review">Report Review</option>
+                <option value="Urgent Care">Urgent Care</option>
+                <option value="Other">Other</option>
+              </Sel>
             </div>
 
             <div className="mb-5">
