@@ -108,8 +108,6 @@ services:
       - healthcare-network
     depends_on:
       - mongodb
-    volumes:
-      - ./backend/services/user-service:/app/user-service
 
   appointment-service:
     build:
