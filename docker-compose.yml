@@ -1,4 +1,3 @@
-
 services:
   mongodb:
     image: mongo:latest
@@ -79,7 +78,6 @@ services:
       - .env
     networks:
       - healthcare-network
- 
 
   ai-symptom-service:
     build:
@@ -96,7 +94,7 @@ services:
       - GEMINI_MODEL=${GEMINI_MODEL}
     networks:
       - healthcare-network
-  
+
   doctor-service:
     build:
       context: ./backend/services/doctor-service
@@ -108,6 +106,8 @@ services:
       - .env
     networks:
       - healthcare-network
+    depends_on:
+      - mongodb
     volumes:
       - ./backend/services/user-service:/app/user-service
 
@@ -118,6 +118,12 @@ services:
     container_name: smart-healthcare-appointment-service
     ports:
       - "${APPOINTMENT_PORT}:${APPOINTMENT_PORT}"
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+    networks:
+      - healthcare-network
 
   payment-service:
     build:
@@ -133,7 +139,6 @@ services:
     networks:
       - healthcare-network
 
-  
   frontend:
     build:
       context: ./frontend
