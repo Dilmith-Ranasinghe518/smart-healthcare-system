@@ -32,10 +32,10 @@ const getDayName = (dateStr) => {
 
 // POST /appointments
 exports.createAppointment = catchAsync(async (req, res, next) => {
-  const { doctorId, locationId, slotId, date, notes } = req.body;
+  const { doctorId, locationId, slotId, date, notes, appointmentType } = req.body;
 
-  if (!doctorId || !locationId || !slotId || !date) {
-    return next(new AppError('Please provide doctorId, locationId, slotId, and date', 400));
+  if (!doctorId || !locationId || !slotId || !date || !appointmentType) {
+    return next(new AppError('Please provide doctorId, locationId, slotId, date, and appointmentType', 400));
   }
 
   // 1. Validate future date
@@ -89,6 +89,13 @@ exports.createAppointment = catchAsync(async (req, res, next) => {
     ));
   }
 
+  // Calculate queue number based on all bookings for this slot + date
+  const totalBookings = await Appointment.countDocuments({
+    'timeSlot.slotId': slot._id,
+    date
+  });
+  const queueNo = totalBookings + 1;
+
   // 8. Create the appointment (partial unique index prevents double-booking per patient at DB level too)
   let appointment;
   try {
@@ -109,6 +116,8 @@ exports.createAppointment = catchAsync(async (req, res, next) => {
         endTime: slot.endTime
       },
       date,
+      appointmentType,
+      queueNo,
       notes: notes || '',
       paymentStatus: 'COMPLETED' // As requested, automatically complete payment for now
     });

@@ -3,6 +3,10 @@ const mongoose = require('mongoose');
 const APPOINTMENT_STATUSES = ['PENDING', 'CONFIRMED', 'REJECTED', 'CANCELLED', 'COMPLETED'];
 
 const appointmentSchema = new mongoose.Schema({
+  appointmentId: {
+    type: String,
+    unique: true
+  },
   patientId: {
     type: String,
     required: [true, 'An appointment must have a patient']
@@ -63,6 +67,15 @@ const appointmentSchema = new mongoose.Schema({
       message: 'Date must be in YYYY-MM-DD format'
     }
   },
+  appointmentType: {
+    type: String,
+    required: [true, 'An appointment must have a type'],
+    enum: ['General Checkup', 'Follow-up', 'Report Review', 'First Time Consultation', 'Urgent Care', 'Other']
+  },
+  queueNo: {
+    type: Number,
+    required: true
+  },
   status: {
     type: String,
     enum: {
@@ -112,6 +125,13 @@ appointmentSchema.index({ doctorId: 1, status: 1 });
 appointmentSchema.index({ patientId: 1, status: 1 });
 
 appointmentSchema.statics.STATUSES = APPOINTMENT_STATUSES;
+
+appointmentSchema.pre('save', function () {
+  if (!this.appointmentId) {
+    // Generate a 10-digit numeric string 
+    this.appointmentId = Math.floor(1000000000 + Math.random() * 9000000000).toString();
+  }
+});
 
 const Appointment = mongoose.model('Appointment', appointmentSchema);
 
