@@ -88,6 +88,10 @@ const doctorSchema = new mongoose.Schema({
   userId: {
     type: String
   },
+  doctorId: {
+    type: String,
+    unique: true
+  },
   name: {
     type: String,
     required: [true, 'A doctor must have a name'],
@@ -126,9 +130,19 @@ const doctorSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Explicitly index the nested locationPoint for geo-queries across all hospitals a doctor operates in
+doctorSchema.index({ 'locations.locationPoint': '2dsphere' }, { sparse: true });
+
 // Export valid options so controllers can send them to the frontend (for dropdowns)
 doctorSchema.statics.VALID_DAYS = VALID_DAYS;
 doctorSchema.statics.VALID_TIMES = VALID_TIMES;
+
+doctorSchema.pre('save', function () {
+  if (!this.doctorId) {
+    const randomNumber = Math.floor(100000 + Math.random() * 900000); 
+    this.doctorId = 'DOC-' + randomNumber;
+  }
+});
 
 const Doctor = mongoose.model('Doctor', doctorSchema);
 

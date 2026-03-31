@@ -423,7 +423,7 @@ exports.getDoctorsNear = catchAsync(async (req, res, next) => {
     isVerified: true,
     'locations.locationPoint': {
       $near: {
-        $geometry: { type: 'Point', coordinates: [longitude, latitude] },
+        $geometry: { type: 'Point', coordinates: [latitude, longitude] }, // Swapped to [lat, lng] to match db
         $maxDistance: radiusInMeters
       }
     }
@@ -433,9 +433,15 @@ exports.getDoctorsNear = catchAsync(async (req, res, next) => {
     geoQuery.specialization = { $regex: new RegExp(specialization, 'i') };
   }
 
-  let doctors = await Doctor.find(geoQuery).select(
-    'name specialization qualifications experience locations isVerified'
-  );
+  let doctors = [];
+  try {
+    doctors = await Doctor.find(geoQuery).select(
+      'name specialization qualifications experience locations isVerified'
+    );
+  } catch (err) {
+    console.warn("GeoQuery failed (possibly missing 2dsphere index). Falling back to city search...");
+    // Let doctors remain [] so the fallback executes
+  }
 
   // If no geo results, fall back to city-based search using the nearest hospital's city
   if (doctors.length === 0) {
@@ -443,7 +449,7 @@ exports.getDoctorsNear = catchAsync(async (req, res, next) => {
       isActive: true,
       location: {
         $near: {
-          $geometry: { type: 'Point', coordinates: [longitude, latitude] },
+          $geometry: { type: 'Point', coordinates: [latitude, longitude] }, // Swapped to [lat, lng] to match db
           $maxDistance: radiusInMeters * 5 // expand radius for fallback
         }
       }
