@@ -99,7 +99,8 @@ exports.createAppointment = catchAsync(async (req, res, next) => {
         hospitalId: location.hospitalId,
         hospitalName: location.hospitalName,
         city: location.city,
-        address: location.address
+        address: location.address,
+        consultationFee: location.consultationFee
       },
       timeSlot: {
         slotId: slot._id,
@@ -108,7 +109,8 @@ exports.createAppointment = catchAsync(async (req, res, next) => {
         endTime: slot.endTime
       },
       date,
-      notes: notes || ''
+      notes: notes || '',
+      paymentStatus: 'COMPLETED' // As requested, automatically complete payment for now
     });
   } catch (err) {
     if (err.code === 11000) {
@@ -249,7 +251,8 @@ exports.rescheduleAppointment = catchAsync(async (req, res, next) => {
     hospitalId: newLocation.hospitalId,
     hospitalName: newLocation.hospitalName,
     city: newLocation.city,
-    address: newLocation.address
+    address: newLocation.address,
+    consultationFee: newLocation.consultationFee
   };
   appointment.timeSlot = {
     slotId: newSlot._id,

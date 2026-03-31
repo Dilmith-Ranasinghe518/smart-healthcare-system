@@ -28,6 +28,11 @@ const appointmentSchema = new mongoose.Schema({
     address: {
       type: String,
       required: true
+    },
+    consultationFee: {
+      type: Number,
+      required: true,
+      default: 0
     }
   },
   // Embedded snapshot of the booked time slot
@@ -77,6 +82,14 @@ const appointmentSchema = new mongoose.Schema({
     type: String,
     trim: true,
     default: ''
+  },
+  paymentStatus: {
+    type: String,
+    enum: {
+      values: ['PENDING', 'COMPLETED', 'FAILED'],
+      message: '{VALUE} is not a valid payment status'
+    },
+    default: 'PENDING'
   }
 }, {
   timestamps: true
