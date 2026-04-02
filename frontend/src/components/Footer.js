@@ -1,15 +1,90 @@
-import { Activity } from "lucide-react";
+"use client";
+
+import Link from "next/link";
+import { Activity, Mail, Phone, MapPin } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-slate-200 dark:border-white/5 bg-white/80 dark:bg-slate-950/50 backdrop-blur-md mt-auto py-8 w-full transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-white">
-          <Activity size={18} className="text-indigo-400" /> SmartHealth
+    <footer
+      id="contact"
+      className="mt-auto border-t border-[#96D7C6]/40 dark:border-white/10 bg-white dark:bg-slate-950 transition-colors duration-300"
+    >
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-14">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-11 h-11 rounded-2xl bg-[#5AA7A7] flex items-center justify-center shadow-lg shadow-[#5AA7A7]/30">
+                <Activity size={22} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  SmartHealth
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Better care, digitally
+                </p>
+              </div>
+            </div>
+
+            <p className="text-sm leading-7 text-slate-600 dark:text-slate-400 max-w-sm">
+              SmartHealth helps patients, doctors, and administrators work together
+              in one secure and easy healthcare platform.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-4">
+              Quick Links
+            </h4>
+            <div className="flex flex-col gap-3 text-sm text-slate-600 dark:text-slate-400">
+              <Link href="#home" className="hover:text-[#5AA7A7]">Home</Link>
+              <Link href="#services" className="hover:text-[#BAC94A]">Services</Link>
+              <Link href="#features" className="hover:text-[#6C8CBF]">Features</Link>
+              <Link href="#roles" className="hover:text-[#E2D36B]">Roles</Link>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-4">
+              Services
+            </h4>
+            <div className="flex flex-col gap-3 text-sm text-slate-600 dark:text-slate-400">
+              <p>Online Appointments</p>
+              <p>Symptom Checker</p>
+              <p>Doctor Consultations</p>
+              <p>Medical Records</p>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-4">
+              Contact
+            </h4>
+            <div className="flex flex-col gap-4 text-sm text-slate-600 dark:text-slate-400">
+              <div className="flex items-center gap-3">
+                <Mail size={16} className="text-[#5AA7A7]" />
+                <span>support@smarthealth.com</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Phone size={16} className="text-[#BAC94A]" />
+                <span>+94 77 123 4567</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <MapPin size={16} className="text-[#6C8CBF] mt-1" />
+                <span>Colombo, Sri Lanka</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <p className="text-slate-500 dark:text-slate-400 text-xs">
-          &copy; {new Date().getFullYear()} Smart Healthcare Node. All rights reserved.
-        </p>
+
+        <div className="border-t border-[#96D7C6]/40 dark:border-white/10 mt-10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            © {new Date().getFullYear()} SmartHealth. All rights reserved.
+          </p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Built with care for modern healthcare experiences.
+          </p>
+        </div>
       </div>
     </footer>
   );
