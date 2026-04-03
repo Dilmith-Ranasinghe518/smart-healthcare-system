@@ -8,8 +8,8 @@ import Sel from "@/components/Sel";
 import ConfirmModal from "@/components/ConfirmModal";
 import Pagination from "@/components/Pagination";
 
-const APPOINTMENT_API = process.env.NEXT_PUBLIC_APPOINTMENT_API_URL || "http://localhost:5070";
-const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL || "http://localhost:5007";
+const APPOINTMENT_API = process.env.NEXT_PUBLIC_APPOINTMENT_API_URL;
+const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL;
 
 export default function DoctorAppointmentsPage() {
   const { user, loading } = useAuth();
@@ -51,7 +51,7 @@ export default function DoctorAppointmentsPage() {
       });
       const profData = await profRes.json();
       if (!profRes.ok) throw new Error(profData.message);
-      
+
       const myDoctor = profData.doctor;
       if (!myDoctor) {
         setFetching(false);
@@ -65,9 +65,9 @@ export default function DoctorAppointmentsPage() {
       });
       const apptData = await apptRes.json();
       if (!apptRes.ok) throw new Error(apptData.message);
-      
+
       const appts = apptData.appointments || [];
-      
+
       // Sort: upcoming logic (Pending and Confirmed first, then past)
       appts.sort((a, b) => {
         const dateTimeA = new Date(`${a.date}T${a.timeSlot.startTime}`);
@@ -91,12 +91,12 @@ export default function DoctorAppointmentsPage() {
         method: "PATCH",
         headers: { Authorization: `Bearer ${user.token}` }
       });
-      
+
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.message || `Failed to ${actionStr}`);
       }
-      
+
       const labels = { accept: 'Appointment accepted!', reject: 'Appointment rejected.', complete: 'Marked as completed.', cancel: 'Appointment cancelled.' };
       toast.success(labels[actionStr] || 'Status updated.');
       fetchDoctorAndAppointments();
@@ -132,7 +132,7 @@ export default function DoctorAppointmentsPage() {
     const matchDate = !filterDate || app.date === filterDate;
     const timeSlotStr = app.timeSlot ? `${app.timeSlot.startTime} - ${app.timeSlot.endTime}` : "";
     const matchTimeSlot = filterTimeSlot === "all" || timeSlotStr === filterTimeSlot;
-    
+
     return matchSearch && matchHospital && matchDate && matchTimeSlot;
   });
 
@@ -170,7 +170,7 @@ export default function DoctorAppointmentsPage() {
 
     if (successCount > 0) toast.success(`Successfully accepted ${successCount} appointment(s).`);
     if (failCount > 0) toast.error(`Failed to accept ${failCount} appointment(s).`);
-    
+
     setBulkLoading(false);
     setShowBulkConfirm(false);
     fetchDoctorAndAppointments();
@@ -256,7 +256,7 @@ export default function DoctorAppointmentsPage() {
                 ))}
               </Sel>
             </div>
-            
+
             {pendingFiltered.length > 0 && (
               <button
                 disabled={bulkLoading}
@@ -276,118 +276,117 @@ export default function DoctorAppointmentsPage() {
             ) : paginatedAppointments.map(app => {
               const isPending = app.status === 'PENDING';
               const isConfirmed = app.status === 'CONFIRMED';
-              
+
               return (
                 <div key={app._id} className="glass-panel p-5 flex flex-col relative overflow-hidden transition-all hover:border-indigo-500/30">
-                
-                {/* Visual Status Indicator Strip */}
-                <div className={`absolute left-0 top-0 bottom-0 w-1 ${
-                  app.status === 'PENDING' ? 'bg-amber-400' :
-                  app.status === 'CONFIRMED' ? 'bg-emerald-500' :
-                  app.status === 'COMPLETED' ? 'bg-indigo-500' :
-                  'bg-rose-500'
-                }`} />
 
-                <div className="flex items-start justify-between mb-4 pl-2">
-                  {getStatusBadge(app.status)}
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-[10px] font-mono text-slate-400 tracking-wider bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
-                      {app.appointmentId || app._id.slice(-6)}
-                    </span>
-                    {app.queueNo && (
-                      <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
-                        Queue: {app.queueNo}
+                  {/* Visual Status Indicator Strip */}
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 ${app.status === 'PENDING' ? 'bg-amber-400' :
+                      app.status === 'CONFIRMED' ? 'bg-emerald-500' :
+                        app.status === 'COMPLETED' ? 'bg-indigo-500' :
+                          'bg-rose-500'
+                    }`} />
+
+                  <div className="flex items-start justify-between mb-4 pl-2">
+                    {getStatusBadge(app.status)}
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-[10px] font-mono text-slate-400 tracking-wider bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                        {app.appointmentId || app._id.slice(-6)}
                       </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="pl-2 flex-1 mb-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="font-extrabold text-lg text-slate-800 dark:text-white mb-0.5">
-                        Patient ID
-                      </h3>
-                      <p className="text-slate-400 text-[10px] font-mono">{app.patientId}</p>
+                      {app.queueNo && (
+                        <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                          Queue: {app.queueNo}
+                        </span>
+                      )}
                     </div>
-                    {app.appointmentType && (
-                      <span className="text-[10px] text-indigo-500 font-semibold bg-indigo-500/10 px-2 py-0.5 rounded-full mt-1 border border-indigo-500/20">
-                        {app.appointmentType}
-                      </span>
-                    )}
                   </div>
 
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-start gap-3 bg-slate-50 dark:bg-white/5 p-3 rounded-xl border border-slate-100 dark:border-white/5">
-                      <Calendar size={18} className="text-indigo-500 mt-0.5 shrink-0" />
+                  <div className="pl-2 flex-1 mb-6">
+                    <div className="flex justify-between items-start mb-4">
                       <div>
-                        <p className="font-semibold text-slate-700 dark:text-slate-200 text-sm">{app.date}</p>
-                        <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-1">
-                          <Clock size={12} /> {app.timeSlot.startTime} - {app.timeSlot.endTime}
-                        </p>
+                        <h3 className="font-extrabold text-lg text-slate-800 dark:text-white mb-0.5">
+                          Patient ID
+                        </h3>
+                        <p className="text-slate-400 text-[10px] font-mono">{app.patientId}</p>
                       </div>
+                      {app.appointmentType && (
+                        <span className="text-[10px] text-indigo-500 font-semibold bg-indigo-500/10 px-2 py-0.5 rounded-full mt-1 border border-indigo-500/20">
+                          {app.appointmentType}
+                        </span>
+                      )}
                     </div>
 
-                    <div className="flex items-start gap-3 px-1">
-                      <MapPin size={16} className="text-slate-400 mt-0.5 shrink-0" />
-                      <div>
-                        <p className="font-semibold text-slate-700 dark:text-slate-300 text-xs">{app.location.hospitalName}</p>
-                        <p className="text-[11px] text-slate-500">{app.location.city}</p>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-start gap-3 bg-slate-50 dark:bg-white/5 p-3 rounded-xl border border-slate-100 dark:border-white/5">
+                        <Calendar size={18} className="text-indigo-500 mt-0.5 shrink-0" />
+                        <div>
+                          <p className="font-semibold text-slate-700 dark:text-slate-200 text-sm">{app.date}</p>
+                          <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-1">
+                            <Clock size={12} /> {app.timeSlot.startTime} - {app.timeSlot.endTime}
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    {app.notes && (
-                      <div className="mt-2 text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border-l-2 border-slate-300 dark:border-slate-700 italic">
-                        "{app.notes}"
+                      <div className="flex items-start gap-3 px-1">
+                        <MapPin size={16} className="text-slate-400 mt-0.5 shrink-0" />
+                        <div>
+                          <p className="font-semibold text-slate-700 dark:text-slate-300 text-xs">{app.location.hospitalName}</p>
+                          <p className="text-[11px] text-slate-500">{app.location.city}</p>
+                        </div>
                       </div>
-                    )}
+
+                      {app.notes && (
+                        <div className="mt-2 text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border-l-2 border-slate-300 dark:border-slate-700 italic">
+                          "{app.notes}"
+                        </div>
+                      )}
+                    </div>
                   </div>
+
+                  {/* Actions */}
+                  {isPending && (
+                    <div className="flex gap-2 w-full shrink-0">
+                      <button
+                        className="flex-1 py-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                        onClick={() => updateStatus(app._id, 'accept')}
+                        disabled={processing === `${app._id}-accept`}
+                      >
+                        <Check size={14} /> Accept
+                      </button>
+                      <button
+                        className="flex-1 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-500/5 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                        onClick={() => updateStatus(app._id, 'reject')}
+                        disabled={processing === `${app._id}-reject`}
+                      >
+                        <X size={14} /> Reject
+                      </button>
+                    </div>
+                  )}
+
+                  {isConfirmed && (
+                    <div className="flex gap-2 w-full shrink-0">
+                      <button
+                        className="flex-1 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-indigo-50 dark:bg-indigo-500/5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                        onClick={() => updateStatus(app._id, 'complete')}
+                        disabled={processing === `${app._id}-complete`}
+                      >
+                        <CheckSquare size={14} /> Complete
+                      </button>
+                      <button
+                        className="flex-1 py-2.5 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-500/5 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                        onClick={() => updateStatus(app._id, 'cancel')}
+                        disabled={processing === `${app._id}-cancel`}
+                      >
+                        <XCircle size={14} /> Cancel
+                      </button>
+                    </div>
+                  )}
                 </div>
-
-                {/* Actions */}
-                {isPending && (
-                  <div className="flex gap-2 w-full shrink-0">
-                    <button 
-                      className="flex-1 py-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
-                      onClick={() => updateStatus(app._id, 'accept')}
-                      disabled={processing === `${app._id}-accept`}
-                    >
-                      <Check size={14} /> Accept
-                    </button>
-                    <button 
-                      className="flex-1 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-500/5 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
-                      onClick={() => updateStatus(app._id, 'reject')}
-                      disabled={processing === `${app._id}-reject`}
-                    >
-                      <X size={14} /> Reject
-                    </button>
-                  </div>
-                )}
-
-                {isConfirmed && (
-                  <div className="flex gap-2 w-full shrink-0">
-                    <button 
-                      className="flex-1 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-indigo-50 dark:bg-indigo-500/5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
-                      onClick={() => updateStatus(app._id, 'complete')}
-                      disabled={processing === `${app._id}-complete`}
-                    >
-                      <CheckSquare size={14} /> Complete
-                    </button>
-                    <button 
-                      className="flex-1 py-2.5 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-500/5 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
-                      onClick={() => updateStatus(app._id, 'cancel')}
-                      disabled={processing === `${app._id}-cancel`}
-                    >
-                      <XCircle size={14} /> Cancel
-                    </button>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
           </div>
 
-          <Pagination 
+          <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={setCurrentPage}

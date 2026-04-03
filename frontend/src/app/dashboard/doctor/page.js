@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { Activity, Users, Clock, Clipboard, Plus, CheckCircle } from "lucide-react";
 import { API_URL } from "@/utils/api";
 
-const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL || "http://localhost:5007";
-const APPOINTMENT_API = process.env.NEXT_PUBLIC_APPOINTMENT_API_URL || "http://localhost:5070";
+const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL;
+const APPOINTMENT_API = process.env.NEXT_PUBLIC_APPOINTMENT_API_URL;
 
 export default function DoctorDashboard() {
   const { user, loading } = useAuth();
@@ -45,23 +45,23 @@ export default function DoctorDashboard() {
           // Fetch today's appointments
           const today = new Date();
           const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-          
+
           const apptRes = await fetch(`${APPOINTMENT_API}/api/appointments/doctor/${myDoctor._id}?date=${todayString}`, {
             headers: { Authorization: `Bearer ${user.token}` }
           });
           const apptData = await apptRes.json();
-          
+
           if (apptRes.ok && apptData.appointments) {
             // Filter only PENDING and CONFIRMED
             const activeAppts = apptData.appointments.filter(a => ['PENDING', 'CONFIRMED'].includes(a.status));
-            
+
             // Sort by time
             activeAppts.sort((a, b) => {
               const timeA = a.timeSlot?.startTime || "00:00";
               const timeB = b.timeSlot?.startTime || "00:00";
               return timeA.localeCompare(timeB);
             });
-            
+
             setAppointments(activeAppts);
 
             // Fetch user names
@@ -143,13 +143,13 @@ export default function DoctorDashboard() {
               <h3 className="text-lg font-bold flex items-center gap-2">
                 <Activity size={20} className="text-emerald-400" /> Upcoming Appointments
               </h3>
-              
+
               <div className="flex flex-col gap-3">
                 {appointments.length === 0 ? (
                   <p className="text-sm text-slate-500 py-4">No active appointments for today.</p>
                 ) : appointments.map((app) => {
                   const pName = patientMap[app.patientId] || app.patientId;
-                  
+
                   return (
                     <div key={app._id} className="flex items-center justify-between p-4 bg-slate-200/50 dark:bg-slate-800/30 rounded-xl border border-slate-200 dark:border-white/5 hover:bg-slate-800/50 transition-all duration-200">
                       <div className="flex items-center gap-4">
@@ -191,7 +191,7 @@ export default function DoctorDashboard() {
                   <CheckCircle size={20} /> View Medical History
                 </button>
               </div>
-              
+
               <div className="mt-2 p-4 bg-emerald-500/5 text-emerald-300 rounded-xl border border-emerald-500/10 text-xs">
                 <h4 className="font-semibold mb-1">System Notification</h4>
                 <p className="text-slate-600 dark:text-slate-400">{data?.message || "All critical services online."}</p>

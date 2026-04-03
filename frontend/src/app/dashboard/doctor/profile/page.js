@@ -6,7 +6,7 @@ import { UserCircle, Edit, MapPin, Building2, BadgeCheck, Stethoscope, Clock, Ba
 import DoctorProfileModal from "@/components/DoctorProfileModal";
 import toast from "react-hot-toast";
 
-const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL || "http://localhost:5007";
+const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL;
 
 export default function DoctorProfilePage() {
   const { user, loading } = useAuth();
@@ -37,7 +37,7 @@ export default function DoctorProfilePage() {
       });
       const profData = await profRes.json();
       if (!profRes.ok) throw new Error(profData.message);
-      
+
       setDoctor(profData.doctor); // null if not created yet
 
       // Fetch all hospitals for the modal dropdown
@@ -63,7 +63,7 @@ export default function DoctorProfilePage() {
 
   return (
     <div className="animate-[fadeIn_0.5s_ease-out] w-full max-w-4xl mx-auto">
-      
+
       <header className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h2 className="text-4xl font-extrabold text-slate-800 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-white dark:to-slate-400 mb-2">
@@ -91,7 +91,7 @@ export default function DoctorProfilePage() {
           </div>
           <h3 className="text-2xl font-bold text-slate-800 dark:text-white">Profile Not Configured</h3>
           <p className="text-slate-500 text-sm max-w-md">
-            Your user account doesn't have a linked professional doctor profile yet. 
+            Your user account doesn't have a linked professional doctor profile yet.
             Create one now to appear in patient searches and start receiving appointments.
           </p>
           <button className="btn btn-primary mt-4 px-8" onClick={() => setModalOpen(true)}>
@@ -101,11 +101,11 @@ export default function DoctorProfilePage() {
       ) : (
         /* Profile View State */
         <div className="flex flex-col gap-6">
-          
+
           <div className="glass-panel p-8 relative overflow-hidden">
             {/* Background Accent */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-3xl -mr-10 -mt-20 pointer-events-none rounded-full" />
-            
+
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10">
               <div className="w-24 h-24 rounded-3xl bg-indigo-500/10 border-2 border-indigo-500/20 flex flex-col items-center justify-center text-indigo-500 flex-shrink-0 shadow-inner">
                 <Stethoscope size={32} />
@@ -121,7 +121,7 @@ export default function DoctorProfilePage() {
                   )}
                 </div>
                 <p className="text-indigo-500 dark:text-indigo-400 font-semibold mb-3">{doctor.specialization}</p>
-                
+
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-4">
                   <span className="badge bg-slate-100 dark:bg-white/5 border-none text-slate-600 dark:text-slate-300 px-3 py-1">
                     {doctor.experience} Yrs Experience
@@ -134,7 +134,7 @@ export default function DoctorProfilePage() {
                 </div>
               </div>
 
-              <button 
+              <button
                 className="btn btn-secondary flex items-center gap-2 self-center sm:self-start flex-shrink-0"
                 onClick={() => setModalOpen(true)}
               >
@@ -165,18 +165,17 @@ export default function DoctorProfilePage() {
                         <p className="text-xs text-slate-500">{loc.address}, {loc.city}</p>
                       </div>
                     </div>
-                    
+
                     <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3">
                       <p className="text-[10px] font-bold uppercase text-slate-400 mb-2">Weekly Slots ({loc.availability?.length || 0}){loc.consultationFee > 0 ? ` · Rs. ${loc.consultationFee.toLocaleString()}` : ''}</p>
                       {loc.availability?.length > 0 ? (
                         <div className="flex flex-col gap-1 max-h-32 overflow-y-auto">
                           {loc.availability.map(slot => (
-                            <span key={slot._id} className={`text-[10px] font-medium px-2 py-1 border rounded shadow-sm whitespace-nowrap flex items-center justify-between gap-2 ${
-                              slot.isAvailable === false
+                            <span key={slot._id} className={`text-[10px] font-medium px-2 py-1 border rounded shadow-sm whitespace-nowrap flex items-center justify-between gap-2 ${slot.isAvailable === false
                                 ? 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-white/5 text-slate-400 line-through'
                                 : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300'
-                            }`}>
-                              <span>{slot.day.substring(0,3)}: {slot.startTime}-{slot.endTime}</span>
+                              }`}>
+                              <span>{slot.day.substring(0, 3)}: {slot.startTime}-{slot.endTime}</span>
                               <span className="text-slate-400 font-normal">Limit: {slot.patientLimit}</span>
                             </span>
                           ))}

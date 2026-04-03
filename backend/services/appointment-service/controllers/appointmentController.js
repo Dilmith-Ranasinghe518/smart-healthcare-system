@@ -4,7 +4,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
 // Internal URL of doctor-service (set in .env)
-const DOCTOR_SERVICE_URL = process.env.DOCTOR_SERVICE_URL || 'http://localhost:5007';
+const DOCTOR_SERVICE_URL = process.env.DOCTOR_SERVICE_URL;
 
 // Helper: fetch doctor data from doctor-service
 const fetchDoctor = async (doctorId) => {
@@ -119,7 +119,7 @@ exports.createAppointment = catchAsync(async (req, res, next) => {
       appointmentType,
       queueNo,
       notes: notes || '',
-      paymentStatus: 'COMPLETED' // As requested, automatically complete payment for now
+      paymentStatus: 'PENDING' // Set to PENDING until real payment is completed
     });
   } catch (err) {
     if (err.code === 11000) {

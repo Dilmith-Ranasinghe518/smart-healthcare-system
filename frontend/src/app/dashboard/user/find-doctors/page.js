@@ -7,13 +7,13 @@ import {
 } from "lucide-react";
 import Sel from "@/components/Sel";
 
-const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL || "http://localhost:5007";
+const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL;
 
 const SPECIALIZATIONS = [
-  "Cardiology","Dermatology","Endocrinology","ENT","Gastroenterology",
-  "General Practitioner","General Surgery","Gynecology","Internal Medicine",
-  "Neurology","Oncology","Ophthalmology","Orthopedics","Pediatrics",
-  "Psychiatry","Pulmonology","Radiology","Urology","Dentistry","Other"
+  "Cardiology", "Dermatology", "Endocrinology", "ENT", "Gastroenterology",
+  "General Practitioner", "General Surgery", "Gynecology", "Internal Medicine",
+  "Neurology", "Oncology", "Ophthalmology", "Orthopedics", "Pediatrics",
+  "Psychiatry", "Pulmonology", "Radiology", "Urology", "Dentistry", "Other"
 ];
 
 export default function FindDoctorsPage() {
@@ -23,11 +23,11 @@ export default function FindDoctorsPage() {
   const [doctors, setDoctors] = useState([]);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
-  
+
   // Filters
   const [search, setSearch] = useState("");
   const [specFilter, setSpecFilter] = useState("");
-  
+
   // Geolocation state
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoActive, setGeoActive] = useState(false);
@@ -45,7 +45,7 @@ export default function FindDoctorsPage() {
     setError("");
     try {
       let url = `${DOCTOR_API}/api/doctors?limit=50`;
-      
+
       if (geo) {
         url = `${DOCTOR_API}/api/doctors/near?lng=${geo.lng}&lat=${geo.lat}&distance=20000`; // 20km search radius
         if (specFilter) url += `&specialization=${encodeURIComponent(specFilter)}`;
@@ -55,9 +55,9 @@ export default function FindDoctorsPage() {
 
       const res = await fetch(url);
       const data = await res.json();
-      
+
       if (!res.ok) throw new Error(data.message || "Failed to fetch doctors");
-      
+
       setDoctors(data.doctors || []);
       setGeoActive(!!geo);
     } catch (err) {
@@ -96,12 +96,12 @@ export default function FindDoctorsPage() {
   // Client-side text filter (if no geo, we also allow the backend to do some filtering, but client-side is fast)
   const filtered = doctors.filter(d => {
     const q = search.toLowerCase();
-    const matchSearch = d.name.toLowerCase().includes(q) || 
+    const matchSearch = d.name.toLowerCase().includes(q) ||
       (d.locations || []).some(l => l.city.toLowerCase().includes(q) || l.hospitalName.toLowerCase().includes(q));
-    
+
     // If backend already filtered specs, we don't strictly need to do it here, but safe to keep
     const matchSpec = !specFilter || d.specialization === specFilter;
-    
+
     return matchSearch && matchSpec;
   });
 
@@ -128,7 +128,7 @@ export default function FindDoctorsPage() {
 
       {/* ── Search Toolbar ── */}
       <div className="glass-panel p-4 mb-6 flex flex-col md:flex-row gap-3 items-center">
-        
+
         <div className="relative flex-1 w-full">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
           <input
@@ -140,13 +140,13 @@ export default function FindDoctorsPage() {
         </div>
 
         <div className="w-full md:w-56">
-          <Sel 
-            value={specFilter} 
+          <Sel
+            value={specFilter}
             onChange={e => {
               setSpecFilter(e.target.value);
               // if we change spec, we probably want to re-fetch if geo is active or just re-fetch in general
               if (geoActive) handleClearGeo(); // easiest is to reset geo if they change dropdow
-            }} 
+            }}
             className="py-3"
           >
             <option value="">All Specialities</option>
@@ -154,12 +154,11 @@ export default function FindDoctorsPage() {
           </Sel>
         </div>
 
-        <button 
-          className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl border font-semibold text-sm transition-all w-full md:w-auto ${
-            geoActive 
-              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/20" 
+        <button
+          className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl border font-semibold text-sm transition-all w-full md:w-auto ${geoActive
+              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/20"
               : "bg-indigo-50 dark:bg-white/5 border-indigo-100 dark:border-white/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-white/10"
-          }`}
+            }`}
           onClick={geoActive ? handleClearGeo : handleNearMe}
           disabled={geoLoading}
         >
@@ -184,7 +183,7 @@ export default function FindDoctorsPage() {
           <Stethoscope size={40} className="text-slate-300 dark:text-slate-700 mb-2" />
           <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300">No Doctors Found</h3>
           <p className="text-slate-500 text-sm max-w-sm">
-            {geoActive 
+            {geoActive
               ? "We couldn't find any verified doctors near your location. Try clearing your location filter."
               : "No verified doctors match your current search constraints."}
           </p>
@@ -198,7 +197,7 @@ export default function FindDoctorsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filtered.map(doc => (
             <div key={doc._id} className="glass-panel p-5 flex flex-col group hover:border-indigo-500/30 transition-all duration-300">
-              
+
               {/* Card Header Component */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -253,7 +252,7 @@ export default function FindDoctorsPage() {
               </div>
 
               {/* Action */}
-              <button 
+              <button
                 className="w-full btn btn-primary flex items-center justify-between py-2.5 px-4 text-sm mt-auto"
                 onClick={() => router.push(`/dashboard/user/find-doctors/${doc._id}`)}
               >

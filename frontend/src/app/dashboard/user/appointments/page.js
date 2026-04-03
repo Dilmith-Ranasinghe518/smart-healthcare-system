@@ -6,8 +6,8 @@ import { Calendar, Clock, MapPin, XCircle, CheckCircle, Clock3, AlertCircle } fr
 import toast from "react-hot-toast";
 import ConfirmModal from "@/components/ConfirmModal";
 
-const APPOINTMENT_API = process.env.NEXT_PUBLIC_APPOINTMENT_API_URL || "http://localhost:5070";
-const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL || "http://localhost:5007";
+const APPOINTMENT_API = process.env.NEXT_PUBLIC_APPOINTMENT_API_URL;
+const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL;
 
 export default function UserAppointmentsPage() {
   const { user, loading } = useAuth();
@@ -38,9 +38,9 @@ export default function UserAppointmentsPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to fetch appointments");
-      
+
       const appts = data.appointments || [];
-      
+
       // Sort: upcoming first (by date then time)
       appts.sort((a, b) => {
         const dateTimeA = new Date(`${a.date}T${a.timeSlot.startTime}`);
@@ -86,18 +86,18 @@ export default function UserAppointmentsPage() {
     try {
       const res = await fetch(`${APPOINTMENT_API}/api/appointments/${cancelTargetId}/cancel`, {
         method: "PATCH",
-        headers: { 
+        headers: {
           Authorization: `Bearer ${user.token}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ reason: "Cancelled by User" })
       });
-      
+
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.message || "Failed to cancel appointment");
       }
-      
+
       toast.success("Appointment cancelled successfully.");
       setShowCancelModal(false);
       fetchAppointments();
@@ -151,7 +151,7 @@ export default function UserAppointmentsPage() {
           <Calendar size={48} className="text-slate-300 dark:text-slate-700 mb-4" />
           <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300">No Appointments</h3>
           <p className="text-slate-500 text-sm max-w-sm mb-4">
-            You don't have any booked appointments yet. 
+            You don't have any booked appointments yet.
           </p>
           <button className="btn btn-primary" onClick={() => router.push("/dashboard/user/find-doctors")}>
             Find a Doctor
@@ -162,17 +162,16 @@ export default function UserAppointmentsPage() {
           {appointments.map(app => {
             const docInfo = doctors[app.doctorId];
             const isCancellable = app.status === 'PENDING' || app.status === 'CONFIRMED';
-            
+
             return (
               <div key={app._id} className={`glass-panel p-5 flex flex-col relative overflow-hidden transition-all ${!isCancellable ? 'opacity-70 grayscale-[30%]' : ''}`}>
-                
+
                 {/* Visual Status Indicator Strip */}
-                <div className={`absolute left-0 top-0 bottom-0 w-1 ${
-                  app.status === 'PENDING' ? 'bg-amber-400' :
-                  app.status === 'CONFIRMED' ? 'bg-emerald-500' :
-                  app.status === 'COMPLETED' ? 'bg-indigo-500' :
-                  'bg-rose-500'
-                }`} />
+                <div className={`absolute left-0 top-0 bottom-0 w-1 ${app.status === 'PENDING' ? 'bg-amber-400' :
+                    app.status === 'CONFIRMED' ? 'bg-emerald-500' :
+                      app.status === 'COMPLETED' ? 'bg-indigo-500' :
+                        'bg-rose-500'
+                  }`} />
 
                 <div className="flex items-start justify-between mb-4 pl-2">
                   {getStatusBadge(app.status)}
@@ -223,7 +222,7 @@ export default function UserAppointmentsPage() {
                 </div>
 
                 {isCancellable && (
-                  <button 
+                  <button
                     className="mt-6 w-full py-2.5 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-500/5 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/10 text-xs font-bold transition-all disabled:opacity-50"
                     onClick={() => handleCancelClick(app._id)}
                     disabled={cancelling === app._id}

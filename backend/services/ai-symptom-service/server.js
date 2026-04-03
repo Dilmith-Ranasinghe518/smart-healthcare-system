@@ -10,7 +10,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "*",
+    origin: process.env.FRONTEND_URL,
     credentials: true,
   })
 );
@@ -29,7 +29,7 @@ app.use("/api/symptoms", symptomRoutes);
 
 app.use(errorHandler);
 
-const PORT = process.env.AI_SYMPTOM_PORT || 5006;
+const PORT = process.env.AI_SYMPTOM_PORT;
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`AI Symptom Service running on port ${PORT}`);

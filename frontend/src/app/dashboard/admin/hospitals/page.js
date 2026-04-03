@@ -10,7 +10,7 @@ import Sel from "@/components/Sel";
 import toast from "react-hot-toast";
 import Pagination from "@/components/Pagination";
 
-const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL || "http://localhost:5007";
+const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL;
 
 /* ── labelled input ── */
 function Field({ label, required, children }) {
@@ -32,11 +32,11 @@ export default function ManageHospitalsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  const [hospitals, setHospitals]   = useState([]);
-  const [search, setSearch]         = useState("");
+  const [hospitals, setHospitals] = useState([]);
+  const [search, setSearch] = useState("");
   const [showFilter, setShowFilter] = useState("all"); // all | active | inactive
-  const [fetching, setFetching]     = useState(true);
-  const [error, setError]           = useState("");
+  const [fetching, setFetching] = useState(true);
+  const [error, setError] = useState("");
   const [modalHospital, setModalHospital] = useState(undefined); // undefined=closed null=create obj=edit
   const [actionLoading, setActionLoading] = useState(null);
 
@@ -108,14 +108,14 @@ export default function ManageHospitalsPage() {
       (h.address || "").toLowerCase().includes(q);
     const matchStatus =
       showFilter === "all" ? true :
-      showFilter === "active" ? h.isActive :
-      !h.isActive;
+        showFilter === "active" ? h.isActive :
+          !h.isActive;
     return matchSearch && matchStatus;
   });
 
-  const totalActive   = hospitals.filter(h => h.isActive).length;
+  const totalActive = hospitals.filter(h => h.isActive).length;
   const totalInactive = hospitals.filter(h => !h.isActive).length;
-  const cities        = [...new Set(hospitals.map(h => h.city).filter(Boolean))];
+  const cities = [...new Set(hospitals.map(h => h.city).filter(Boolean))];
 
   // Calculate Pagination
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
@@ -162,16 +162,15 @@ export default function ManageHospitalsPage() {
       {/* ── Stats ── */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: "Total",    value: hospitals.length,  color: "text-indigo-400",  action: () => setShowFilter("all") },
-          { label: "Active",   value: totalActive,       color: "text-emerald-400", action: () => setShowFilter("active") },
-          { label: "Inactive", value: totalInactive,     color: "text-amber-400",   action: () => setShowFilter("inactive") },
+          { label: "Total", value: hospitals.length, color: "text-indigo-400", action: () => setShowFilter("all") },
+          { label: "Active", value: totalActive, color: "text-emerald-400", action: () => setShowFilter("active") },
+          { label: "Inactive", value: totalInactive, color: "text-amber-400", action: () => setShowFilter("inactive") },
         ].map(s => (
           <button
             key={s.label}
             onClick={s.action}
-            className={`glass-panel p-4 text-left transition-all hover:ring-2 ring-offset-0 ${
-              showFilter === s.label.toLowerCase() ? "ring-2 ring-indigo-500/50" : ""
-            }`}
+            className={`glass-panel p-4 text-left transition-all hover:ring-2 ring-offset-0 ${showFilter === s.label.toLowerCase() ? "ring-2 ring-indigo-500/50" : ""
+              }`}
           >
             <div className={`flex items-center gap-2 ${s.color}`}>
               <Building2 size={16} />
@@ -294,7 +293,7 @@ export default function ManageHospitalsPage() {
         )}
 
         {!fetching && filtered.length > 0 && (
-          <Pagination 
+          <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
@@ -323,15 +322,15 @@ export default function ManageHospitalsPage() {
 function HospitalModal({ hospital, cities, onClose, onSaved, token, apiUrl }) {
   const isEditing = !!hospital;
   const [form, setForm] = useState({
-    name:    hospital?.name    || "",
-    city:    hospital?.city    || "",
+    name: hospital?.name || "",
+    city: hospital?.city || "",
     address: hospital?.address || "",
-    lng:     hospital?.location?.coordinates?.[0] ?? "",
-    lat:     hospital?.location?.coordinates?.[1] ?? "",
+    lng: hospital?.location?.coordinates?.[0] ?? "",
+    lat: hospital?.location?.coordinates?.[1] ?? "",
     isActive: hospital?.isActive ?? true,
   });
   const [saving, setSaving] = useState(false);
-  const [error, setError]   = useState("");
+  const [error, setError] = useState("");
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -340,8 +339,8 @@ function HospitalModal({ hospital, cities, onClose, onSaved, token, apiUrl }) {
     setError("");
 
     const body = {
-      name:    form.name.trim(),
-      city:    form.city.trim(),
+      name: form.name.trim(),
+      city: form.city.trim(),
       address: form.address.trim(),
       isActive: form.isActive,
     };
@@ -350,17 +349,17 @@ function HospitalModal({ hospital, cities, onClose, onSaved, token, apiUrl }) {
     const lat = parseFloat(form.lat);
     if (form.lng !== "" && form.lat !== "") {
       if (isNaN(lng) || isNaN(lat)) { setError("Coordinates must be valid numbers."); return; }
-      if (lng < -180 || lng > 180)  { setError("Longitude must be between -180 and 180."); return; }
-      if (lat < -90  || lat > 90)   { setError("Latitude must be between -90 and 90."); return; }
+      if (lng < -180 || lng > 180) { setError("Longitude must be between -180 and 180."); return; }
+      if (lat < -90 || lat > 90) { setError("Latitude must be between -90 and 90."); return; }
       body.coordinates = [lng, lat];
     }
 
     setSaving(true);
     try {
-      const url    = isEditing ? `${apiUrl}/api/hospitals/${hospital._id}` : `${apiUrl}/api/hospitals`;
+      const url = isEditing ? `${apiUrl}/api/hospitals/${hospital._id}` : `${apiUrl}/api/hospitals`;
       const method = isEditing ? "PUT" : "POST";
 
-      const res  = await fetch(url, {
+      const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(body),
@@ -453,11 +452,10 @@ function HospitalModal({ hospital, cities, onClose, onSaved, token, apiUrl }) {
             <button
               type="button"
               onClick={() => set("isActive", !form.isActive)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                form.isActive
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${form.isActive
                   ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
                   : "bg-slate-200 dark:bg-white/10 text-slate-500 hover:bg-slate-300 dark:hover:bg-white/15"
-              }`}
+                }`}
             >
               {form.isActive ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
               {form.isActive ? "Active" : "Inactive"}

@@ -2,17 +2,17 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { 
-  Calendar, Clock, MapPin, XCircle, CheckCircle, Clock3, 
-  AlertCircle, Check, X, CheckSquare, Search, RefreshCw, Activity 
+import {
+  Calendar, Clock, MapPin, XCircle, CheckCircle, Clock3,
+  AlertCircle, Check, X, CheckSquare, Search, RefreshCw, Activity
 } from "lucide-react";
 import toast from "react-hot-toast";
 import Sel from "@/components/Sel";
 import Pagination from "@/components/Pagination";
 
-const APPOINTMENT_API = process.env.NEXT_PUBLIC_APPOINTMENT_API_URL || "http://localhost:5070";
-const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL || "http://localhost:5007";
-const USER_API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+const APPOINTMENT_API = process.env.NEXT_PUBLIC_APPOINTMENT_API_URL;
+const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL;
+const USER_API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function AdminAppointmentsPage() {
   const { user, loading } = useAuth();
@@ -31,7 +31,7 @@ export default function AdminAppointmentsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [doctorFilter, setDoctorFilter] = useState("all");
-  
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
@@ -51,15 +51,15 @@ export default function AdminAppointmentsPage() {
       const apptRes = fetch(`${APPOINTMENT_API}/api/appointments/all`, { headers: { Authorization: `Bearer ${user.token}` } });
       const docRes = fetch(`${DOCTOR_API}/api/doctors/admin/all`, { headers: { Authorization: `Bearer ${user.token}` } });
       const userRes = fetch(`${USER_API}/users`, { headers: { Authorization: `Bearer ${user.token}` } });
-      
+
       const [rAppt, rDoc, rUser] = await Promise.all([apptRes, docRes, userRes]);
-      
+
       if (!rAppt.ok) { const d = await rAppt.json(); throw new Error(d.message || "Failed to fetch appointments"); }
-      
+
       const apptData = await rAppt.json();
       const docData = rDoc.ok ? await rDoc.json() : { doctors: [] };
       const userData = rUser.ok ? await rUser.json() : [];
-      
+
       // Build Lookup Maps
       const pMap = {};
       const actualUsers = Array.isArray(userData) ? userData : userData.users || [];
@@ -72,7 +72,7 @@ export default function AdminAppointmentsPage() {
       setDoctorMap(dMap);
 
       const appts = apptData.appointments || [];
-      
+
       // Sort by absolute date+time (newest first for admin view)
       appts.sort((a, b) => {
         const dateTimeA = new Date(`${a.date}T${a.timeSlot.startTime}`);
@@ -96,19 +96,19 @@ export default function AdminAppointmentsPage() {
         headers: { Authorization: `Bearer ${user.token}`, "Content-Type": "application/json" },
         body: JSON.stringify(actionStr === 'cancel' ? { reason: "Cancelled by Admin" } : {})
       });
-      
+
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.message || `Failed to ${actionStr}`);
       }
-      
-      const labels = { 
-        accept: 'Appointment accepted', 
-        reject: 'Appointment rejected', 
+
+      const labels = {
+        accept: 'Appointment accepted',
+        reject: 'Appointment rejected',
         complete: 'Marked as completed',
         cancel: 'Appointment cancelled'
       };
-      
+
       toast.success(labels[actionStr] || 'Status updated');
       fetchAllAppointments();
     } catch (err) {
@@ -216,7 +216,7 @@ export default function AdminAppointmentsPage() {
             ))}
           </Sel>
         </div>
-        
+
         <button
           className="p-2.5 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-500 hover:text-indigo-400 transition-all flex-shrink-0"
           onClick={fetchAllAppointments}
@@ -254,10 +254,10 @@ export default function AdminAppointmentsPage() {
                 const isConfirmed = app.status === 'CONFIRMED';
                 const pName = patientMap[app.patientId] || app.patientId;
                 const dName = doctorMap[app.doctorId] || app.doctorId;
-                
+
                 return (
                   <tr key={app._id} className="border-b border-slate-200 dark:border-white/5 last:border-none hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-all">
-                    
+
                     {/* Time & Date */}
                     <td className="py-4 pr-4">
                       <div className="flex items-start gap-3">
@@ -312,13 +312,13 @@ export default function AdminAppointmentsPage() {
                       <div className="flex items-center justify-end gap-1.5">
                         {isPending && (
                           <>
-                            <button 
+                            <button
                               title="Accept"
                               className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition-all disabled:opacity-50"
                               onClick={() => updateStatus(app._id, 'accept')}
                               disabled={processing}
                             ><Check size={16} /></button>
-                            <button 
+                            <button
                               title="Reject"
                               className="p-1.5 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition-all disabled:opacity-50"
                               onClick={() => updateStatus(app._id, 'reject')}
@@ -329,13 +329,13 @@ export default function AdminAppointmentsPage() {
 
                         {isConfirmed && (
                           <>
-                            <button 
+                            <button
                               title="Complete"
                               className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 transition-all disabled:opacity-50"
                               onClick={() => updateStatus(app._id, 'complete')}
                               disabled={processing}
                             ><CheckSquare size={16} /></button>
-                            <button 
+                            <button
                               title="Cancel"
                               className="p-1.5 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition-all disabled:opacity-50"
                               onClick={() => updateStatus(app._id, 'cancel')}
@@ -343,7 +343,7 @@ export default function AdminAppointmentsPage() {
                             ><XCircle size={16} /></button>
                           </>
                         )}
-                        
+
                         {['CANCELLED', 'REJECTED', 'COMPLETED'].includes(app.status) && (
                           <span className="text-xs text-slate-400 italic">No actions</span>
                         )}
@@ -357,7 +357,7 @@ export default function AdminAppointmentsPage() {
           </table>
 
           {paginatedAppointments.length > 0 && (
-            <Pagination 
+            <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={setCurrentPage}

@@ -11,8 +11,8 @@ import Sel from "@/components/Sel";
 import toast from "react-hot-toast";
 import Pagination from "@/components/Pagination";
 
-const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL || "http://localhost:5007";
-const USER_API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL;
+const USER_API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ManageDoctorsPage() {
     const { user, loading } = useAuth();
@@ -336,9 +336,9 @@ export default function ManageDoctorsPage() {
                         </tbody>
                     </table>
                 )}
-                
+
                 {!fetching && filtered.length > 0 && (
-                    <Pagination 
+                    <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
                         onPageChange={setCurrentPage}

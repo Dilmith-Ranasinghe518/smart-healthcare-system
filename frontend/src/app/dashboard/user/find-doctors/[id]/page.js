@@ -12,7 +12,7 @@ import Sel from "@/components/Sel";
 const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL || "http://localhost:5007";
 const APPOINTMENT_API = process.env.NEXT_PUBLIC_APPOINTMENT_API_URL || "http://localhost:5070";
 
-const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 function formatDateLabel(dateStr) {
   const d = new Date(dateStr + "T00:00:00");
@@ -92,7 +92,7 @@ export default function DoctorDetailsPage() {
         (data.bookedSlots || []).forEach(s => { countMap[s.slotId] = s.count; });
         setBookedCounts(prev => ({ ...prev, [dateStr]: countMap }));
       }
-    } catch {}
+    } catch { }
     setLoadingDates(p => { const n = new Set(p); n.delete(dateStr); return n; });
   };
 
@@ -146,18 +146,37 @@ export default function DoctorDetailsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Booking failed");
 
-      toast.success("Appointment booked! Payment received. Redirecting...");
-      setBookingSlot(null);
-      setBookingNote("");
-      setAppointmentType("General Checkup");
+      // SECOND STEP: Create Payment Session
+      try {
+        const paymentRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payment/create`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`
+          },
+          body: JSON.stringify({
+            userId: user.id || user._id,
+            appointmentId: data.appointment._id,
+            amount: location.consultationFee * 100, // Stripe expects cents
+            currency: "lkr", // Or usd from loc
+            title: `Consultation with Dr. ${doctor.name}`
+          })
+        });
 
-      // Refresh counts for that date
-      setBookedCounts(prev => {
-        const updated = { ...prev };
-        delete updated[date];
-        return updated;
-      });
-      setTimeout(() => router.push("/dashboard/user/find-doctors"), 1500);
+        const paymentData = await paymentRes.json();
+        if (paymentRes.ok && paymentData.url) {
+          toast.success("Appointment created! Redirecting to payment...");
+          window.location.href = paymentData.url; // Redirect to Stripe
+          return;
+        } else {
+          throw new Error(paymentData.message || "Failed to initiate payment");
+        }
+      } catch (payErr) {
+        toast.error("Appointment created but payment failed to start: " + payErr.message);
+        // We still created an appointment, but payment failed.
+        // Redirecting to find-doctors for now.
+        setTimeout(() => router.push("/dashboard/user/find-doctors"), 2000);
+      }
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -352,7 +371,7 @@ export default function DoctorDetailsPage() {
 
             <div className="flex flex-col gap-3 mb-5 bg-slate-50 dark:bg-white/5 rounded-2xl p-4 border border-slate-100 dark:border-white/5">
               <div className="flex items-start gap-3">
-                <Stethoscope size={16} className="text-indigo-400 mt-0.5 shrink-0"/>
+                <Stethoscope size={16} className="text-indigo-400 mt-0.5 shrink-0" />
                 <div>
                   <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Doctor</p>
                   <p className="font-semibold text-slate-800 dark:text-white text-sm">{doctor.name}</p>
@@ -360,7 +379,7 @@ export default function DoctorDetailsPage() {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Building2 size={16} className="text-emerald-400 mt-0.5 shrink-0"/>
+                <Building2 size={16} className="text-emerald-400 mt-0.5 shrink-0" />
                 <div>
                   <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Hospital</p>
                   <p className="font-semibold text-slate-800 dark:text-white text-sm">{bookingSlot.location.hospitalName}</p>
@@ -368,7 +387,7 @@ export default function DoctorDetailsPage() {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Calendar size={16} className="text-amber-400 mt-0.5 shrink-0"/>
+                <Calendar size={16} className="text-amber-400 mt-0.5 shrink-0" />
                 <div>
                   <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Date & Time</p>
                   <p className="font-semibold text-slate-800 dark:text-white text-sm">{bookingSlot.dateLabel}</p>
@@ -377,7 +396,7 @@ export default function DoctorDetailsPage() {
               </div>
               {bookingSlot.location.consultationFee > 0 && (
                 <div className="flex items-start gap-3">
-                  <CircleDollarSign size={16} className="text-emerald-400 mt-0.5 shrink-0"/>
+                  <CircleDollarSign size={16} className="text-emerald-400 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Consultation Fee</p>
                     <p className="font-bold text-emerald-600 dark:text-emerald-400 text-lg">Rs. {bookingSlot.location.consultationFee.toLocaleString()}</p>
@@ -388,9 +407,9 @@ export default function DoctorDetailsPage() {
 
             <div className="mb-4">
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Appointment Type</label>
-              <Sel 
-                value={appointmentType} 
-                onChange={e => setAppointmentType(e.target.value)} 
+              <Sel
+                value={appointmentType}
+                onChange={e => setAppointmentType(e.target.value)}
                 className="w-full bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 py-3"
               >
                 <option value="General Checkup">General Checkup</option>
