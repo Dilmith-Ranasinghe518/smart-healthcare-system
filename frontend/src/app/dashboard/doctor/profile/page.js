@@ -6,7 +6,7 @@ import { UserCircle, Edit, MapPin, Building2, BadgeCheck, Stethoscope, Clock, Ba
 import DoctorProfileModal from "@/components/DoctorProfileModal";
 import toast from "react-hot-toast";
 
-const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL;
+const DOCTOR_API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function DoctorProfilePage() {
   const { user, loading } = useAuth();
@@ -32,7 +32,7 @@ export default function DoctorProfilePage() {
     setFetching(true);
     try {
       // Fetch my profile
-      const profRes = await fetch(`${DOCTOR_API}/api/doctors/me`, {
+      const profRes = await fetch(`${DOCTOR_API}/doctors/me`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       const profData = await profRes.json();
@@ -41,7 +41,7 @@ export default function DoctorProfilePage() {
       setDoctor(profData.doctor); // null if not created yet
 
       // Fetch all hospitals for the modal dropdown
-      const hospRes = await fetch(`${DOCTOR_API}/api/hospitals?isActive=all`, {
+      const hospRes = await fetch(`${DOCTOR_API}/hospitals?isActive=all`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       const hospData = await hospRes.json();
@@ -172,8 +172,8 @@ export default function DoctorProfilePage() {
                         <div className="flex flex-col gap-1 max-h-32 overflow-y-auto">
                           {loc.availability.map(slot => (
                             <span key={slot._id} className={`text-[10px] font-medium px-2 py-1 border rounded shadow-sm whitespace-nowrap flex items-center justify-between gap-2 ${slot.isAvailable === false
-                                ? 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-white/5 text-slate-400 line-through'
-                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300'
+                              ? 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-white/5 text-slate-400 line-through'
+                              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300'
                               }`}>
                               <span>{slot.day.substring(0, 3)}: {slot.startTime}-{slot.endTime}</span>
                               <span className="text-slate-400 font-normal">Limit: {slot.patientLimit}</span>

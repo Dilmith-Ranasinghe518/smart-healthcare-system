@@ -9,8 +9,9 @@ import {
 import toast from "react-hot-toast";
 import Sel from "@/components/Sel";
 
-const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL || "http://localhost:5007";
-const APPOINTMENT_API = process.env.NEXT_PUBLIC_APPOINTMENT_API_URL || "http://localhost:5070";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL;
+const DOCTOR_API = API_BASE;
+const APPOINTMENT_API = API_BASE;
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -67,7 +68,7 @@ export default function DoctorDetailsPage() {
   const fetchData = async () => {
     setFetching(true);
     try {
-      const res = await fetch(`${DOCTOR_API}/api/doctors/${id}`);
+      const res = await fetch(`${DOCTOR_API}/doctors/${id}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to load doctor");
       setDoctor(data.doctor);
@@ -83,7 +84,7 @@ export default function DoctorDetailsPage() {
     setLoadingDates(p => new Set([...p, dateStr]));
     try {
       const res = await fetch(
-        `${APPOINTMENT_API}/api/appointments/doctor/${id}/booked-slots?date=${dateStr}`,
+        `${APPOINTMENT_API}/appointments/doctor/${id}/booked-slots?date=${dateStr}`,
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
       const data = await res.json();
@@ -131,7 +132,7 @@ export default function DoctorDetailsPage() {
 
     const { date, location, slot } = bookingSlot;
     try {
-      const res = await fetch(`${APPOINTMENT_API}/api/appointments`, {
+      const res = await fetch(`${APPOINTMENT_API}/appointments`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.token}` },
         body: JSON.stringify({

@@ -8,8 +8,9 @@ import Sel from "@/components/Sel";
 import ConfirmModal from "@/components/ConfirmModal";
 import Pagination from "@/components/Pagination";
 
-const APPOINTMENT_API = process.env.NEXT_PUBLIC_APPOINTMENT_API_URL;
-const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL;
+const API_BASE = process.env.NEXT_PUBLIC_API_URL;
+const APPOINTMENT_API = API_BASE;
+const DOCTOR_API = API_BASE;
 
 export default function DoctorAppointmentsPage() {
   const { user, loading } = useAuth();
@@ -46,7 +47,7 @@ export default function DoctorAppointmentsPage() {
     setError("");
     try {
       // 1. Get my doctor profile to find _id
-      const profRes = await fetch(`${DOCTOR_API}/api/doctors/me`, {
+      const profRes = await fetch(`${DOCTOR_API}/doctors/me`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       const profData = await profRes.json();
@@ -60,7 +61,7 @@ export default function DoctorAppointmentsPage() {
       setDoctor(myDoctor);
 
       // 2. Fetch appointments for this doctor
-      const apptRes = await fetch(`${APPOINTMENT_API}/api/appointments/doctor/${myDoctor._id}`, {
+      const apptRes = await fetch(`${APPOINTMENT_API}/appointments/doctor/${myDoctor._id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       const apptData = await apptRes.json();
@@ -87,7 +88,7 @@ export default function DoctorAppointmentsPage() {
   const updateStatus = async (appId, actionStr) => {
     setProcessing(`${appId}-${actionStr}`); // e.g., '123-accept'
     try {
-      const res = await fetch(`${APPOINTMENT_API}/api/appointments/${appId}/${actionStr}`, {
+      const res = await fetch(`${APPOINTMENT_API}/appointments/${appId}/${actionStr}`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${user.token}` }
       });
@@ -282,9 +283,9 @@ export default function DoctorAppointmentsPage() {
 
                   {/* Visual Status Indicator Strip */}
                   <div className={`absolute left-0 top-0 bottom-0 w-1 ${app.status === 'PENDING' ? 'bg-amber-400' :
-                      app.status === 'CONFIRMED' ? 'bg-emerald-500' :
-                        app.status === 'COMPLETED' ? 'bg-indigo-500' :
-                          'bg-rose-500'
+                    app.status === 'CONFIRMED' ? 'bg-emerald-500' :
+                      app.status === 'COMPLETED' ? 'bg-indigo-500' :
+                        'bg-rose-500'
                     }`} />
 
                   <div className="flex items-start justify-between mb-4 pl-2">

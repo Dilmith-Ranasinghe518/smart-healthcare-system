@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { Activity, Users, Clock, Clipboard, Plus, CheckCircle } from "lucide-react";
 import { API_URL } from "@/utils/api";
 
-const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL;
-const APPOINTMENT_API = process.env.NEXT_PUBLIC_APPOINTMENT_API_URL;
+const DOCTOR_API = API_URL;
+const APPOINTMENT_API = API_URL;
 
 export default function DoctorDashboard() {
   const { user, loading } = useAuth();
@@ -34,7 +34,7 @@ export default function DoctorDashboard() {
           }
 
           // Fetch doctor profile to get _id
-          const profRes = await fetch(`${DOCTOR_API}/api/doctors/me`, {
+          const profRes = await fetch(`${DOCTOR_API}/doctors/me`, {
             headers: { Authorization: `Bearer ${user.token}` }
           });
           const profData = await profRes.json();
@@ -46,7 +46,7 @@ export default function DoctorDashboard() {
           const today = new Date();
           const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-          const apptRes = await fetch(`${APPOINTMENT_API}/api/appointments/doctor/${myDoctor._id}?date=${todayString}`, {
+          const apptRes = await fetch(`${APPOINTMENT_API}/appointments/doctor/${myDoctor._id}?date=${todayString}`, {
             headers: { Authorization: `Bearer ${user.token}` }
           });
           const apptData = await apptRes.json();

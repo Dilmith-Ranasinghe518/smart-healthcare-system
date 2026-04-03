@@ -24,6 +24,9 @@ services:
       - telemedicine-service
       - prescription-service
       - ai-symptom-service
+      - doctor-service
+      - appointment-service
+      - payment-service
     networks:
       - healthcare-network
 
@@ -145,7 +148,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:5005/api
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     depends_on:
       - api-gateway
     networks:

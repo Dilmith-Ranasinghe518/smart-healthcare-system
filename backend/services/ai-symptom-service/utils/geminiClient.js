@@ -13,7 +13,7 @@ function getGenAI() {
 async function generateSymptomAdvice(prompt) {
   const genAI = getGenAI();
 
-  const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const modelName = process.env.GEMINI_MODEL;
 
   const model = genAI.getGenerativeModel({
     model: modelName,

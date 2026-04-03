@@ -10,9 +10,10 @@ import toast from "react-hot-toast";
 import Sel from "@/components/Sel";
 import Pagination from "@/components/Pagination";
 
-const APPOINTMENT_API = process.env.NEXT_PUBLIC_APPOINTMENT_API_URL;
-const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL;
-const USER_API = process.env.NEXT_PUBLIC_API_URL;
+const API_BASE = process.env.NEXT_PUBLIC_API_URL;
+const APPOINTMENT_API = API_BASE;
+const DOCTOR_API = API_BASE;
+const USER_API = API_BASE;
 
 export default function AdminAppointmentsPage() {
   const { user, loading } = useAuth();
@@ -48,8 +49,8 @@ export default function AdminAppointmentsPage() {
     setFetching(true);
     setError("");
     try {
-      const apptRes = fetch(`${APPOINTMENT_API}/api/appointments/all`, { headers: { Authorization: `Bearer ${user.token}` } });
-      const docRes = fetch(`${DOCTOR_API}/api/doctors/admin/all`, { headers: { Authorization: `Bearer ${user.token}` } });
+      const apptRes = fetch(`${APPOINTMENT_API}/appointments/all`, { headers: { Authorization: `Bearer ${user.token}` } });
+      const docRes = fetch(`${DOCTOR_API}/doctors/admin/all`, { headers: { Authorization: `Bearer ${user.token}` } });
       const userRes = fetch(`${USER_API}/users`, { headers: { Authorization: `Bearer ${user.token}` } });
 
       const [rAppt, rDoc, rUser] = await Promise.all([apptRes, docRes, userRes]);
@@ -91,7 +92,7 @@ export default function AdminAppointmentsPage() {
   const updateStatus = async (appId, actionStr) => {
     setProcessing(`${appId}-${actionStr}`);
     try {
-      const res = await fetch(`${APPOINTMENT_API}/api/appointments/${appId}/${actionStr}`, {
+      const res = await fetch(`${APPOINTMENT_API}/appointments/${appId}/${actionStr}`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${user.token}`, "Content-Type": "application/json" },
         body: JSON.stringify(actionStr === 'cancel' ? { reason: "Cancelled by Admin" } : {})

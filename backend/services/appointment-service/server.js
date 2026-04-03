@@ -27,5 +27,5 @@ app.all(/(.*)/, (req, res, next) => {
 // Global Error Handler
 app.use(globalErrorHandler);
 
-const PORT = process.env.APPOINTMENT_PORT || 5008;
+const PORT = process.env.APPOINTMENT_PORT;
 app.listen(PORT, () => console.log(`Appointment Service running on port ${PORT}`));

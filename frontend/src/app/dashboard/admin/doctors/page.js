@@ -11,8 +11,9 @@ import Sel from "@/components/Sel";
 import toast from "react-hot-toast";
 import Pagination from "@/components/Pagination";
 
-const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL;
-const USER_API = process.env.NEXT_PUBLIC_API_URL;
+const API_BASE = process.env.NEXT_PUBLIC_API_URL;
+const DOCTOR_API = API_BASE;
+const USER_API = API_BASE;
 
 export default function ManageDoctorsPage() {
     const { user, loading } = useAuth();
@@ -54,7 +55,7 @@ export default function ManageDoctorsPage() {
     };
 
     const fetchDoctors = async () => {
-        const res = await fetch(`${DOCTOR_API}/api/doctors/admin/all`, {
+        const res = await fetch(`${DOCTOR_API}/doctors/admin/all`, {
             headers: { Authorization: `Bearer ${user.token}` },
         });
         const data = await res.json();
@@ -63,7 +64,7 @@ export default function ManageDoctorsPage() {
     };
 
     const fetchHospitals = async () => {
-        const res = await fetch(`${DOCTOR_API}/api/hospitals`);
+        const res = await fetch(`${DOCTOR_API}/hospitals`);
         const data = await res.json();
         setHospitals(data.hospitals || []);
     };
@@ -79,7 +80,7 @@ export default function ManageDoctorsPage() {
             // Only doctor-role accounts
             const doctorRoleUsers = allUsers.filter(u => u.role === "doctor");
             // Fetch all existing doctor profiles to know which userIds are already taken
-            const profRes = await fetch(`${DOCTOR_API}/api/doctors/admin/all`, {
+            const profRes = await fetch(`${DOCTOR_API}/doctors/admin/all`, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             const profData = await profRes.json();
@@ -92,7 +93,7 @@ export default function ManageDoctorsPage() {
     const handleVerify = async (doc) => {
         setActionLoading(doc._id + "_v");
         try {
-            const res = await fetch(`${DOCTOR_API}/api/doctors/${doc._id}/verify`, {
+            const res = await fetch(`${DOCTOR_API}/doctors/${doc._id}/verify`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.token}` },
                 body: JSON.stringify({ isVerified: !doc.isVerified }),
@@ -111,7 +112,7 @@ export default function ManageDoctorsPage() {
     const handleDelete = async (id) => {
         setActionLoading(id + "_d");
         try {
-            const res = await fetch(`${DOCTOR_API}/api/doctors/${id}`, {
+            const res = await fetch(`${DOCTOR_API}/doctors/${id}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${user.token}` },
             });

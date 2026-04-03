@@ -1,7 +1,7 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function checkSymptoms(symptoms) {
-  const response = await fetch(`${API_BASE_URL}/api/ai-symptoms/check`, {
+  const response = await fetch(`${API_BASE_URL}/ai-symptoms/check`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"

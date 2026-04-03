@@ -29,7 +29,7 @@ app.get("/cancel", (req, res) => {
   res.send("Payment Cancelled ❌");
 });
 
-const PORT = process.env.PAYMENT_PORT || 5009;
+const PORT = process.env.PAYMENT_PORT;
 
 app.listen(PORT, () => {
   console.log(`Payment Service running on port ${PORT}`);

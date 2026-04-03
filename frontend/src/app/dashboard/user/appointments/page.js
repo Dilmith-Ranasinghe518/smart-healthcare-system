@@ -6,8 +6,9 @@ import { Calendar, Clock, MapPin, XCircle, CheckCircle, Clock3, AlertCircle } fr
 import toast from "react-hot-toast";
 import ConfirmModal from "@/components/ConfirmModal";
 
-const APPOINTMENT_API = process.env.NEXT_PUBLIC_APPOINTMENT_API_URL;
-const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL;
+const API_BASE = process.env.NEXT_PUBLIC_API_URL;
+const APPOINTMENT_API = API_BASE;
+const DOCTOR_API = API_BASE;
 
 export default function UserAppointmentsPage() {
   const { user, loading } = useAuth();
@@ -33,7 +34,7 @@ export default function UserAppointmentsPage() {
     setFetching(true);
     setError("");
     try {
-      const res = await fetch(`${APPOINTMENT_API}/api/appointments/my`, {
+      const res = await fetch(`${APPOINTMENT_API}/appointments/my`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       const data = await res.json();
@@ -65,7 +66,7 @@ export default function UserAppointmentsPage() {
 
   const fetchDoctorDetails = async (doctorId) => {
     try {
-      const res = await fetch(`${DOCTOR_API}/api/doctors/${doctorId}`);
+      const res = await fetch(`${DOCTOR_API}/doctors/${doctorId}`);
       if (res.ok) {
         const data = await res.json();
         setDoctors(prev => ({ ...prev, [doctorId]: data.doctor }));
@@ -84,7 +85,7 @@ export default function UserAppointmentsPage() {
     if (!cancelTargetId) return;
     setCancelling(cancelTargetId);
     try {
-      const res = await fetch(`${APPOINTMENT_API}/api/appointments/${cancelTargetId}/cancel`, {
+      const res = await fetch(`${APPOINTMENT_API}/appointments/${cancelTargetId}/cancel`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${user.token}`,
@@ -168,9 +169,9 @@ export default function UserAppointmentsPage() {
 
                 {/* Visual Status Indicator Strip */}
                 <div className={`absolute left-0 top-0 bottom-0 w-1 ${app.status === 'PENDING' ? 'bg-amber-400' :
-                    app.status === 'CONFIRMED' ? 'bg-emerald-500' :
-                      app.status === 'COMPLETED' ? 'bg-indigo-500' :
-                        'bg-rose-500'
+                  app.status === 'CONFIRMED' ? 'bg-emerald-500' :
+                    app.status === 'COMPLETED' ? 'bg-indigo-500' :
+                      'bg-rose-500'
                   }`} />
 
                 <div className="flex items-start justify-between mb-4 pl-2">

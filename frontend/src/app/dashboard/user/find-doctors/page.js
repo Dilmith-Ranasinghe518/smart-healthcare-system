@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import Sel from "@/components/Sel";
 
-const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL;
+const DOCTOR_API = process.env.NEXT_PUBLIC_API_URL;
 
 const SPECIALIZATIONS = [
   "Cardiology", "Dermatology", "Endocrinology", "ENT", "Gastroenterology",
@@ -44,10 +44,10 @@ export default function FindDoctorsPage() {
     setFetching(true);
     setError("");
     try {
-      let url = `${DOCTOR_API}/api/doctors?limit=50`;
+      let url = `${DOCTOR_API}/doctors?limit=50`;
 
       if (geo) {
-        url = `${DOCTOR_API}/api/doctors/near?lng=${geo.lng}&lat=${geo.lat}&distance=20000`; // 20km search radius
+        url = `${DOCTOR_API}/doctors/near?lng=${geo.lng}&lat=${geo.lat}&distance=20000`; // 20km search radius
         if (specFilter) url += `&specialization=${encodeURIComponent(specFilter)}`;
       } else {
         if (specFilter) url += `&specialization=${encodeURIComponent(specFilter)}`;

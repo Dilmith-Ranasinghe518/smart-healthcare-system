@@ -10,7 +10,7 @@ import Sel from "@/components/Sel";
 import toast from "react-hot-toast";
 import Pagination from "@/components/Pagination";
 
-const DOCTOR_API = process.env.NEXT_PUBLIC_DOCTOR_API_URL;
+const DOCTOR_API = process.env.NEXT_PUBLIC_API_URL;
 
 /* ── labelled input ── */
 function Field({ label, required, children }) {
@@ -58,7 +58,7 @@ export default function ManageHospitalsPage() {
     setFetching(true);
     setError("");
     try {
-      const res = await fetch(`${DOCTOR_API}/api/hospitals?isActive=all`, {
+      const res = await fetch(`${DOCTOR_API}/hospitals?isActive=all`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       const data = await res.json();
@@ -75,7 +75,7 @@ export default function ManageHospitalsPage() {
   const handleToggle = async (hosp) => {
     setActionLoading(hosp._id + "_t");
     try {
-      const res = await fetch(`${DOCTOR_API}/api/hospitals/${hosp._id}/toggle-status`, {
+      const res = await fetch(`${DOCTOR_API}/hospitals/${hosp._id}/toggle-status`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${user.token}` },
       });
@@ -356,7 +356,7 @@ function HospitalModal({ hospital, cities, onClose, onSaved, token, apiUrl }) {
 
     setSaving(true);
     try {
-      const url = isEditing ? `${apiUrl}/api/hospitals/${hospital._id}` : `${apiUrl}/api/hospitals`;
+      const url = isEditing ? `${apiUrl}/hospitals/${hospital._id}` : `${apiUrl}/hospitals`;
       const method = isEditing ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -453,8 +453,8 @@ function HospitalModal({ hospital, cities, onClose, onSaved, token, apiUrl }) {
               type="button"
               onClick={() => set("isActive", !form.isActive)}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${form.isActive
-                  ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
-                  : "bg-slate-200 dark:bg-white/10 text-slate-500 hover:bg-slate-300 dark:hover:bg-white/15"
+                ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+                : "bg-slate-200 dark:bg-white/10 text-slate-500 hover:bg-slate-300 dark:hover:bg-white/15"
                 }`}
             >
               {form.isActive ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
