@@ -30,10 +30,16 @@ export default function Navbar() {
 
           <div className="hidden md:flex items-center gap-8">
             <Link
-              href="#home"
+              href="/"
               className="text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-[#5AA7A7] transition-colors"
             >
               Home
+            </Link>
+            <Link
+              href="/doctors"
+              className="text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-[#5AA7A7] transition-colors"
+            >
+              Find Doctors
             </Link>
             <Link
               href="#services"

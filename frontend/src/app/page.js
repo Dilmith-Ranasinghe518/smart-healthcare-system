@@ -264,7 +264,12 @@ export default function Home() {
           </div>
 
           <div>
-            <h3 className="text-3xl font-bold dark:text-white mb-8">Browse by Specialists</h3>
+            <div className="flex justify-between items-end mb-8">
+              <h3 className="text-3xl font-bold dark:text-white">Browse by Specialists</h3>
+              <Link href="/doctors" className="hidden md:flex items-center gap-2 text-slate-500 hover:text-[#74B49B] font-bold transition-colors">
+                View All Doctors <ChevronRight size={20} />
+              </Link>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
               {specialists.map((spec, i) => (
                 <div
