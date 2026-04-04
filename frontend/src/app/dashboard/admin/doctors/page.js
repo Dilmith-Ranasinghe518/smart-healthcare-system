@@ -79,14 +79,7 @@ export default function ManageDoctorsPage() {
             const allUsers = Array.isArray(data) ? data : data.users || [];
             // Only doctor-role accounts
             const doctorRoleUsers = allUsers.filter(u => u.role === "doctor");
-            // Fetch all existing doctor profiles to know which userIds are already taken
-            const profRes = await fetch(`${DOCTOR_API}/doctors/admin/all`, {
-                headers: { Authorization: `Bearer ${user.token}` }
-            });
-            const profData = await profRes.json();
-            const linkedUserIds = new Set((profData.doctors || []).map(d => d.userId).filter(Boolean).map(String));
-            // Only show doctor-role users that are NOT yet linked to any profile
-            setDoctorUsers(doctorRoleUsers.filter(u => !linkedUserIds.has(String(u._id))));
+            setDoctorUsers(doctorRoleUsers);
         } catch { }
     };
 
@@ -382,7 +375,10 @@ export default function ManageDoctorsPage() {
                 <DoctorProfileModal
                     doctor={modalDoctor}
                     hospitals={hospitals}
-                    doctorUsers={doctorUsers}
+                    doctorUsers={doctorUsers.filter(u => {
+                        const linkedToAnother = doctors.some(d => d._id !== modalDoctor?._id && d.userId === u._id);
+                        return !linkedToAnother;
+                    })}
                     isAdmin={true}
                     onClose={() => setModalDoctor(undefined)}
                     onSaved={handleSaved}

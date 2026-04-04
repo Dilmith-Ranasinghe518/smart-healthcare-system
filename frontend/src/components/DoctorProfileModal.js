@@ -142,7 +142,7 @@ export default function DoctorProfileModal({
         specialization: form.specialization,
         qualifications: quals,
         experience: Number(form.experience),
-        ...(isAdmin && form.userId ? { userId: form.userId } : {}),
+        ...(isAdmin ? { userId: form.userId || null } : {}),
       };
 
       const url = isEditing ? `${doctorApiUrl}/doctors/${doctor._id}` : `${doctorApiUrl}/doctors`;

@@ -110,12 +110,15 @@ exports.updateProfile = catchAsync(async (req, res, next) => {
     return next(new AppError('You do not have permission to perform this action', 403));
   }
 
-  const { name, specialization, qualifications, experience } = req.body;
+  const { name, specialization, qualifications, experience, userId } = req.body;
   const updateData = {};
   if (name !== undefined) updateData.name = name;
   if (specialization !== undefined) updateData.specialization = specialization;
   if (qualifications !== undefined) updateData.qualifications = qualifications;
   if (experience !== undefined) updateData.experience = experience;
+  if (req.user.role === 'admin' && userId !== undefined) {
+    updateData.userId = userId;
+  }
 
   const updatedDoctor = await Doctor.findByIdAndUpdate(req.params.id, updateData, {
     returnDocument: 'after',
