@@ -8,6 +8,7 @@ const DOCTOR_SERVICE_URL = process.env.DOCTOR_SERVICE_URL;
 
 // Helper: fetch doctor data from doctor-service
 const fetchDoctor = async (doctorId) => {
+  console.log(`Appointment Service: Fetching doctor info for ID: ${doctorId} from ${DOCTOR_SERVICE_URL}`);
   const { data } = await axios.get(`${DOCTOR_SERVICE_URL}/api/doctors/${doctorId}`);
   return data.doctor;
 };
@@ -391,6 +392,13 @@ exports.completeAppointment = catchAsync(async (req, res, next) => {
     }
   }
 
+  if (appointment.status === 'COMPLETED') {
+    return res.status(200).json({
+      message: 'Appointment already marked as completed',
+      appointment
+    });
+  }
+
   if (appointment.status !== 'CONFIRMED') {
     return next(new AppError(
       `Can only complete a CONFIRMED appointment. Current status: ${appointment.status}`,
@@ -403,6 +411,44 @@ exports.completeAppointment = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     message: 'Appointment marked as completed',
+    appointment
+  });
+});
+
+// PATCH /appointments/:id/toggle-meeting (doctor or admin)
+exports.toggleMeeting = catchAsync(async (req, res, next) => {
+  console.log(`Appointment Service: Toggling meeting for ID: ${req.params.id} (User: ${req.user.id}, Role: ${req.user.role})`);
+  const appointment = await Appointment.findById(req.params.id);
+  if (!appointment) return next(new AppError('No appointment found with that ID', 404));
+
+  console.log(`Appointment Service: Found appointment for doctor: ${appointment.doctorId}`);
+
+  // Auth check: only doctor of this appointment or admin
+  if (req.user.role === 'doctor') {
+    try {
+      const doctor = await fetchDoctor(appointment.doctorId);
+      console.log(`Appointment Service: Verified doctor userID from service: ${doctor?.userId}`);
+      if (!doctor || doctor.userId !== req.user.id) {
+        console.error(`Appointment Service: Unauthorized. Doctor userID ${doctor?.userId} !== req.user.id ${req.user.id}`);
+        return next(new AppError('You can only manage your own appointments', 403));
+      }
+    } catch (err) {
+      console.error(`Appointment Service: Doctor verification error: ${err.message}`);
+      return next(new AppError('Doctor verification failed', 503));
+    }
+  } else if (req.user.role !== 'admin') {
+    return next(new AppError('You do not have permission to toggle meetings', 403));
+  }
+
+  // Toggle flag
+  appointment.isMeetingEnabled = !appointment.isMeetingEnabled;
+  await appointment.save();
+
+  console.log(`Appointment Service: Meeting enabled state updated to: ${appointment.isMeetingEnabled}`);
+
+  res.status(200).json({
+    status: 'success',
+    isMeetingEnabled: appointment.isMeetingEnabled,
     appointment
   });
 });

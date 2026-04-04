@@ -18,6 +18,10 @@ mongoose.connect(uri)
 
 app.use('/api/appointments', appointmentRoutes);
 
+// Initialize Cron Jobs
+const initCron = require('./utils/cron');
+initCron();
+
 // Handle undefined routes
 app.all(/(.*)/, (req, res, next) => {
   const AppError = require('./utils/appError');

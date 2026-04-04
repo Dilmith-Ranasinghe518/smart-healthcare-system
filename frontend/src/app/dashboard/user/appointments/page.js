@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Calendar, Clock, MapPin, XCircle, CheckCircle, Clock3, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import ConfirmModal from "@/components/ConfirmModal";
+import AppointmentDetailsModal from "@/components/AppointmentDetailsModal";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 const APPOINTMENT_API = API_BASE;
@@ -21,6 +22,8 @@ export default function UserAppointmentsPage() {
   const [cancelling, setCancelling] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelTargetId, setCancelTargetId] = useState(null);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "user")) router.push("/login");
@@ -109,6 +112,11 @@ export default function UserAppointmentsPage() {
     }
   };
 
+  const handleCardClick = (app) => {
+    setSelectedAppointment(app);
+    setShowDetailsModal(true);
+  };
+
   const getStatusBadge = (status) => {
     switch (status) {
       case 'PENDING':
@@ -165,7 +173,11 @@ export default function UserAppointmentsPage() {
             const isCancellable = app.status === 'PENDING' || app.status === 'CONFIRMED';
 
             return (
-              <div key={app._id} className={`glass-panel p-5 flex flex-col relative overflow-hidden transition-all ${!isCancellable ? 'opacity-70 grayscale-[30%]' : ''}`}>
+              <div 
+                key={app._id} 
+                onClick={() => handleCardClick(app)}
+                className={`glass-panel p-5 flex flex-col relative overflow-hidden transition-all cursor-pointer hover:border-indigo-500/30 ${!isCancellable ? 'opacity-70 grayscale-[30%]' : ''}`}
+              >
 
                 {/* Visual Status Indicator Strip */}
                 <div className={`absolute left-0 top-0 bottom-0 w-1 ${app.status === 'PENDING' ? 'bg-amber-400' :
@@ -225,7 +237,10 @@ export default function UserAppointmentsPage() {
                 {isCancellable && (
                   <button
                     className="mt-6 w-full py-2.5 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-500/5 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/10 text-xs font-bold transition-all disabled:opacity-50"
-                    onClick={() => handleCancelClick(app._id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCancelClick(app._id);
+                    }}
                     disabled={cancelling === app._id}
                   >
                     {cancelling === app._id ? "Cancelling..." : "Cancel Appointment"}
@@ -236,6 +251,16 @@ export default function UserAppointmentsPage() {
           })}
         </div>
       )}
+
+      {/* Appointment Details Modal */}
+      <AppointmentDetailsModal
+        isOpen={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        appointment={selectedAppointment}
+        user={user}
+        onStatusUpdate={() => {}} // User doesn't update status from details yet
+        onToggleMeeting={() => {}} // User doesn't toggle meeting
+      />
 
       {/* Cancel Confirm Modal */}
       <ConfirmModal

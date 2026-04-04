@@ -4,17 +4,40 @@ import { useAuth } from "@/context/AuthContext";
 import { Video, Plus, CheckCircle, AlertTriangle } from "lucide-react";
 import { API_URL } from "@/utils/api";
 import { StreamVideoClient, StreamVideo, StreamCall, SpeakerLayout, CallControls, StreamTheme } from "@stream-io/video-react-sdk";
+import { useSearchParams, useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 export default function MeetingsPage() {
   const { user, loading } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialCallId = searchParams.get("callId") || "";
+
   const [client, setClient] = useState(null);
   const [call, setCall] = useState(null);
-  const [callId, setCallId] = useState("");
+  const [callId, setCallId] = useState(initialCallId);
+  const [appointment, setAppointment] = useState(null);
   const [error, setError] = useState("");
+  const [isEnding, setIsEnding] = useState(false);
 
   useEffect(() => {
     if (!loading && user) {
-      // Fetch Stream Token from Backend
+      // 1. Fetch Appointment if ID is present to check status
+      if (initialCallId) {
+        fetch(`${API_URL}/appointments/${initialCallId}`, {
+          headers: { Authorization: `Bearer ${user.token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.appointment) {
+            setAppointment(data.appointment);
+            // Doctor can always rejoin, even if status is COMPLETED
+          }
+        })
+        .catch(err => console.error("Error fetching appointment:", err));
+      }
+
+      // 2. Fetch Stream Token from Backend
       fetch(`${API_URL}/telemedicine/stream-token`, {
         headers: { Authorization: `Bearer ${user.token}` }
       })
@@ -48,6 +71,13 @@ export default function MeetingsPage() {
     };
   }, [user, loading]);
 
+  // Auto-join if callId is provided in URL
+  useEffect(() => {
+    if (client && initialCallId && !call) {
+      joinCall(initialCallId);
+    }
+  }, [client, initialCallId, call]);
+
   const joinCall = async (id) => {
     if (!client || !id) return;
     try {
@@ -56,6 +86,42 @@ export default function MeetingsPage() {
       setCall(activeCall);
     } catch (err) {
       setError(err.message);
+    }
+  };
+
+  const handleEndConsultation = async () => {
+    if (!call || !user) return;
+    
+    const confirmEnd = window.confirm("Are you sure you want to end this consultation? This will disconnect the patient and mark the appointment as completed.");
+    if (!confirmEnd) return;
+
+    setIsEnding(true);
+    try {
+      // 1. End the call for everyone
+      await call.endCall();
+      
+      // 2. Update status in database
+      const res = await fetch(`${API_URL}/appointments/${initialCallId}/complete`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        }
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Failed to mark appointment as completed");
+      }
+
+      toast.success("Consultation ended successfully");
+      setCall(null);
+      router.push('/dashboard/doctor/appointments');
+    } catch (err) {
+      console.error("Error ending consultation:", err);
+      toast.error(err.message || "Failed to end consultation");
+    } finally {
+      setIsEnding(false);
     }
   };
 
@@ -119,8 +185,15 @@ export default function MeetingsPage() {
             <StreamCall call={call}>
               <StreamTheme>
                 <SpeakerLayout />
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-50">
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center gap-4">
                   <CallControls onLeave={() => setCall(null)} />
+                  <button 
+                    onClick={handleEndConsultation}
+                    disabled={isEnding}
+                    className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg transition-all flex items-center gap-2"
+                  >
+                    {isEnding ? "Ending..." : "End Consultation"}
+                  </button>
                 </div>
               </StreamTheme>
             </StreamCall>

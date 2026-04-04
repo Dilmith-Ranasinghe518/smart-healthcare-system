@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import Sel from "@/components/Sel";
 import ConfirmModal from "@/components/ConfirmModal";
 import Pagination from "@/components/Pagination";
+import AppointmentDetailsModal from "@/components/AppointmentDetailsModal";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 const APPOINTMENT_API = API_BASE;
@@ -29,6 +30,8 @@ export default function DoctorAppointmentsPage() {
   const [filterTimeSlot, setFilterTimeSlot] = useState("all");
   const [bulkLoading, setBulkLoading] = useState(false);
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -106,6 +109,33 @@ export default function DoctorAppointmentsPage() {
     } finally {
       setProcessing(null);
     }
+  };
+
+  const handleToggleMeeting = async (appId) => {
+    try {
+      const res = await fetch(`${APPOINTMENT_API}/appointments/${appId}/toggle-meeting`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to toggle meeting");
+
+      toast.success(data.isMeetingEnabled ? "Meeting enabled for patient" : "Meeting disabled");
+      
+      // Update local state for both the list and the selected appointment
+      const updatedAppt = data.appointment;
+      setAppointments(prev => prev.map(a => a._id === appId ? updatedAppt : a));
+      if (selectedAppointment?._id === appId) {
+        setSelectedAppointment(updatedAppt);
+      }
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleCardClick = (app) => {
+    setSelectedAppointment(app);
+    setShowDetailsModal(true);
   };
 
   const getStatusBadge = (status) => {
@@ -279,7 +309,11 @@ export default function DoctorAppointmentsPage() {
               const isConfirmed = app.status === 'CONFIRMED';
 
               return (
-                <div key={app._id} className="glass-panel p-5 flex flex-col relative overflow-hidden transition-all hover:border-indigo-500/30">
+                <div 
+                  key={app._id} 
+                  onClick={() => handleCardClick(app)}
+                  className="glass-panel p-5 flex flex-col relative overflow-hidden transition-all hover:border-indigo-500/30 cursor-pointer"
+                >
 
                   {/* Visual Status Indicator Strip */}
                   <div className={`absolute left-0 top-0 bottom-0 w-1 ${app.status === 'PENDING' ? 'bg-amber-400' :
@@ -347,39 +381,51 @@ export default function DoctorAppointmentsPage() {
                   {/* Actions */}
                   {isPending && (
                     <div className="flex gap-2 w-full shrink-0">
-                      <button
-                        className="flex-1 py-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
-                        onClick={() => updateStatus(app._id, 'accept')}
-                        disabled={processing === `${app._id}-accept`}
-                      >
-                        <Check size={14} /> Accept
-                      </button>
-                      <button
-                        className="flex-1 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-500/5 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
-                        onClick={() => updateStatus(app._id, 'reject')}
-                        disabled={processing === `${app._id}-reject`}
-                      >
-                        <X size={14} /> Reject
-                      </button>
-                    </div>
-                  )}
-
-                  {isConfirmed && (
-                    <div className="flex gap-2 w-full shrink-0">
-                      <button
-                        className="flex-1 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-indigo-50 dark:bg-indigo-500/5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
-                        onClick={() => updateStatus(app._id, 'complete')}
-                        disabled={processing === `${app._id}-complete`}
-                      >
-                        <CheckSquare size={14} /> Complete
-                      </button>
-                      <button
-                        className="flex-1 py-2.5 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-500/5 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
-                        onClick={() => updateStatus(app._id, 'cancel')}
-                        disabled={processing === `${app._id}-cancel`}
-                      >
-                        <XCircle size={14} /> Cancel
-                      </button>
+                        <button
+                          className="flex-1 py-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateStatus(app._id, 'accept');
+                          }}
+                          disabled={processing === `${app._id}-accept`}
+                        >
+                          <Check size={14} /> Accept
+                        </button>
+                        <button
+                          className="flex-1 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-500/5 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateStatus(app._id, 'reject');
+                          }}
+                          disabled={processing === `${app._id}-reject`}
+                        >
+                          <X size={14} /> Reject
+                        </button>
+                      </div>
+                    )}
+  
+                    {isConfirmed && (
+                      <div className="flex gap-2 w-full shrink-0">
+                        <button
+                          className="flex-1 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-indigo-50 dark:bg-indigo-500/5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateStatus(app._id, 'complete');
+                          }}
+                          disabled={processing === `${app._id}-complete`}
+                        >
+                          <CheckSquare size={14} /> Complete
+                        </button>
+                        <button
+                          className="flex-1 py-2.5 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-500/5 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateStatus(app._id, 'cancel');
+                          }}
+                          disabled={processing === `${app._id}-cancel`}
+                        >
+                          <XCircle size={14} /> Cancel
+                        </button>
                     </div>
                   )}
                 </div>
@@ -395,6 +441,19 @@ export default function DoctorAppointmentsPage() {
 
         </div>
       )}
+
+      {/* Appointment Details Modal */}
+      <AppointmentDetailsModal
+        isOpen={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        appointment={selectedAppointment}
+        user={user}
+        onStatusUpdate={(id, action) => {
+          updateStatus(id, action);
+          setShowDetailsModal(false);
+        }}
+        onToggleMeeting={handleToggleMeeting}
+      />
 
       {/* Bulk Confirm Modal */}
       <ConfirmModal

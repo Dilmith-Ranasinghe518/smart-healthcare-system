@@ -59,6 +59,10 @@ const appointmentSchema = new mongoose.Schema({
     }
   },
   // The calendar date for this appointment (YYYY-MM-DD)
+  isMeetingEnabled: {
+    type: Boolean,
+    default: false
+  },
   date: {
     type: String,
     required: [true, 'An appointment must have a date'],

@@ -57,4 +57,7 @@ router.route('/:id/complete')
 router.route('/:id/confirm-payment')
   .patch(protect, appointmentController.confirmPayment);
 
+// Toggle meeting
+router.patch('/:id/toggle-meeting', protect, restrictTo('doctor', 'admin'), appointmentController.toggleMeeting);
+
 module.exports = router;
