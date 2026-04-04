@@ -26,7 +26,7 @@ export default function ManageUsersPage() {
       return;
     }
 
-    if (user) {
+    if (user && user.role === "admin") {
       fetchUsers();
     }
   }, [user, loading, router]);

@@ -22,7 +22,7 @@ export default function DoctorDashboard() {
       return;
     }
 
-    if (user) {
+    if (user && (user.role === "doctor" || user.role === "admin")) {
       const fetchData = async () => {
         try {
           // Fetch generic dashboard data (system notification etc)

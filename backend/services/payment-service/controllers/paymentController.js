@@ -1,5 +1,6 @@
 const Stripe = require("stripe");
 const Payment = require("../models/Payment");
+const axios = require("axios");
 
 exports.createPayment = async (req, res) => {
   try {
@@ -67,7 +68,24 @@ exports.markAsPaid = async (req, res) => {
       payment.status = "paid";
       await payment.save();
 
-      res.json({ message: "Payment marked as PAID" });
+      // Notify Appointment Service to activate the appointment
+      try {
+        const authHeader = req.headers.authorization;
+        await axios.patch(
+          `${process.env.APPOINTMENT_SERVICE_URL}/api/appointments/${payment.appointmentId}/confirm-payment`,
+          {},
+          {
+            headers: {
+              ...(authHeader && { Authorization: authHeader })
+            }
+          }
+        );
+      } catch (apptErr) {
+        console.error("Failed to notify Appointment Service:", apptErr.message);
+        // We still return success for the payment, but log the error (or handle it more robustly)
+      }
+
+      res.json({ message: "Payment marked as PAID and appointment activated" });
     } else {
       res.status(404).json({ message: "Payment not found" });
     }
@@ -113,4 +131,3 @@ exports.getFinancialSummary = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-

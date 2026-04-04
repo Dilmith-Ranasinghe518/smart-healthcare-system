@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const APPOINTMENT_STATUSES = ['PENDING', 'CONFIRMED', 'REJECTED', 'CANCELLED', 'COMPLETED'];
+const APPOINTMENT_STATUSES = ['AWAITING_PAYMENT', 'PENDING', 'CONFIRMED', 'REJECTED', 'CANCELLED', 'COMPLETED'];
 
 const appointmentSchema = new mongoose.Schema({
   appointmentId: {

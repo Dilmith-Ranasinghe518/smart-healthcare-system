@@ -9,10 +9,12 @@ router.use(protect);
 router.put('/profile', updateProfile);
 
 
+// Admin & Doctor can view user list (for name resolution)
+router.get('/', restrictTo('admin', 'doctor'), getAllUsers);
+
 // Restrict following routes to Admin execution
 router.use(restrictTo('admin'));
 
-router.get('/', getAllUsers);
 router.put('/:id', updateUser);
 router.delete('/:id', deleteUser);
 

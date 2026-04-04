@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import { X, Calendar, MapPin, Clock, Info } from "lucide-react";
 
 // The appointment service port is 5070 based on docker-compose.yml
-const APPOINTMENT_API = process.env.NEXT_PUBLIC_APPOINTMENT_API_URL;
+const APPOINTMENT_API = process.env.NEXT_PUBLIC_API_URL;
 
 // Helper: slice a master time range (e.g. 14:00 - 17:00) into 30 minute chunks
 const generateSubSlots = (masterSlot) => {
@@ -152,7 +152,7 @@ export default function BookAppointmentModal({ doctor, onClose, token }) {
     setChecking(true);
     setError("");
     try {
-      const res = await fetch(`${APPOINTMENT_API}/api/appointments/doctor/${doctor._id}/booked-slots?date=${selectedDate}`, {
+      const res = await fetch(`${APPOINTMENT_API}/appointments/doctor/${doctor._id}/booked-slots?date=${selectedDate}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -174,7 +174,7 @@ export default function BookAppointmentModal({ doctor, onClose, token }) {
     setBooking(true);
     setError("");
     try {
-      const res = await fetch(`${APPOINTMENT_API}/api/appointments`, {
+      const res = await fetch(`${APPOINTMENT_API}/appointments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

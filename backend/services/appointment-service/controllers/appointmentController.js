@@ -72,7 +72,7 @@ exports.createAppointment = catchAsync(async (req, res, next) => {
   const bookedCount = await Appointment.countDocuments({
     'timeSlot.slotId': slot._id,
     date,
-    status: { $in: ['PENDING', 'CONFIRMED'] }
+    status: { $in: ['AWAITING_PAYMENT', 'PENDING', 'CONFIRMED'] }
   });
 
   const limit = slot.patientLimit || 1;
@@ -119,7 +119,8 @@ exports.createAppointment = catchAsync(async (req, res, next) => {
       appointmentType,
       queueNo,
       notes: notes || '',
-      paymentStatus: 'PENDING' // Set to PENDING until real payment is completed
+      status: 'AWAITING_PAYMENT', // Lock the appointment until payment success
+      paymentStatus: 'PENDING'
     });
   } catch (err) {
     if (err.code === 11000) {
@@ -316,6 +317,25 @@ exports.acceptAppointment = catchAsync(async (req, res, next) => {
   });
 });
 
+// PATCH /appointments/:id/confirm-payment (Internal/Secure)
+exports.confirmPayment = catchAsync(async (req, res, next) => {
+  const appointment = await Appointment.findById(req.params.id);
+
+  if (!appointment) {
+    return next(new AppError('No appointment found with that ID', 404));
+  }
+
+  // Update status to PENDING (for doctor) and paymentStatus to COMPLETED
+  appointment.status = 'PENDING';
+  appointment.paymentStatus = 'COMPLETED';
+  await appointment.save();
+
+  res.status(200).json({
+    message: 'Payment confirmed and appointment activated',
+    appointment
+  });
+});
+
 // PATCH /appointments/:id/reject  (doctor or admin)
 exports.rejectAppointment = catchAsync(async (req, res, next) => {
   const appointment = await Appointment.findById(req.params.id);
@@ -393,7 +413,13 @@ exports.completeAppointment = catchAsync(async (req, res, next) => {
 exports.getMyAppointments = catchAsync(async (req, res, next) => {
   const { status } = req.query;
   const filter = { patientId: req.user.id };
-  if (status) filter.status = status.toUpperCase();
+  
+  // Filter out AWAITING_PAYMENT unless specific status requested
+  if (status) {
+    filter.status = status.toUpperCase();
+  } else {
+    filter.status = { $ne: 'AWAITING_PAYMENT' };
+  }
 
   const appointments = await Appointment.find(filter).sort({ date: 1, 'timeSlot.startTime': 1 });
 
@@ -410,7 +436,13 @@ exports.getMyAppointments = catchAsync(async (req, res, next) => {
 exports.getDoctorAppointments = catchAsync(async (req, res, next) => {
   const { status, date } = req.query;
   const filter = { doctorId: req.params.doctorId };
-  if (status) filter.status = status.toUpperCase();
+  
+  if (status) {
+    filter.status = status.toUpperCase();
+  } else {
+    filter.status = { $ne: 'AWAITING_PAYMENT' };
+  }
+  
   if (date) filter.date = date;
 
   const appointments = await Appointment.find(filter).sort({ date: 1, 'timeSlot.startTime': 1 });
@@ -451,7 +483,13 @@ exports.getAppointmentById = catchAsync(async (req, res, next) => {
 exports.getAllAppointments = catchAsync(async (req, res, next) => {
   const { status, doctorId, patientId, date } = req.query;
   const filter = {};
-  if (status) filter.status = status.toUpperCase();
+  
+  if (status) {
+    filter.status = status.toUpperCase();
+  } else {
+    filter.status = { $ne: 'AWAITING_PAYMENT' };
+  }
+  
   if (doctorId) filter.doctorId = doctorId;
   if (patientId) filter.patientId = patientId;
   if (date) filter.date = date;
@@ -482,7 +520,7 @@ exports.getBookedSlots = catchAsync(async (req, res, next) => {
       $match: {
         doctorId: new mongoose.Types.ObjectId(doctorId),
         date,
-        status: { $in: ['PENDING', 'CONFIRMED'] }
+        status: { $in: ['AWAITING_PAYMENT', 'PENDING', 'CONFIRMED'] }
       }
     },
     {

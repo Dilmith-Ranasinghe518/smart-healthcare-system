@@ -17,7 +17,7 @@ export default function AdminDashboard() {
       return;
     }
 
-    if (user) {
+    if (user && user.role === "admin") {
       fetch(`${API_URL}/dashboard/admin`, {
         headers: {
           Authorization: `Bearer ${user.token}`,

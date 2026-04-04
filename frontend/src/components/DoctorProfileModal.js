@@ -40,7 +40,7 @@ export default function DoctorProfileModal({
   const [TIMES, setTimes] = useState([]);
 
   useEffect(() => {
-    fetch(`${doctorApiUrl}/api/doctors/options/availability`)
+    fetch(`${doctorApiUrl}/doctors/options/availability`)
       .then(r => r.json())
       .then(data => {
         setDays(data.days || []);
@@ -145,7 +145,7 @@ export default function DoctorProfileModal({
         ...(isAdmin && form.userId ? { userId: form.userId } : {}),
       };
 
-      const url = isEditing ? `${doctorApiUrl}/api/doctors/${doctor._id}` : `${doctorApiUrl}/api/doctors`;
+      const url = isEditing ? `${doctorApiUrl}/doctors/${doctor._id}` : `${doctorApiUrl}/doctors`;
       const method = isEditing ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -162,7 +162,7 @@ export default function DoctorProfileModal({
       if (currentDocState && locations.length > 0) {
         for (const loc of locations) {
           // 1. Always PATCH locations to upsert hospital + consultation fee
-          const addRes = await fetch(`${doctorApiUrl}/api/doctors/${currentDocState._id}/locations`, {
+          const addRes = await fetch(`${doctorApiUrl}/doctors/${currentDocState._id}/locations`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
             body: JSON.stringify({ hospitalId: loc.hospitalId, consultationFee: Number(loc.consultationFee) || 0 })
@@ -182,7 +182,7 @@ export default function DoctorProfileModal({
           // 2. Only update availability if slots exist and we have a location ID
           if (targetLocId && loc.availability && loc.availability.length > 0) {
             const availRes = await fetch(
-              `${doctorApiUrl}/api/doctors/${currentDocState._id}/locations/${targetLocId}/availability`,
+              `${doctorApiUrl}/doctors/${currentDocState._id}/locations/${targetLocId}/availability`,
               {
                 method: "PUT",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },

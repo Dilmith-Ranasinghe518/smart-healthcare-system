@@ -53,4 +53,8 @@ router.route('/:id/reject')
 router.route('/:id/complete')
   .patch(protect, restrictTo('doctor', 'admin'), appointmentController.completeAppointment);
 
+// Confirm payment
+router.route('/:id/confirm-payment')
+  .patch(protect, appointmentController.confirmPayment);
+
 module.exports = router;

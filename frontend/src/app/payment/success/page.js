@@ -19,8 +19,13 @@ export default function SuccessPage() {
       const verifyPayment = async () => {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+          const userToken = JSON.parse(localStorage.getItem("user"))?.token;
+
           const res = await fetch(`${apiUrl}/payment/success/${sessionId}`, {
             method: "PUT",
+            headers: {
+              ...(userToken && { Authorization: `Bearer ${userToken}` })
+            }
           });
           if (res.ok) {
             setStatus("success");
