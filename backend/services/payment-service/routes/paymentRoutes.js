@@ -6,7 +6,9 @@ const {
   getAllPayments,
   markAsPaid,
   refundPayment,
-  getFinancialSummary
+  getFinancialSummary,
+  getTaxSetting,
+  updateTaxSetting
 } = require("../controllers/paymentController");
 
 router.post("/create", createPayment);
@@ -14,5 +16,7 @@ router.get("/", getAllPayments);
 router.put("/success/:sessionId", markAsPaid);
 router.put("/refund/:id", refundPayment);
 router.get("/summary", getFinancialSummary);
+router.get("/tax-setting", getTaxSetting);
+router.put("/tax-setting", updateTaxSetting);
 
 module.exports = router;

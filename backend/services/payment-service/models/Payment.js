@@ -3,7 +3,9 @@ const mongoose = require("mongoose");
 const paymentSchema = new mongoose.Schema({
   userId: String,
   appointmentId: String,
-  amount: Number,
+  consultationFee: Number,
+  taxAmount: Number,
+  amount: Number, // Total amount = consultationFee + taxAmount
   status: {
     type: String,
     default: "pending",

@@ -1,6 +1,39 @@
 const Stripe = require("stripe");
 const Payment = require("../models/Payment");
+const TaxSetting = require("../models/TaxSetting");
 const axios = require("axios");
+
+exports.getTaxSetting = async (req, res) => {
+  try {
+    let taxSetting = await TaxSetting.findOne();
+    if (!taxSetting) {
+      taxSetting = await TaxSetting.create({ percentage: 5 });
+    }
+    res.json(taxSetting);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch tax setting", error: error.message });
+  }
+};
+
+exports.updateTaxSetting = async (req, res) => {
+  try {
+    const { percentage } = req.body;
+    if (percentage === undefined || percentage < 0 || percentage > 100) {
+      return res.status(400).json({ message: "Valid percentage (0-100) is required" });
+    }
+    let taxSetting = await TaxSetting.findOne();
+    if (!taxSetting) {
+      taxSetting = await TaxSetting.create({ percentage });
+    } else {
+      taxSetting.percentage = percentage;
+      taxSetting.updatedAt = Date.now();
+      await taxSetting.save();
+    }
+    res.json({ message: "Tax setting updated successfully", taxSetting });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update tax setting", error: error.message });
+  }
+};
 
 exports.createPayment = async (req, res) => {
   try {
@@ -17,6 +50,16 @@ exports.createPayment = async (req, res) => {
       console.error("FATAL: STRIPE_SECRET_KEY is missing from environment variables.");
     }
 
+    let taxSetting = await TaxSetting.findOne();
+    if (!taxSetting) {
+      taxSetting = await TaxSetting.create({ percentage: 5 });
+    }
+
+    // The 'amount' coming from body is the consultationFee (before tax) in actual units (e.g. 1000 Rs)
+    const baseFee = amount; 
+    const taxAmount = (baseFee * taxSetting.percentage) / 100;
+    const totalAmount = baseFee + taxAmount;
+
     // Initialize Stripe inside the handler to ensure env is ready
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     const frontendUrl = process.env.FRONTEND_URL;
@@ -31,7 +74,7 @@ exports.createPayment = async (req, res) => {
             product_data: {
               name: title || "Doctor Consultation",
             },
-            unit_amount: Math.round(amount), // Stripe expects integer cents
+            unit_amount: Math.round(totalAmount), // Stripe expects integer cents
           },
           quantity: 1,
         },
@@ -43,7 +86,9 @@ exports.createPayment = async (req, res) => {
     const payment = new Payment({
       userId,
       appointmentId,
-      amount,
+      consultationFee: baseFee,
+      taxAmount: taxAmount,
+      amount: totalAmount,
       status: "pending",
       stripeSessionId: session.id,
     });
@@ -71,15 +116,15 @@ exports.getAllPayments = async (req, res) => {
 
 exports.markAsPaid = async (req, res) => {
   try {
-    const payment = await Payment.findOne({
-      stripeSessionId: req.params.sessionId,
-    });
+    const payment = await Payment.findOneAndUpdate(
+      { stripeSessionId: req.params.sessionId, status: { $ne: 'paid' } },
+      { $set: { status: 'paid' } },
+      { new: true }
+    );
 
-    console.log("Found payment for success callback:", payment);
+    console.log("Found and updated payment for success callback atomically:", payment);
 
     if (payment) {
-      payment.status = "paid";
-      await payment.save();
 
       // Notify Appointment Service to activate the appointment
       try {
@@ -103,7 +148,7 @@ exports.markAsPaid = async (req, res) => {
 
       res.json({ message: "Payment marked as PAID and appointment activated" });
     } else {
-      res.status(404).json({ message: "Payment not found" });
+      res.json({ message: "Payment already processed or not found", isDuplicate: true });
     }
 
   } catch (error) {
