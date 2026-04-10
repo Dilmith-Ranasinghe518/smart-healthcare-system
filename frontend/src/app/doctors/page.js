@@ -104,16 +104,29 @@ export default function FindDoctorsPublicPage() {
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-6 py-12">
         {/* ── Hero Header ── */}
-        <header className="mb-12 text-center max-w-3xl mx-auto animate-[fadeIn_0.5s_ease-out]">
-          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#74B49B]/15 text-[#74B49B] text-sm font-bold border border-[#74B49B]/30 mb-4">
-            <Zap size={16} /> Fast Booking
-          </span>
-          <h2 className="text-4xl md:text-5xl font-black text-slate-800 dark:text-white mb-4 leading-tight">
-            Find Your <span className="text-[#74B49B]">Specialist</span>
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400 text-lg">
-            Search top-rated medical professionals near you. Check availability and easily book your appointment online.
-          </p>
+        <header className="mb-12 relative w-full rounded-[32px] overflow-hidden shadow-lg animate-[fadeIn_0.5s_ease-out]">
+          {/* Banner image */}
+          <img
+            src="/find_doctors_banner.jpg"
+            alt="Find Doctors Banner"
+            className="w-full h-56 md:h-72 object-cover"
+          />
+
+          {/* Dark gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/30" />
+
+          {/* Text content on top */}
+          <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-14">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#74B49B]/25 text-[#74B49B] text-xs font-bold border border-[#74B49B]/40 mb-3 w-fit backdrop-blur-sm">
+              <Zap size={13} /> Fast Booking
+            </span>
+            <h2 className="text-3xl md:text-4xl font-black text-white mb-2 leading-tight drop-shadow-md">
+              Find Your <span className="text-[#74B49B]">Specialist</span>
+            </h2>
+            <p className="text-slate-200 text-sm md:text-base max-w-lg leading-relaxed drop-shadow">
+              Search top-rated medical professionals near you. Check availability and easily book your appointment online.
+            </p>
+          </div>
         </header>
 
         {/* ── Error ── */}
