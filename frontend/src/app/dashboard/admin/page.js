@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 import { ShieldAlert, Users, Grid, RefreshCw, Power, Plus, ShieldCheck } from "lucide-react";
 import { API_URL } from "@/utils/api";
 
+import TaxSettingModal from "@/components/TaxSettingModal";
+
 export default function AdminDashboard() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
+  const [isTaxModalOpen, setIsTaxModalOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "admin")) {
@@ -105,6 +108,12 @@ export default function AdminDashboard() {
             <div className="glass-panel p-6 flex flex-col gap-4 h-fit">
               <h3 className="text-lg font-bold">Quick Actions</h3>
               <div className="flex flex-col gap-3">
+                <button 
+                  className="btn bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 w-full justify-start gap-2 text-sm py-3 px-4 hover:bg-indigo-200 dark:hover:bg-indigo-500/20 border-none transition-all font-bold"
+                  onClick={() => setIsTaxModalOpen(true)}
+                >
+                  <RefreshCw size={20} /> Manage Global Tax Settings
+                </button>
                 <button className="btn btn-primary w-full justify-start gap-2 text-sm py-3 px-4">
                   <Plus size={20} /> Provision Doctor Node
                 </button>
@@ -124,6 +133,12 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
+
+      <TaxSettingModal 
+        isOpen={isTaxModalOpen} 
+        onClose={() => setIsTaxModalOpen(false)} 
+        user={user} 
+      />
     </div>
   );
 }
