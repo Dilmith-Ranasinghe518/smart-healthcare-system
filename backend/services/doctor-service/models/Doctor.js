@@ -66,8 +66,8 @@ const locationSchema = new mongoose.Schema({
   consultationFee: {
     type: Number,
     required: [true, 'A location must specify a consultation fee'],
-    default: 0,
-    min: [0, 'Fee cannot be negative']
+    default: 1000,
+    min: [1000, 'Fee must be at least Rs. 1000']
   },
   locationPoint: {
     type: {
