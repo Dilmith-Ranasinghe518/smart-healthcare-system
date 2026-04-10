@@ -24,6 +24,7 @@ export default function UserAppointmentsPage() {
   const [cancelTargetId, setCancelTargetId] = useState(null);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("ALL");
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "user")) router.push("/login");
@@ -31,13 +32,17 @@ export default function UserAppointmentsPage() {
 
   useEffect(() => {
     if (user?.role === "user") fetchAppointments();
-  }, [user]);
+  }, [user, statusFilter]);
 
   const fetchAppointments = async () => {
     setFetching(true);
     setError("");
     try {
-      const res = await fetch(`${APPOINTMENT_API}/appointments/my`, {
+      let url = `${APPOINTMENT_API}/appointments/my`;
+      if (statusFilter !== "ALL") {
+        url += `?status=${statusFilter}`;
+      }
+      const res = await fetch(url, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       const data = await res.json();
@@ -45,12 +50,7 @@ export default function UserAppointmentsPage() {
 
       const appts = data.appointments || [];
 
-      // Sort: upcoming first (by date then time)
-      appts.sort((a, b) => {
-        const dateTimeA = new Date(`${a.date}T${a.timeSlot.startTime}`);
-        const dateTimeB = new Date(`${b.date}T${b.timeSlot.startTime}`);
-        return dateTimeA - dateTimeB;
-      });
+      // Removed manual frontend sorting so the DB decides order (latest ones first via createdAt)
 
       setAppointments(appts);
 
@@ -138,13 +138,29 @@ export default function UserAppointmentsPage() {
 
   return (
     <div className="animate-[fadeIn_0.5s_ease-out] w-full max-w-5xl mx-auto pb-12">
-      <header className="mb-8">
-        <h2 className="text-4xl font-extrabold text-slate-800 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-white dark:to-slate-400 mb-2">
-          My Appointments
-        </h2>
-        <p className="text-slate-500 dark:text-slate-400 text-sm">
-          Track and manage your upcoming doctor visits and see past history.
-        </p>
+      <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h2 className="text-4xl font-extrabold text-slate-800 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-white dark:to-slate-400 mb-2">
+            My Appointments
+          </h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">
+            Track and manage your upcoming doctor visits and see past history.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Status:</label>
+          <select 
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-40 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 text-sm font-bold focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-800 dark:text-white"
+          >
+            <option value="ALL">All</option>
+            <option value="PENDING">Pending</option>
+            <option value="CONFIRMED">Confirmed</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+        </div>
       </header>
 
       {error && (
@@ -170,7 +186,7 @@ export default function UserAppointmentsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {appointments.map(app => {
             const docInfo = doctors[app.doctorId];
-            const isCancellable = app.status === 'PENDING' || app.status === 'CONFIRMED';
+            const isCancellable = app.status === 'PENDING';
 
             return (
               <div 
