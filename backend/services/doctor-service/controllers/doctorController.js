@@ -2,6 +2,22 @@ const Doctor = require('../models/Doctor');
 const Hospital = require('../models/Hospital');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const axios = require("axios");
+const sendNotificationEvent = require("../utils/notificationClient");
+
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL;
+
+const fetchUserById = async (userId) => {
+  const { data } = await axios.get(
+    `${USER_SERVICE_URL}/api/users/internal/${userId}`,
+    {
+      headers: {
+        "x-internal-service-secret": process.env.INTERNAL_SERVICE_SECRET
+      }
+    }
+  );
+  return data;
+};
 
 // Profile Management //
 
@@ -158,6 +174,22 @@ exports.verifyDoctor = catchAsync(async (req, res, next) => {
 
   if (!doctor) {
     return next(new AppError('No doctor found with that ID', 404));
+  }
+
+  try {
+    if (doctor.userId) {
+      const doctorUser = await fetchUserById(doctor.userId);
+
+      if (doctorUser?.email) {
+        await sendNotificationEvent("DOCTOR_VERIFIED", {
+          doctorName: doctor.name,
+          doctorEmail: doctorUser.email,
+          isVerified: doctor.isVerified
+        });
+      }
+    }
+  } catch (notifyErr) {
+    console.error("Doctor Service: Failed to send doctor verification email:", notifyErr.message);
   }
 
   res.status(200).json({
@@ -478,4 +510,3 @@ exports.getDoctorsNear = catchAsync(async (req, res, next) => {
     doctors
   });
 });
-

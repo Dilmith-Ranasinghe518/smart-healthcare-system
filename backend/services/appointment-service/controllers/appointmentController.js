@@ -5,6 +5,8 @@ const AppError = require('../utils/appError');
 
 // Internal URL of doctor-service (set in .env)
 const DOCTOR_SERVICE_URL = process.env.DOCTOR_SERVICE_URL;
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL;
+const sendNotificationEvent = require("../utils/notificationClient");
 
 // Helper: fetch doctor data from doctor-service
 const fetchDoctor = async (doctorId) => {
@@ -13,7 +15,69 @@ const fetchDoctor = async (doctorId) => {
   return data.doctor;
 };
 
+const fetchUserById = async (userId) => {
+  const { data } = await axios.get(
+    `${USER_SERVICE_URL}/api/users/internal/${userId}`,
+    {
+      headers: {
+        "x-internal-service-secret": process.env.INTERNAL_SERVICE_SECRET
+      }
+    }
+  );
+  return data;
+};
 
+const safeSendNotification = async (eventType, payload) => {
+  try {
+    await sendNotificationEvent(eventType, payload);
+    console.log(`Appointment Service: Notification sent for ${eventType}`);
+  } catch (err) {
+    console.error(`Appointment Service: Notification failed for ${eventType}`);
+    console.error("Message:", err.message);
+    console.error("Status:", err.response?.status);
+    console.error("Data:", err.response?.data);
+  }
+};
+
+const buildAppointmentNotificationPayload = async (appointment, extra = {}) => {
+  console.log("buildAppointmentNotificationPayload: Fetching patient by ID:", appointment.patientId);
+  const patient = await fetchUserById(appointment.patientId);
+
+  console.log("buildAppointmentNotificationPayload: Fetching doctor by ID:", appointment.doctorId);
+  const doctor = await fetchDoctor(
+    appointment.doctorId.toString ? appointment.doctorId.toString() : appointment.doctorId
+  );
+
+  let doctorUser = null;
+  if (doctor?.userId) {
+    try {
+      console.log("buildAppointmentNotificationPayload: Fetching doctor user by ID:", doctor.userId);
+      doctorUser = await fetchUserById(doctor.userId);
+    } catch (err) {
+      console.warn("Appointment Service: Failed to fetch doctor user email:", err.message);
+    }
+  }
+
+  const payload = {
+    patientName: patient?.name || "Patient",
+    patientEmail: patient?.email || "",
+    doctorName: doctor?.name || "Doctor",
+    doctorEmail: doctorUser?.email || "",
+    hospitalName: appointment.location?.hospitalName || "",
+    city: appointment.location?.city || "",
+    address: appointment.location?.address || "",
+    date: appointment.date || "",
+    startTime: appointment.timeSlot?.startTime || "",
+    endTime: appointment.timeSlot?.endTime || "",
+    appointmentType: appointment.appointmentType || "",
+    appointmentId: appointment.appointmentId || appointment._id?.toString() || "",
+    statusReason: appointment.statusReason || "",
+    ...extra
+  };
+
+  console.log("buildAppointmentNotificationPayload: Final payload:", payload);
+  return payload;
+};
 
 // Helper: validate that the given date string is today or in the future
 const isFutureDate = (dateStr) => {
@@ -174,6 +238,16 @@ exports.cancelAppointment = catchAsync(async (req, res, next) => {
   appointment.statusReason = req.body?.reason || '';
   await appointment.save();
 
+  try {
+    const payload = await buildAppointmentNotificationPayload(appointment, {
+      cancelledBy: req.user.role
+    });
+
+    await safeSendNotification("APPOINTMENT_CANCELLED", payload);
+  } catch (notifyErr) {
+    console.error("Appointment Service: Failed to send cancel email:", notifyErr.message);
+  }
+
   res.status(200).json({
     message: 'Appointment cancelled successfully',
     appointment
@@ -255,8 +329,6 @@ exports.rescheduleAppointment = catchAsync(async (req, res, next) => {
     ));
   }
 
-
-
   // Update appointment with new slot/location/date, reset to PENDING
   appointment.location = {
     hospitalId: newLocation.hospitalId,
@@ -274,6 +346,13 @@ exports.rescheduleAppointment = catchAsync(async (req, res, next) => {
   appointment.date = newDate;
   appointment.status = 'PENDING';
   await appointment.save();
+
+  try {
+    const payload = await buildAppointmentNotificationPayload(appointment);
+    await safeSendNotification("APPOINTMENT_RESCHEDULED", payload);
+  } catch (notifyErr) {
+    console.error("Appointment Service: Failed to send reschedule email:", notifyErr.message);
+  }
 
   res.status(200).json({
     message: 'Appointment rescheduled successfully',
@@ -312,6 +391,13 @@ exports.acceptAppointment = catchAsync(async (req, res, next) => {
   appointment.status = 'CONFIRMED';
   await appointment.save();
 
+  try {
+    const payload = await buildAppointmentNotificationPayload(appointment);
+    await safeSendNotification("APPOINTMENT_ACCEPTED", payload);
+  } catch (notifyErr) {
+    console.error("Appointment Service: Failed to send accept email:", notifyErr.message);
+  }
+
   res.status(200).json({
     message: 'Appointment confirmed successfully',
     appointment
@@ -320,16 +406,45 @@ exports.acceptAppointment = catchAsync(async (req, res, next) => {
 
 // PATCH /appointments/:id/confirm-payment (Internal/Secure)
 exports.confirmPayment = catchAsync(async (req, res, next) => {
+  console.log("confirmPayment route hit for appointment ID:", req.params.id);
+
   const appointment = await Appointment.findById(req.params.id);
 
   if (!appointment) {
+    console.error("confirmPayment: No appointment found for ID:", req.params.id);
     return next(new AppError('No appointment found with that ID', 404));
   }
+
+  console.log("confirmPayment: Appointment found:", {
+    _id: appointment._id,
+    patientId: appointment.patientId,
+    doctorId: appointment.doctorId,
+    status: appointment.status,
+    paymentStatus: appointment.paymentStatus
+  });
 
   // Update status to PENDING (for doctor) and paymentStatus to COMPLETED
   appointment.status = 'PENDING';
   appointment.paymentStatus = 'COMPLETED';
   await appointment.save();
+
+  console.log("confirmPayment: Appointment updated to PENDING and COMPLETED");
+
+  try {
+    console.log("confirmPayment: Building notification payload...");
+
+    const payload = await buildAppointmentNotificationPayload(appointment);
+
+    console.log("confirmPayment: Notification payload built successfully:", payload);
+
+    console.log("confirmPayment: Sending notification event to notification-service...");
+
+    await safeSendNotification("APPOINTMENT_BOOKED_PAYMENT_CONFIRMED", payload);
+
+    console.log("confirmPayment: Notification event send attempt completed");
+  } catch (notifyErr) {
+    console.error("Appointment Service: Failed to send booking confirmation email:", notifyErr);
+  }
 
   res.status(200).json({
     message: 'Payment confirmed and appointment activated',
@@ -366,6 +481,13 @@ exports.rejectAppointment = catchAsync(async (req, res, next) => {
   appointment.status = 'REJECTED';
   appointment.statusReason = req.body?.reason || '';
   await appointment.save();
+
+  try {
+    const payload = await buildAppointmentNotificationPayload(appointment);
+    await safeSendNotification("APPOINTMENT_REJECTED", payload);
+  } catch (notifyErr) {
+    console.error("Appointment Service: Failed to send rejection email:", notifyErr.message);
+  }
 
   res.status(200).json({
     message: 'Appointment rejected',
@@ -408,6 +530,13 @@ exports.completeAppointment = catchAsync(async (req, res, next) => {
 
   appointment.status = 'COMPLETED';
   await appointment.save();
+
+  try {
+    const payload = await buildAppointmentNotificationPayload(appointment);
+    await safeSendNotification("APPOINTMENT_COMPLETED", payload);
+  } catch (notifyErr) {
+    console.error("Appointment Service: Failed to send completion email:", notifyErr.message);
+  }
 
   res.status(200).json({
     message: 'Appointment marked as completed',

@@ -1,6 +1,7 @@
 const express = require('express');
 const appointmentController = require('../controllers/appointmentController');
 const { protect, restrictTo } = require('../middleware/authMiddleware');
+const { protectInternal } = require('../middleware/internalMiddleware');
 
 const router = express.Router();
 
@@ -53,9 +54,9 @@ router.route('/:id/reject')
 router.route('/:id/complete')
   .patch(protect, restrictTo('doctor', 'admin'), appointmentController.completeAppointment);
 
-// Confirm payment
+// Confirm payment - INTERNAL ONLY
 router.route('/:id/confirm-payment')
-  .patch(protect, appointmentController.confirmPayment);
+  .patch(protectInternal, appointmentController.confirmPayment);
 
 // Toggle meeting
 router.patch('/:id/toggle-meeting', protect, restrictTo('doctor', 'admin'), appointmentController.toggleMeeting);
