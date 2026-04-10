@@ -53,7 +53,7 @@ export default function TransactionsPage() {
                 <tr key={item._id} className="border-t">
                   <td className="px-4 py-3">{item.userId || "-"}</td>
                   <td className="px-4 py-3">{item.appointmentId || "-"}</td>
-                  <td className="px-4 py-3">Rs. {item.amount}</td>
+                  <td className="px-4 py-3">Rs. {item.amount / 100}</td>
 
                   <td className="px-4 py-3">
                     <span

@@ -123,7 +123,7 @@ exports.getFinancialSummary = async (req, res) => {
     );
 
     res.json({
-      totalRevenue,
+      totalRevenue: totalRevenue / 100,
       totalTransactions: payments.length,
     });
 
