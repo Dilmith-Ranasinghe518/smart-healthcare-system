@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import Sel from "@/components/Sel";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BookAppointmentModal from "@/components/BookAppointmentModal";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 const DOCTOR_API = API_BASE;
@@ -48,6 +49,7 @@ export default function DoctorPublicDetailsPage() {
   const [doctor, setDoctor] = useState(null);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
+  const [taxSetting, setTaxSetting] = useState({ percentage: 5 });
 
   const [bookedCounts, setBookedCounts] = useState({});
   const [loadingDates, setLoadingDates] = useState(new Set());
@@ -58,8 +60,22 @@ export default function DoctorPublicDetailsPage() {
   const [bookingSubmitting, setBookingSubmitting] = useState(false);
 
   useEffect(() => {
-    if (id) fetchData();
+    if (id) {
+      fetchData();
+      fetchTaxSetting();
+    }
   }, [id]);
+
+  const fetchTaxSetting = async () => {
+    try {
+      // payment service might be accessible directly or via API_BASE wrapper
+      const res = await fetch(`${API_BASE}/payment/tax-setting`);
+      if (res.ok) {
+        const data = await res.json();
+        setTaxSetting(data);
+      }
+    } catch (err) {}
+  };
 
   const fetchData = async () => {
     setFetching(true);
@@ -132,7 +148,7 @@ export default function DoctorPublicDetailsPage() {
     }
   }, [sessions]);
 
-  const confirmBooking = async () => {
+  const confirmBooking = async (apptType, note) => {
     if (!bookingSlot || !user) return;
     setBookingSubmitting(true);
 
@@ -146,8 +162,8 @@ export default function DoctorPublicDetailsPage() {
           locationId: location._id,
           slotId: slot._id,
           date,
-          appointmentType,
-          notes: bookingNote,
+          appointmentType: apptType || appointmentType,
+          notes: note || bookingNote,
         })
       });
       const data = await res.json();
@@ -389,106 +405,16 @@ export default function DoctorPublicDetailsPage() {
       <Footer />
 
       {/* ── BOOKING CONFIRMATION DIALOG ── */}
-      {bookingSlot && user && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-[#1E2E2A] w-full max-w-[480px] p-6 md:p-8 rounded-[32px] animate-[fadeIn_0.3s_ease-out] relative shadow-2xl border border-[#74B49B]/20">
-            <button onClick={() => setBookingSlot(null)} className="absolute top-4 right-4 md:top-6 md:right-6 p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#16221F] dark:hover:bg-white/10 text-slate-500 transition-all">
-              <X size={20} />
-            </button>
-
-            <h3 className="text-xl md:text-2xl font-black text-slate-800 dark:text-white mb-1 md:mb-2">Confirm Booking</h3>
-            <p className="text-xs md:text-sm text-slate-500 mb-4 md:mb-6 font-semibold">Review your appointment details below before proceeding.</p>
-
-            <div className="flex flex-col gap-3 md:gap-4 mb-4 md:mb-6 bg-[#F8FBF9] dark:bg-[#16221F] rounded-2xl md:rounded-3xl p-4 border border-[#74B49B]/15">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-[#74B49B]/10 flex items-center justify-center text-[#74B49B]">
-                   <Stethoscope size={20} />
-                </div>
-                <div>
-                  <p className="text-[10px] text-slate-400 uppercase font-black tracking-wider">Doctor</p>
-                  <p className="font-bold text-slate-800 dark:text-white text-base">{doctor.name}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-[#BAC94A]/10 flex items-center justify-center text-[#BAC94A]">
-                   <Building2 size={20} />
-                </div>
-                <div>
-                  <p className="text-[10px] text-slate-400 uppercase font-black tracking-wider">Hospital</p>
-                  <p className="font-bold text-slate-800 dark:text-white text-base line-clamp-1">{bookingSlot.location.hospitalName}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-[#6C8CBF]/10 flex items-center justify-center text-[#6C8CBF]">
-                   <Calendar size={20} />
-                </div>
-                <div>
-                  <p className="text-[10px] text-slate-400 uppercase font-black tracking-wider">Date & Time</p>
-                  <p className="font-bold text-slate-800 dark:text-white text-base">{bookingSlot.dateLabel}</p>
-                  <p className="text-sm text-slate-500 font-semibold">{bookingSlot.slot.startTime} – {bookingSlot.slot.endTime}</p>
-                </div>
-              </div>
-              
-              {bookingSlot.location.consultationFee > 0 && (
-                <div className="pt-3 mt-1 border-t border-slate-200 dark:border-white/5 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] text-slate-400 uppercase font-black tracking-wider">Consultation Fee</p>
-                  </div>
-                  <p className="font-black text-[#8EAC50] text-xl">Rs. {bookingSlot.location.consultationFee.toLocaleString()}</p>
-                </div>
-              )}
-            </div>
-
-            <div className="mb-4">
-              <label className="text-[10px] md:text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1.5 md:mb-2 block pl-1">Appointment Reason</label>
-              <select
-                value={appointmentType}
-                onChange={e => setAppointmentType(e.target.value)}
-                className="w-full bg-[#F8FBF9] dark:bg-[#16221F] border border-slate-200 dark:border-white/10 py-2.5 md:py-3 px-4 rounded-xl text-sm font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:border-[#74B49B] focus:ring-2 focus:ring-[#74B49B]/20"
-              >
-                <option value="General Checkup">General Checkup</option>
-                <option value="First Time Consultation">First Time Consultation</option>
-                <option value="Follow-up">Follow-up</option>
-                <option value="Report Review">Report Review</option>
-                <option value="Urgent Care">Urgent Care</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-
-            <div className="mb-5 md:mb-8">
-              <label className="text-[10px] md:text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1.5 md:mb-2 block pl-1">Additional Notes (Optional)</label>
-              <textarea
-                rows={2}
-                className="w-full px-4 py-2.5 md:py-3 border border-slate-200 dark:border-white/10 bg-[#F8FBF9] dark:bg-[#16221F] text-slate-800 dark:text-slate-100 text-sm resize-none focus:outline-none focus:border-[#74B49B] focus:ring-2 focus:ring-[#74B49B]/20 transition-all font-medium placeholder:font-normal rounded-xl md:rounded-2xl"
-                placeholder="Any symptoms, concerns..."
-                value={bookingNote}
-                onChange={e => setBookingNote(e.target.value)}
-              />
-            </div>
-
-            <div className="flex gap-3 md:gap-4">
-              <button 
-                onClick={() => setBookingSlot(null)} 
-                className="w-1/3 py-3 md:py-4 rounded-xl md:rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-sm font-bold transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                disabled={bookingSubmitting}
-                onClick={confirmBooking}
-                className="flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl bg-[#74B49B] hover:bg-[#5C8D7A] text-white text-sm font-black shadow-lg shadow-[#74B49B]/30 transition-all active:scale-95 disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
-              >
-                {bookingSubmitting ? (
-                  <><RefreshCw size={18} className="animate-spin" /> Processing...</>
-                ) : (
-                  "Proceed to Checkout"
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
+      {user && (
+        <BookAppointmentModal
+          isOpen={!!bookingSlot}
+          onClose={() => setBookingSlot(null)}
+          doctor={doctor}
+          bookingSlot={bookingSlot}
+          taxSetting={taxSetting}
+          onConfirm={confirmBooking}
+          isSubmitting={bookingSubmitting}
+        />
       )}
     </div>
   );

@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import Sel from "@/components/Sel";
+import BookAppointmentModal from "@/components/BookAppointmentModal";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 const DOCTOR_API = API_BASE;
@@ -46,6 +47,7 @@ export default function DoctorDetailsPage() {
   const [doctor, setDoctor] = useState(null);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
+  const [taxSetting, setTaxSetting] = useState({ percentage: 5 });
 
   // Booked slot counts: { [date]: { [slotId]: count } }
   const [bookedCounts, setBookedCounts] = useState({});
@@ -62,7 +64,10 @@ export default function DoctorDetailsPage() {
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (user && id) fetchData();
+    if (user && id) {
+      fetchData();
+      fetchTaxSetting();
+    }
   }, [user, id]);
 
   const fetchData = async () => {
@@ -77,6 +82,18 @@ export default function DoctorDetailsPage() {
     } finally {
       setFetching(false);
     }
+  };
+
+  const fetchTaxSetting = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/payment/tax-setting`, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTaxSetting(data);
+      }
+    } catch (err) {}
   };
 
   const fetchBookedCounts = async (dateStr) => {
@@ -126,7 +143,7 @@ export default function DoctorDetailsPage() {
   }, [sessions]);
 
   // Confirm booking
-  const confirmBooking = async () => {
+  const confirmBooking = async (apptType, note) => {
     if (!bookingSlot) return;
     setBookingSubmitting(true);
 
@@ -140,8 +157,8 @@ export default function DoctorDetailsPage() {
           locationId: location._id,
           slotId: slot._id,
           date,
-          appointmentType,
-          notes: bookingNote,
+          appointmentType: apptType || appointmentType,
+          notes: note || bookingNote,
         })
       });
       const data = await res.json();
@@ -158,7 +175,7 @@ export default function DoctorDetailsPage() {
           body: JSON.stringify({
             userId: user.id || user._id,
             appointmentId: data.appointment._id,
-            amount: location.consultationFee * 100, // Stripe expects cents
+            amount: Math.round(location.consultationFee * (1 + taxSetting.percentage / 100)) * 100, // Stripe expects cents, with tax
             currency: "lkr", // Or usd from loc
             title: `Consultation with Dr. ${doctor.name}`
           })
@@ -360,94 +377,15 @@ export default function DoctorDetailsPage() {
       )}
 
       {/* ── BOOKING CONFIRMATION DIALOG ── */}
-      {bookingSlot && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="glass-panel w-full max-w-md p-6 animate-[fadeIn_0.3s_ease-out] relative">
-            <button onClick={() => setBookingSlot(null)} className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 transition-all">
-              <X size={18} />
-            </button>
-
-            <h3 className="text-xl font-extrabold text-slate-800 dark:text-white mb-1">Confirm Appointment</h3>
-            <p className="text-sm text-slate-500 mb-5">Review the details below before proceeding to payment.</p>
-
-            <div className="flex flex-col gap-3 mb-5 bg-slate-50 dark:bg-white/5 rounded-2xl p-4 border border-slate-100 dark:border-white/5">
-              <div className="flex items-start gap-3">
-                <Stethoscope size={16} className="text-indigo-400 mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Doctor</p>
-                  <p className="font-semibold text-slate-800 dark:text-white text-sm">{doctor.name}</p>
-                  <p className="text-xs text-indigo-500">{doctor.specialization}</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Building2 size={16} className="text-emerald-400 mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Hospital</p>
-                  <p className="font-semibold text-slate-800 dark:text-white text-sm">{bookingSlot.location.hospitalName}</p>
-                  <p className="text-xs text-slate-500">{bookingSlot.location.city}</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Calendar size={16} className="text-amber-400 mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Date & Time</p>
-                  <p className="font-semibold text-slate-800 dark:text-white text-sm">{bookingSlot.dateLabel}</p>
-                  <p className="text-xs text-slate-500">{bookingSlot.slot.startTime} – {bookingSlot.slot.endTime}</p>
-                </div>
-              </div>
-              {bookingSlot.location.consultationFee > 0 && (
-                <div className="flex items-start gap-3">
-                  <CircleDollarSign size={16} className="text-emerald-400 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Consultation Fee</p>
-                    <p className="font-bold text-emerald-600 dark:text-emerald-400 text-lg">Rs. {bookingSlot.location.consultationFee.toLocaleString()}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="mb-4">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Appointment Type</label>
-              <Sel
-                value={appointmentType}
-                onChange={e => setAppointmentType(e.target.value)}
-                className="w-full bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 py-3"
-              >
-                <option value="General Checkup">General Checkup</option>
-                <option value="First Time Consultation">First Time Consultation</option>
-                <option value="Follow-up">Follow-up</option>
-                <option value="Report Review">Report Review</option>
-                <option value="Urgent Care">Urgent Care</option>
-                <option value="Other">Other</option>
-              </Sel>
-            </div>
-
-            <div className="mb-5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Notes (optional)</label>
-              <textarea
-                rows={2}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-sm resize-none focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
-                placeholder="Any symptoms or relevant information..."
-                value={bookingNote}
-                onChange={e => setBookingNote(e.target.value)}
-              />
-            </div>
-
-            <div className="flex gap-3">
-              <button onClick={() => setBookingSlot(null)} className="flex-1 py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
-                Cancel
-              </button>
-              <button
-                disabled={bookingSubmitting}
-                onClick={confirmBooking}
-                className="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-lg shadow-indigo-500/20 transition-all active:scale-95 disabled:opacity-50"
-              >
-                {bookingSubmitting ? "Booking..." : "Confirm & Pay"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <BookAppointmentModal
+        isOpen={!!bookingSlot}
+        onClose={() => setBookingSlot(null)}
+        doctor={doctor}
+        bookingSlot={bookingSlot}
+        taxSetting={taxSetting}
+        onConfirm={confirmBooking}
+        isSubmitting={bookingSubmitting}
+      />
     </div>
   );
 }
