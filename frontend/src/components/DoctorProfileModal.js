@@ -396,7 +396,9 @@ export default function DoctorProfileModal({
                         <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">Consultation Fee (Rs.)</label>
                         <input 
                           type="number" 
-                          min="0"
+                          min="1000"
+                          title="Minimum fee is Rs. 1000"
+                          required
                           className="w-full max-w-[120px] px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-mono"
                           value={activeLoc.consultationFee}
                           onChange={e => {
