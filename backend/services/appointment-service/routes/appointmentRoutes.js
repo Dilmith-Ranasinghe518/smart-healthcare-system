@@ -38,17 +38,11 @@ router.route('/:id')
 router.route('/:id/cancel')
   .patch(protect, appointmentController.cancelAppointment);
 
-// Patient: reschedule
-router.route('/:id/reschedule')
-  .patch(protect, restrictTo('user', 'admin'), appointmentController.rescheduleAppointment);
 
 // Doctor: confirm
 router.route('/:id/accept')
   .patch(protect, restrictTo('doctor', 'admin'), appointmentController.acceptAppointment);
 
-// Doctor: reject
-router.route('/:id/reject')
-  .patch(protect, restrictTo('doctor', 'admin'), appointmentController.rejectAppointment);
 
 // Doctor: mark completed
 router.route('/:id/complete')

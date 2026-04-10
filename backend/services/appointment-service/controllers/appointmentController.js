@@ -210,28 +210,33 @@ exports.cancelAppointment = catchAsync(async (req, res, next) => {
     return next(new AppError('No appointment found with that ID', 404));
   }
 
-  let isAuthorized = false;
-  if (req.user.role === 'admin') {
-    isAuthorized = true;
-  } else if (req.user.role === 'user' && appointment.patientId === req.user.id) {
-    isAuthorized = true;
+  let isPatient = false;
+  let isDoctor = false;
+  let isAdmin = req.user.role === 'admin';
+
+  if (req.user.role === 'user' && appointment.patientId === req.user.id) {
+    isPatient = true;
   } else if (req.user.role === 'doctor') {
     try {
       const doctor = await fetchDoctor(appointment.doctorId);
-      if (doctor && doctor.userId === req.user.id) isAuthorized = true;
+      if (doctor && doctor.userId === req.user.id) isDoctor = true;
     } catch (err) { }
   }
 
-  if (!isAuthorized) {
+  if (!isPatient && !isDoctor && !isAdmin) {
     return next(new AppError('You do not have permission to cancel this appointment', 403));
   }
 
-  const cancellableStatuses = ['PENDING', 'CONFIRMED'];
-  if (!cancellableStatuses.includes(appointment.status)) {
-    return next(new AppError(
-      `Cannot cancel an appointment with status ${appointment.status}`,
-      400
-    ));
+  if (isPatient && appointment.status !== 'PENDING') {
+    return next(new AppError('Patients can only cancel pending appointments.', 400));
+  }
+
+  if (isDoctor && !['PENDING', 'CONFIRMED'].includes(appointment.status)) {
+    return next(new AppError('Doctors can only cancel pending or confirmed appointments.', 400));
+  }
+
+  if (isAdmin && !['PENDING', 'CONFIRMED', 'AWAITING_PAYMENT'].includes(appointment.status)) {
+    return next(new AppError('Admins can only cancel pending, confirmed, or awaiting payment appointments.', 400));
   }
 
   appointment.status = 'CANCELLED';
@@ -254,111 +259,7 @@ exports.cancelAppointment = catchAsync(async (req, res, next) => {
   });
 });
 
-// PATCH /appointments/:id/reschedule
-exports.rescheduleAppointment = catchAsync(async (req, res, next) => {
-  const { newSlotId, newLocationId, newDate } = req.body;
 
-  if (!newSlotId || !newLocationId || !newDate) {
-    return next(new AppError('Please provide newSlotId, newLocationId, and newDate', 400));
-  }
-
-  if (!isFutureDate(newDate)) {
-    return next(new AppError('New appointment date must be today or in the future', 400));
-  }
-
-  const appointment = await Appointment.findById(req.params.id);
-  if (!appointment) {
-    return next(new AppError('No appointment found with that ID', 404));
-  }
-
-  let isAuthorized = false;
-  if (req.user.role === 'admin') {
-    isAuthorized = true;
-  } else if (req.user.role === 'user' && appointment.patientId === req.user.id) {
-    isAuthorized = true;
-  } else if (req.user.role === 'doctor') {
-    try {
-      const doctor = await fetchDoctor(appointment.doctorId);
-      if (doctor && doctor.userId === req.user.id) isAuthorized = true;
-    } catch (err) { }
-  }
-
-  if (!isAuthorized) {
-    return next(new AppError('You do not have permission to reschedule this appointment', 403));
-  }
-
-  if (!['PENDING', 'CONFIRMED'].includes(appointment.status)) {
-    return next(new AppError(
-      `Cannot reschedule an appointment with status ${appointment.status}`,
-      400
-    ));
-  }
-
-  // Fetch doctor to validate new slot
-  let doctor;
-  try {
-    doctor = await fetchDoctor(appointment.doctorId.toString());
-  } catch (err) {
-    return next(new AppError('Doctor-service unavailable', 503));
-  }
-
-  const newLocation = doctor.locations.find(l => l._id.toString() === newLocationId);
-  if (!newLocation) {
-    return next(new AppError('New location not found on this doctor', 404));
-  }
-
-  const newSlot = newLocation.availability.find(s => s._id.toString() === newSlotId);
-  if (!newSlot) {
-    return next(new AppError('New time slot not found at this location', 404));
-  }
-
-  const existingAppt = await Appointment.findOne({
-    'timeSlot.slotId': newSlot._id,
-    date: newDate,
-    status: { $in: ['PENDING', 'CONFIRMED'] }
-  });
-  if (existingAppt) {
-    return next(new AppError('The new time slot is already booked on that date', 409));
-  }
-
-  const dateDay = getDayName(newDate);
-  if (dateDay !== newSlot.day) {
-    return next(new AppError(
-      `This slot is for ${newSlot.day}s but ${newDate} is a ${dateDay}`,
-      400
-    ));
-  }
-
-  // Update appointment with new slot/location/date, reset to PENDING
-  appointment.location = {
-    hospitalId: newLocation.hospitalId,
-    hospitalName: newLocation.hospitalName,
-    city: newLocation.city,
-    address: newLocation.address,
-    consultationFee: newLocation.consultationFee
-  };
-  appointment.timeSlot = {
-    slotId: newSlot._id,
-    day: newSlot.day,
-    startTime: newSlot.startTime,
-    endTime: newSlot.endTime
-  };
-  appointment.date = newDate;
-  appointment.status = 'PENDING';
-  await appointment.save();
-
-  try {
-    const payload = await buildAppointmentNotificationPayload(appointment);
-    await safeSendNotification("APPOINTMENT_RESCHEDULED", payload);
-  } catch (notifyErr) {
-    console.error("Appointment Service: Failed to send reschedule email:", notifyErr.message);
-  }
-
-  res.status(200).json({
-    message: 'Appointment rescheduled successfully',
-    appointment
-  });
-});
 
 // DOCTOR STATUS MANAGEMENT
 
@@ -408,28 +309,18 @@ exports.acceptAppointment = catchAsync(async (req, res, next) => {
 exports.confirmPayment = catchAsync(async (req, res, next) => {
   console.log("confirmPayment route hit for appointment ID:", req.params.id);
 
-  const appointment = await Appointment.findById(req.params.id);
+  const appointment = await Appointment.findOneAndUpdate(
+    { _id: req.params.id, paymentStatus: { $ne: 'COMPLETED' } },
+    { $set: { status: 'PENDING', paymentStatus: 'COMPLETED' } },
+    { new: true }
+  );
 
   if (!appointment) {
-    console.error("confirmPayment: No appointment found for ID:", req.params.id);
-    return next(new AppError('No appointment found with that ID', 404));
+    console.error("confirmPayment: No appointment found or already confirmed for ID:", req.params.id);
+    return res.status(200).json({ message: 'Payment already confirmed or appointment not found', isDuplicate: true });
   }
 
-  console.log("confirmPayment: Appointment found:", {
-    _id: appointment._id,
-    patientId: appointment.patientId,
-    doctorId: appointment.doctorId,
-    status: appointment.status,
-    paymentStatus: appointment.paymentStatus
-  });
-
-  // Update status to PENDING (for doctor) and paymentStatus to COMPLETED
-  appointment.status = 'PENDING';
-  appointment.paymentStatus = 'COMPLETED';
-  await appointment.save();
-
-  console.log("confirmPayment: Appointment updated to PENDING and COMPLETED");
-
+  console.log("confirmPayment: Appointment updated atomically to PENDING and COMPLETED:", appointment._id);
   try {
     console.log("confirmPayment: Building notification payload...");
 
@@ -452,48 +343,7 @@ exports.confirmPayment = catchAsync(async (req, res, next) => {
   });
 });
 
-// PATCH /appointments/:id/reject  (doctor or admin)
-exports.rejectAppointment = catchAsync(async (req, res, next) => {
-  const appointment = await Appointment.findById(req.params.id);
 
-  if (!appointment) {
-    return next(new AppError('No appointment found with that ID', 404));
-  }
-
-  if (req.user.role === 'doctor') {
-    try {
-      const doctor = await fetchDoctor(appointment.doctorId);
-      if (!doctor || doctor.userId !== req.user.id) {
-        return next(new AppError('You can only manage your own appointments', 403));
-      }
-    } catch (err) {
-      return next(new AppError('Doctor verification failed', 503));
-    }
-  }
-
-  if (!['PENDING', 'CONFIRMED'].includes(appointment.status)) {
-    return next(new AppError(
-      `Cannot reject an appointment with status ${appointment.status}`,
-      400
-    ));
-  }
-
-  appointment.status = 'REJECTED';
-  appointment.statusReason = req.body?.reason || '';
-  await appointment.save();
-
-  try {
-    const payload = await buildAppointmentNotificationPayload(appointment);
-    await safeSendNotification("APPOINTMENT_REJECTED", payload);
-  } catch (notifyErr) {
-    console.error("Appointment Service: Failed to send rejection email:", notifyErr.message);
-  }
-
-  res.status(200).json({
-    message: 'Appointment rejected',
-    appointment
-  });
-});
 
 // PATCH /appointments/:id/complete  (doctor or admin)
 exports.completeAppointment = catchAsync(async (req, res, next) => {
@@ -596,7 +446,7 @@ exports.getMyAppointments = catchAsync(async (req, res, next) => {
     filter.status = { $ne: 'AWAITING_PAYMENT' };
   }
 
-  const appointments = await Appointment.find(filter).sort({ date: 1, 'timeSlot.startTime': 1 });
+  const appointments = await Appointment.find(filter).sort({ createdAt: -1 });
 
   res.status(200).json({
     message: appointments.length
@@ -620,7 +470,7 @@ exports.getDoctorAppointments = catchAsync(async (req, res, next) => {
   
   if (date) filter.date = date;
 
-  const appointments = await Appointment.find(filter).sort({ date: 1, 'timeSlot.startTime': 1 });
+  const appointments = await Appointment.find(filter).sort({ createdAt: -1 });
 
   res.status(200).json({
     message: appointments.length
@@ -661,15 +511,14 @@ exports.getAllAppointments = catchAsync(async (req, res, next) => {
   
   if (status) {
     filter.status = status.toUpperCase();
-  } else {
-    filter.status = { $ne: 'AWAITING_PAYMENT' };
   }
+  // Admin intentionally sees all records including AWAITING_PAYMENT by default
   
   if (doctorId) filter.doctorId = doctorId;
   if (patientId) filter.patientId = patientId;
   if (date) filter.date = date;
 
-  const appointments = await Appointment.find(filter).sort({ date: 1, 'timeSlot.startTime': 1 });
+  const appointments = await Appointment.find(filter).sort({ createdAt: -1 });
 
   res.status(200).json({
     message: 'All appointments retrieved',
