@@ -6,6 +6,13 @@ exports.createPayment = async (req, res) => {
   try {
     const { userId, appointmentId, amount, currency, title } = req.body;
 
+    console.log("CREATE PAYMENT BODY:", req.body);
+    console.log("Received appointmentId:", appointmentId);
+
+    if (!appointmentId) {
+      return res.status(400).json({ message: "appointmentId is required" });
+    }
+
     if (!process.env.STRIPE_SECRET_KEY) {
       console.error("FATAL: STRIPE_SECRET_KEY is missing from environment variables.");
     }
@@ -25,8 +32,10 @@ exports.createPayment = async (req, res) => {
               name: title || "Doctor Consultation",
             },
             unit_amount: Math.round(amount), // Stripe expects integer cents
-          }, quantity: 1,
-        },],
+          },
+          quantity: 1,
+        },
+      ],
       success_url: `${frontendUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${frontendUrl}/payment/cancel?session_id={CHECKOUT_SESSION_ID}`,
     });
@@ -40,6 +49,8 @@ exports.createPayment = async (req, res) => {
     });
 
     await payment.save();
+
+    console.log("Saved payment document:", payment);
 
     res.json({ url: session.url });
 
@@ -64,25 +75,30 @@ exports.markAsPaid = async (req, res) => {
       stripeSessionId: req.params.sessionId,
     });
 
+    console.log("Found payment for success callback:", payment);
+
     if (payment) {
       payment.status = "paid";
       await payment.save();
 
       // Notify Appointment Service to activate the appointment
       try {
-        const authHeader = req.headers.authorization;
         await axios.patch(
           `${process.env.APPOINTMENT_SERVICE_URL}/api/appointments/${payment.appointmentId}/confirm-payment`,
           {},
           {
             headers: {
-              ...(authHeader && { Authorization: authHeader })
+              "x-internal-service-secret": process.env.INTERNAL_SERVICE_SECRET
             }
           }
         );
       } catch (apptErr) {
-        console.error("Failed to notify Appointment Service:", apptErr.message);
-        // We still return success for the payment, but log the error (or handle it more robustly)
+        console.error("Failed to notify Appointment Service:");
+        console.error("Message:", apptErr.message);
+        console.error("Status:", apptErr.response?.status);
+        console.error("Data:", apptErr.response?.data);
+        console.error("Appointment ID:", payment.appointmentId);
+        console.error("Appointment Service URL:", process.env.APPOINTMENT_SERVICE_URL);
       }
 
       res.json({ message: "Payment marked as PAID and appointment activated" });
