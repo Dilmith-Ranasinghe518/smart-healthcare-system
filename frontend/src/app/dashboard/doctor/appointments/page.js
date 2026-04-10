@@ -22,6 +22,7 @@ export default function DoctorAppointmentsPage() {
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
   const [processing, setProcessing] = useState(null); // stores appointment ID loading
+  const [patientMap, setPatientMap] = useState({}); // stores patient name mapping
 
   // Filter & Bulk
   const [search, setSearch] = useState("");
@@ -63,12 +64,24 @@ export default function DoctorAppointmentsPage() {
       }
       setDoctor(myDoctor);
 
-      // 2. Fetch appointments for this doctor
-      const apptRes = await fetch(`${APPOINTMENT_API}/appointments/doctor/${myDoctor._id}`, {
+      // 2. Fetch appointments and patients
+      const apptRes = fetch(`${APPOINTMENT_API}/appointments/doctor/${myDoctor._id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
-      const apptData = await apptRes.json();
-      if (!apptRes.ok) throw new Error(apptData.message);
+      const userRes = fetch(`${API_BASE}/users`, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+
+      const [rAppt, rUser] = await Promise.all([apptRes, userRes]);
+
+      const apptData = await rAppt.json();
+      if (!rAppt.ok) throw new Error(apptData.message);
+
+      const userData = rUser.ok ? await rUser.json() : [];
+      const pMap = {};
+      const actualUsers = Array.isArray(userData) ? userData : userData.users || [];
+      actualUsers.forEach(u => pMap[u._id] = u.name);
+      setPatientMap(pMap);
 
       const appts = apptData.appointments || [];
 
@@ -146,8 +159,7 @@ export default function DoctorAppointmentsPage() {
         return <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full text-xs font-bold tracking-wide border border-emerald-500/20"><CheckCircle size={14} /> CONFIRMED</span>;
       case 'CANCELLED':
         return <span className="flex items-center gap-1.5 px-3 py-1 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-full text-xs font-bold tracking-wide border border-rose-500/20"><XCircle size={14} /> CANCELLED</span>;
-      case 'REJECTED':
-        return <span className="flex items-center gap-1.5 px-3 py-1 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-full text-xs font-bold tracking-wide border border-rose-500/20"><XCircle size={14} /> REJECTED</span>;
+
       case 'COMPLETED':
         return <span className="flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-full text-xs font-bold tracking-wide border border-indigo-500/20"><CheckSquare size={14} /> COMPLETED</span>;
       default:
@@ -158,7 +170,8 @@ export default function DoctorAppointmentsPage() {
   // Filtered appointments
   const filteredAppointments = appointments.filter(app => {
     const q = search.toLowerCase();
-    const matchSearch = String(app.patientId).toLowerCase().includes(q) || (app.notes || "").toLowerCase().includes(q) || String(app.appointmentId || app._id).toLowerCase().includes(q);
+    const pName = (patientMap[app.patientId] || app.patientId).toLowerCase();
+    const matchSearch = pName.includes(q) || (app.notes || "").toLowerCase().includes(q) || String(app.appointmentId || app._id).toLowerCase().includes(q);
     const matchHospital = filterHospital === "all" || app.location.hospitalName === filterHospital;
     const matchDate = !filterDate || app.date === filterDate;
     const timeSlotStr = app.timeSlot ? `${app.timeSlot.startTime} - ${app.timeSlot.endTime}` : "";
@@ -286,6 +299,17 @@ export default function DoctorAppointmentsPage() {
                   <option key={h} value={h}>{h}</option>
                 ))}
               </Sel>
+              <button
+                className="w-full md:w-auto px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 text-sm font-bold transition-all flex items-center justify-center gap-2 max-h-[42px]"
+                onClick={() => {
+                  setSearch("");
+                  setFilterHospital("all");
+                  setFilterDate("");
+                  setFilterTimeSlot("all");
+                }}
+              >
+                <X size={14} /> Reset
+              </button>
             </div>
 
             {pendingFiltered.length > 0 && (
@@ -326,7 +350,7 @@ export default function DoctorAppointmentsPage() {
                     {getStatusBadge(app.status)}
                     <div className="flex flex-col items-end gap-1">
                       <span className="text-[10px] font-mono text-slate-400 tracking-wider bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
-                        {app.appointmentId || app._id.slice(-6)}
+                        ID: {app.appointmentId || app._id.slice(-6)}
                       </span>
                       {app.queueNo && (
                         <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
@@ -339,10 +363,10 @@ export default function DoctorAppointmentsPage() {
                   <div className="pl-2 flex-1 mb-6">
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                        <h3 className="font-extrabold text-lg text-slate-800 dark:text-white mb-0.5">
-                          Patient ID
+                        <h3 className="font-extrabold text-lg text-slate-800 dark:text-white mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]" title={patientMap[app.patientId] || app.patientId}>
+                          {patientMap[app.patientId] || 'Unknown Patient'}
                         </h3>
-                        <p className="text-slate-400 text-[10px] font-mono">{app.patientId}</p>
+                        <p className="text-slate-400 text-[10px] font-mono">User ID: {app.patientId.slice(-6)}</p>
                       </div>
                       {app.appointmentType && (
                         <span className="text-[10px] text-indigo-500 font-semibold bg-indigo-500/10 px-2 py-0.5 rounded-full mt-1 border border-indigo-500/20">
@@ -379,55 +403,46 @@ export default function DoctorAppointmentsPage() {
                   </div>
 
                   {/* Actions */}
-                  {isPending && (
-                    <div className="flex gap-2 w-full shrink-0">
-                        <button
-                          className="flex-1 py-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            updateStatus(app._id, 'accept');
-                          }}
-                          disabled={processing === `${app._id}-accept`}
-                        >
-                          <Check size={14} /> Accept
-                        </button>
-                        <button
-                          className="flex-1 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-500/5 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            updateStatus(app._id, 'reject');
-                          }}
-                          disabled={processing === `${app._id}-reject`}
-                        >
-                          <X size={14} /> Reject
-                        </button>
-                      </div>
+                  <div className="flex gap-2 w-full shrink-0">
+                    {isPending && (
+                      <button
+                        className="flex-1 py-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateStatus(app._id, 'accept');
+                        }}
+                        disabled={processing === `${app._id}-accept`}
+                      >
+                        <Check size={14} /> Accept
+                      </button>
                     )}
-  
+
                     {isConfirmed && (
-                      <div className="flex gap-2 w-full shrink-0">
-                        <button
-                          className="flex-1 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-indigo-50 dark:bg-indigo-500/5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            updateStatus(app._id, 'complete');
-                          }}
-                          disabled={processing === `${app._id}-complete`}
-                        >
-                          <CheckSquare size={14} /> Complete
-                        </button>
-                        <button
-                          className="flex-1 py-2.5 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-500/5 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            updateStatus(app._id, 'cancel');
-                          }}
-                          disabled={processing === `${app._id}-cancel`}
-                        >
-                          <XCircle size={14} /> Cancel
-                        </button>
-                    </div>
-                  )}
+                      <button
+                        className="flex-1 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-indigo-50 dark:bg-indigo-500/5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateStatus(app._id, 'complete');
+                        }}
+                        disabled={processing === `${app._id}-complete`}
+                      >
+                        <CheckSquare size={14} /> Complete
+                      </button>
+                    )}
+
+                    {(isPending || isConfirmed) && (
+                      <button
+                        className="flex-1 py-2.5 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-500/5 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateStatus(app._id, 'cancel');
+                        }}
+                        disabled={processing === `${app._id}-cancel`}
+                      >
+                        <XCircle size={14} /> Cancel
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}
