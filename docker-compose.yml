@@ -140,6 +140,20 @@ services:
     networks:
       - healthcare-network
 
+  notification-service:
+    build:
+      context: ./backend/services/notification-service
+      dockerfile: Dockerfile
+    container_name: smart-healthcare-notification-service
+    ports:
+      - "${NOTIFICATION_PORT}:${NOTIFICATION_PORT}"
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+    networks:
+      - healthcare-network
+
   frontend:
     build:
       context: ./frontend
@@ -160,7 +174,6 @@ services:
 
 volumes:
   mongodb_data:
-
 
 networks:
   healthcare-network:

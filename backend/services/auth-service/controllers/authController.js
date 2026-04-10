@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const sendNotificationEvent = require('../utils/notificationClient');
 
 const generateToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, {
@@ -24,6 +25,16 @@ const registerUser = async (req, res) => {
     });
 
     if (user) {
+      try {
+        await sendNotificationEvent("WELCOME_USER", {
+          name: user.name,
+          email: user.email,
+          role: user.role
+        });
+      } catch (notifyErr) {
+        console.error("Auth Service: Failed to send welcome email:", notifyErr.message);
+      }
+
       res.status(201).json({
         _id: user._id,
         name: user.name,

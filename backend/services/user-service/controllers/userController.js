@@ -88,10 +88,27 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// @desc    Internal service-to-service user lookup by ID
+// @route   GET /api/users/internal/:id
+// @access  Internal only
+const getUserByIdInternal = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("name email role");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getAllUsers,
   updateUser,
   deleteUser,
   updateProfile,
+  getUserByIdInternal
 };
-
