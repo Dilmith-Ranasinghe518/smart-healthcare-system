@@ -127,8 +127,8 @@ export default function AdminAppointmentsPage() {
         return <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full text-xs font-bold tracking-wide border border-emerald-500/20"><CheckCircle size={14} /> CONFIRMED</span>;
       case 'CANCELLED':
         return <span className="flex items-center gap-1.5 px-3 py-1 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-full text-xs font-bold tracking-wide border border-rose-500/20"><XCircle size={14} /> CANCELLED</span>;
-      case 'REJECTED':
-        return <span className="flex items-center gap-1.5 px-3 py-1 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-full text-xs font-bold tracking-wide border border-rose-500/20"><XCircle size={14} /> REJECTED</span>;
+      case 'AWAITING_PAYMENT':
+        return <span className="flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full text-xs font-bold tracking-wide border border-blue-500/20"><Clock size={14} /> AWAITING PAYMENT</span>;  
       case 'COMPLETED':
         return <span className="flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-full text-xs font-bold tracking-wide border border-indigo-500/20"><CheckSquare size={14} /> COMPLETED</span>;
       default:
@@ -160,7 +160,7 @@ export default function AdminAppointmentsPage() {
     setCurrentPage(1);
   }, [search, statusFilter, doctorFilter]);
 
-  const uniqueStatuses = ["PENDING", "CONFIRMED", "COMPLETED", "REJECTED", "CANCELLED"];
+  const uniqueStatuses = ["PENDING", "CONFIRMED", "COMPLETED", "CANCELLED", "AWAITING_PAYMENT"];
   const uniqueDoctors = [...new Set(appointments.map(a => a.doctorId))].filter(Boolean);
 
   if (loading || !user) return <div className="flex items-center justify-center h-64 text-slate-500">Loading...</div>;
@@ -319,12 +319,6 @@ export default function AdminAppointmentsPage() {
                               onClick={() => updateStatus(app._id, 'accept')}
                               disabled={processing}
                             ><Check size={16} /></button>
-                            <button
-                              title="Reject"
-                              className="p-1.5 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition-all disabled:opacity-50"
-                              onClick={() => updateStatus(app._id, 'reject')}
-                              disabled={processing}
-                            ><X size={16} /></button>
                           </>
                         )}
 
@@ -336,6 +330,11 @@ export default function AdminAppointmentsPage() {
                               onClick={() => updateStatus(app._id, 'complete')}
                               disabled={processing}
                             ><CheckSquare size={16} /></button>
+                          </>
+                        )}
+                        
+                        {(isPending || isConfirmed || app.status === 'AWAITING_PAYMENT') && (
+                          <>
                             <button
                               title="Cancel"
                               className="p-1.5 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition-all disabled:opacity-50"
@@ -345,7 +344,7 @@ export default function AdminAppointmentsPage() {
                           </>
                         )}
 
-                        {['CANCELLED', 'REJECTED', 'COMPLETED'].includes(app.status) && (
+                        {['CANCELLED', 'COMPLETED'].includes(app.status) && (
                           <span className="text-xs text-slate-400 italic">No actions</span>
                         )}
                       </div>
