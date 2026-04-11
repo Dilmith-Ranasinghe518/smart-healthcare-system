@@ -175,8 +175,8 @@ export default function DoctorDetailsPage() {
           body: JSON.stringify({
             userId: user.id || user._id,
             appointmentId: data.appointment._id,
-            amount: Math.round(location.consultationFee * (1 + taxSetting.percentage / 100)) * 100, // Stripe expects cents, with tax
-            currency: "lkr", // Or usd from loc
+            amount: location.consultationFee * 100, // Stripe expects cents, backend will apply tax
+            currency: "lkr", 
             title: `Consultation with Dr. ${doctor.name}`
           })
         });
