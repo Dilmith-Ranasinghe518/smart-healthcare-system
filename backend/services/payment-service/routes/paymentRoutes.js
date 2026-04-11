@@ -8,7 +8,8 @@ const {
   refundPayment,
   getFinancialSummary,
   getTaxSetting,
-  updateTaxSetting
+  updateTaxSetting,
+  doctorCancelPayment
 } = require("../controllers/paymentController");
 
 router.post("/create", createPayment);
@@ -18,5 +19,6 @@ router.put("/refund/:id", refundPayment);
 router.get("/summary", getFinancialSummary);
 router.get("/tax-setting", getTaxSetting);
 router.put("/tax-setting", updateTaxSetting);
+router.put("/doctor-cancel/:appointmentId", doctorCancelPayment);
 
 module.exports = router;

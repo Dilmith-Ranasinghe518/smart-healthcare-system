@@ -8,7 +8,7 @@ import Link from 'next/link';
 import {
   Heart, Calendar, User, LogOut, Settings,
   Activity, ShieldCheck, ClipboardList, Users, Menu, X, Video,
-  Sun, Moon, ChevronLeft, ChevronRight, Building2, Search, CreditCard
+  Sun, Moon, ChevronLeft, ChevronRight, Building2, Search, CreditCard, Undo
 } from 'lucide-react';
 
 import Footer from '@/components/Footer';
@@ -64,6 +64,7 @@ export default function DashboardLayout({ children }) {
     admin: [
       { name: 'Analytics', icon: <ShieldCheck size={20} />, path: '/dashboard/admin' },
       { name: 'Transactions', icon: <CreditCard size={20} />, path: '/dashboard/admin/transactions' },
+      { name: 'Refunds', icon: <Undo size={20} />, path: '/dashboard/admin/refunds' },
       { name: 'Manage Appointments', icon: <Calendar size={20} />, path: '/dashboard/admin/appointments' },
       { name: 'Manage Doctors', icon: <User size={20} />, path: '/dashboard/admin/doctors' },
       { name: 'Manage Hospitals', icon: <Building2 size={20} />, path: '/dashboard/admin/hospitals' },

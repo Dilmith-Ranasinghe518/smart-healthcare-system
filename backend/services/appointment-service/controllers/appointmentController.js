@@ -243,6 +243,18 @@ exports.cancelAppointment = catchAsync(async (req, res, next) => {
   appointment.statusReason = req.body?.reason || '';
   await appointment.save();
 
+  if (isDoctor) {
+    try {
+      await axios.put(`${process.env.PAYMENT_SERVICE_URL}/api/payment/doctor-cancel/${appointment._id}`, {}, {
+        headers: {
+          "x-internal-service-secret": process.env.INTERNAL_SERVICE_SECRET
+        }
+      });
+    } catch (err) {
+      console.error("Failed to update payment status to Doctor Cancelled", err.message);
+    }
+  }
+
   try {
     const payload = await buildAppointmentNotificationPayload(appointment, {
       cancelledBy: req.user.role

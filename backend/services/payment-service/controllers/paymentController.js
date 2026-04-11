@@ -192,3 +192,21 @@ exports.getFinancialSummary = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.doctorCancelPayment = async (req, res) => {
+  try {
+    const payment = await Payment.findOneAndUpdate(
+      { appointmentId: req.params.appointmentId },
+      { $set: { status: "Doctor Cancelled" } },
+      { new: true }
+    );
+
+    if (!payment) {
+      return res.status(404).json({ message: "Payment not found for this appointment" });
+    }
+
+    res.json({ message: "Payment status updated to Doctor Cancelled", payment });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

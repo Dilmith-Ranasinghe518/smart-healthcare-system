@@ -8,26 +8,48 @@ export default function TransactionsPage() {
 
   const API_URL =  process.env.NEXT_PUBLIC_API_URL;
 
+  const fetchData = () => {
+    fetch(`${API_URL}/payment`)
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("❌ API ERROR:", text);
+          throw new Error("API failed");
+        }
+        return res.json();
+      })
+      .then((res) => {
+        console.log("✅ DATA:", res);
+        setData(res);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  };
+
   useEffect(() => {
-  fetch(`${API_URL}/payment`)
-    .then(async (res) => {
-      if (!res.ok) {
-        const text = await res.text();
-        console.error("❌ API ERROR:", text);
-        throw new Error("API failed");
+    fetchData();
+  }, []);
+
+  const handleRefund = async (id) => {
+    if (!confirm("Are you sure you want to refund this transaction?")) return;
+    try {
+      const res = await fetch(`${API_URL}/payment/refund/${id}`, {
+        method: "PUT",
+      });
+      if (res.ok) {
+        alert("Refund successful");
+        fetchData();
+      } else {
+        alert("Refund failed");
       }
-      return res.json();
-    })
-    .then((res) => {
-      console.log("✅ DATA:", res);
-      setData(res);
-      setLoading(false);
-    })
-    .catch((err) => {
+    } catch (err) {
       console.error(err);
-      setLoading(false);
-    });
-}, []);
+      alert("Error processing refund");
+    }
+  };
 
   return (
     <div className="p-6">
@@ -45,6 +67,7 @@ export default function TransactionsPage() {
                 <th className="px-4 py-3">Amount</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Date</th>
+                <th className="px-4 py-3">Action</th>
               </tr>
             </thead>
 
@@ -60,6 +83,10 @@ export default function TransactionsPage() {
                       className={`px-3 py-1 rounded-full text-xs font-semibold ${
                         item.status === "paid"
                           ? "bg-green-100 text-green-700"
+                          : item.status === "Doctor Cancelled"
+                          ? "bg-red-100 text-red-700"
+                          : item.status === "refunded"
+                          ? "bg-gray-200 text-gray-700"
                           : "bg-yellow-100 text-yellow-700"
                       }`}
                     >
@@ -69,6 +96,21 @@ export default function TransactionsPage() {
 
                   <td className="px-4 py-3">
                     {new Date(item.createdAt).toLocaleString()}
+                  </td>
+
+                  <td className="px-4 py-3">
+                    {item.status === "Doctor Cancelled" ? (
+                      <button
+                        onClick={() => handleRefund(item._id)}
+                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-xs shadow"
+                      >
+                        Refund
+                      </button>
+                    ) : item.status === "refunded" ? (
+                      <span className="text-gray-500 text-xs font-medium">Refunded</span>
+                    ) : (
+                      <span className="text-gray-400 text-xs">-</span>
+                    )}
                   </td>
                 </tr>
               ))}
