@@ -8,63 +8,270 @@ const uniqueRecipients = (...values) => {
   return [...new Set(values.flatMap((v) => ensureArray(v)).filter(Boolean))];
 };
 
+const BRAND_NAME = "MediSync";
+const BRAND_TAGLINE = "Connected Health Solutions";
+const BRAND_PRIMARY = "#0E3A8A";
+const BRAND_SECONDARY = "#17A2B8";
+const BRAND_ACCENT = "#22C55E";
+const BRAND_BG = "#F4F8FC";
+const BRAND_TEXT = "#1F2937";
+const BRAND_MUTED = "#6B7280";
+
+const getLogoUrl = () =>
+  process.env.EMAIL_LOGO_URL ||
+  "https://via.placeholder.com/240x80.png?text=MediSync+Logo";
+
+const buildEmailShell = ({
+  title,
+  preheader = "",
+  intro = "",
+  bodyHtml = "",
+  ctaLabel = "",
+  ctaUrl = "",
+  footerNote = "",
+}) => {
+  const logoUrl = getLogoUrl();
+
+  const ctaSection =
+    ctaLabel && ctaUrl
+      ? `
+        <div style="text-align:center; margin: 28px 0 10px 0;">
+          <a
+            href="${ctaUrl}"
+            style="
+              display:inline-block;
+              background:${BRAND_ACCENT};
+              color:#ffffff;
+              text-decoration:none;
+              padding:14px 28px;
+              border-radius:999px;
+              font-size:15px;
+              font-weight:700;
+            "
+          >
+            ${ctaLabel}
+          </a>
+        </div>
+      `
+      : "";
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>${title}</title>
+      </head>
+      <body style="margin:0; padding:0; background:${BRAND_BG}; font-family:Arial, Helvetica, sans-serif; color:${BRAND_TEXT};">
+        <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;">
+          ${preheader}
+        </div>
+
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:${BRAND_BG}; margin:0; padding:24px 0;">
+          <tr>
+            <td align="center">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:680px; background:#ffffff; border-radius:18px; overflow:hidden; box-shadow:0 10px 30px rgba(15,23,42,0.08);">
+                
+                <tr>
+                  <td style="background:linear-gradient(135deg, ${BRAND_PRIMARY}, ${BRAND_SECONDARY}); padding:28px 28px 18px 28px; text-align:center;">
+                    <img
+                      src="${logoUrl}"
+                      alt="${BRAND_NAME} Logo"
+                      style="max-width:260px; width:100%; height:auto; display:block; margin:0 auto 10px auto;"
+                    />
+                    <div style="font-size:14px; color:#DCEBFF; letter-spacing:1px; font-weight:600;">
+                      ${BRAND_TAGLINE}
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:32px 28px 12px 28px;">
+                    <h1 style="margin:0 0 14px 0; font-size:34px; line-height:1.2; color:${BRAND_TEXT}; font-weight:800;">
+                      ${title}
+                    </h1>
+                    ${
+                      intro
+                        ? `<p style="margin:0; font-size:16px; line-height:1.7; color:${BRAND_MUTED};">${intro}</p>`
+                        : ""
+                    }
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:12px 28px 8px 28px;">
+                    ${bodyHtml}
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:0 28px 10px 28px;">
+                    ${ctaSection}
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:12px 28px 28px 28px;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-top:1px solid #E5E7EB; padding-top:20px;">
+                      <tr>
+                        <td style="font-size:13px; line-height:1.7; color:${BRAND_MUTED};">
+                          ${footerNote || `${BRAND_NAME} • ${BRAND_TAGLINE}`}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
+  `;
+};
+
+const buildInfoCard = (rows = []) => {
+  const items = rows
+    .map(
+      (row) => `
+        <tr>
+          <td style="padding:10px 0; border-bottom:1px solid #EEF2F7; vertical-align:top;">
+            <div style="font-size:13px; color:${BRAND_MUTED}; font-weight:700; margin-bottom:4px;">${row.label}</div>
+            <div style="font-size:15px; color:${BRAND_TEXT}; line-height:1.6;">${row.value || "-"}</div>
+          </td>
+        </tr>
+      `
+    )
+    .join("");
+
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+      style="background:#ffffff; border:1px solid #E5E7EB; border-radius:16px; padding:0 18px;">
+      ${items}
+    </table>
+  `;
+};
+
+const buildTwoColumnCard = ({ leftTitle, rightTitle, leftContent, rightContent }) => {
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+      style="background:#ffffff; border:1px solid #E5E7EB; border-radius:18px;">
+      <tr>
+        <td width="55%" style="padding:20px; vertical-align:top; border-right:1px solid #EEF2F7;">
+          <div style="font-size:14px; font-weight:800; color:${BRAND_PRIMARY}; margin-bottom:12px;">${leftTitle}</div>
+          ${leftContent}
+        </td>
+        <td width="45%" style="padding:20px; vertical-align:top;">
+          <div style="font-size:14px; font-weight:800; color:${BRAND_PRIMARY}; margin-bottom:12px;">${rightTitle}</div>
+          ${rightContent}
+        </td>
+      </tr>
+    </table>
+  `;
+};
+
+const buildAppointmentMainCard = ({
+  appointmentId,
+  patientName,
+  doctorName,
+  appointmentType,
+  date,
+  startTime,
+  endTime,
+  hospitalName,
+  address,
+  city,
+}) => {
+  const left = `
+    <div style="font-size:15px; line-height:1.8; color:${BRAND_TEXT};">
+      <div style="margin-bottom:8px;"><strong>Appointment ID:</strong> ${appointmentId || "-"}</div>
+      <div style="margin-bottom:8px;"><strong>Date:</strong> ${date || "-"}</div>
+      <div style="margin-bottom:8px;"><strong>Time:</strong> ${startTime || "-"} - ${endTime || "-"}</div>
+      <div style="margin-bottom:8px;"><strong>Hospital:</strong> ${hospitalName || "-"}</div>
+      <div><strong>Location:</strong> ${address || "-"}, ${city || "-"}</div>
+    </div>
+  `;
+
+  const right = `
+    <div style="font-size:15px; line-height:1.8; color:${BRAND_TEXT};">
+      <div style="margin-bottom:8px;"><strong>Patient:</strong> ${patientName || "-"}</div>
+      <div style="margin-bottom:8px;"><strong>Doctor:</strong> ${doctorName || "-"}</div>
+      <div><strong>Type:</strong> ${appointmentType || "-"}</div>
+    </div>
+  `;
+
+  return buildTwoColumnCard({
+    leftTitle: "Appointment Details",
+    rightTitle: "Consultation Summary",
+    leftContent: left,
+    rightContent: right,
+  });
+};
+
 const buildWelcomeUserTemplate = (payload) => {
   const { name, email, role } = payload;
 
+  const html = buildEmailShell({
+    title: "Welcome to MediSync!",
+    preheader: "Your MediSync account has been created successfully.",
+    intro: `Hello ${name || "User"}, your account has been created successfully. You can now use MediSync and access connected healthcare services securely.`,
+    bodyHtml: buildInfoCard([
+      { label: "Name", value: name || "-" },
+      { label: "Email", value: email || "-" },
+      { label: "Role", value: role || "user" },
+    ]),
+    footerNote: `${BRAND_NAME} • ${BRAND_TAGLINE}`,
+  });
+
   return {
     to: uniqueRecipients(email),
-    subject: "Welcome to Smart Healthcare",
-    html: `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937;">
-        <h2>Welcome to Smart Healthcare</h2>
-        <p>Hello ${name || "User"},</p>
-        <p>Your account has been created successfully.</p>
-        <p><strong>Role:</strong> ${role || "user"}</p>
-        <p>You can now log in and use the platform services.</p>
-        <p>Thank you,<br/>Smart Healthcare Team</p>
-      </div>
-    `,
-    text: `Welcome to Smart Healthcare
+    subject: "Welcome to MediSync",
+    html,
+    text: `Welcome to MediSync
 
 Hello ${name || "User"},
 Your account has been created successfully.
+
+Name: ${name || "-"}
+Email: ${email || "-"}
 Role: ${role || "user"}
 
-You can now log in and use the platform services.
-
 Thank you,
-Smart Healthcare Team`
+MediSync`
   };
 };
 
 const buildDoctorVerifiedTemplate = (payload) => {
   const { doctorName, doctorEmail, isVerified } = payload;
 
+  const html = buildEmailShell({
+    title: isVerified ? "Doctor Profile Verified" : "Doctor Profile Updated",
+    preheader: "Your MediSync doctor profile status has changed.",
+    intro: `Hello Dr. ${doctorName || "Doctor"}, your doctor profile status has been updated in MediSync.`,
+    bodyHtml: buildInfoCard([
+      { label: "Doctor Name", value: doctorName || "-" },
+      { label: "Email", value: doctorEmail || "-" },
+      { label: "Status", value: isVerified ? "Verified" : "Not Verified" },
+    ]),
+    footerNote: `${BRAND_NAME} • ${BRAND_TAGLINE}`,
+  });
+
   return {
     to: uniqueRecipients(doctorEmail),
-    subject: isVerified
-      ? "Doctor Profile Verified"
-      : "Doctor Profile Verification Update",
-    html: `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937;">
-        <h2>${isVerified ? "Doctor Profile Verified" : "Doctor Profile Update"}</h2>
-        <p>Hello Dr. ${doctorName || "Doctor"},</p>
-        <p>Your doctor profile verification status has been updated.</p>
-        <p><strong>Status:</strong> ${isVerified ? "Verified" : "Not Verified"}</p>
-        <p>Please log in to check your dashboard for the latest details.</p>
-        <p>Thank you,<br/>Smart Healthcare Team</p>
-      </div>
-    `,
+    subject: isVerified ? "Doctor Profile Verified" : "Doctor Profile Verification Update",
+    html,
     text: `${isVerified ? "Doctor Profile Verified" : "Doctor Profile Update"}
 
 Hello Dr. ${doctorName || "Doctor"},
-Your doctor profile verification status has been updated.
+Your doctor profile status has been updated.
+
+Email: ${doctorEmail || "-"}
 Status: ${isVerified ? "Verified" : "Not Verified"}
 
-Please log in to check your dashboard for the latest details.
-
 Thank you,
-Smart Healthcare Team`
+MediSync`
   };
 };
 
@@ -84,28 +291,54 @@ const buildAppointmentBookedTemplate = (payload) => {
     appointmentId
   } = payload;
 
+  const html = buildEmailShell({
+    title: "Your Appointment is Confirmed!",
+    preheader: "Your MediSync appointment has been booked successfully.",
+    intro: `Hello ${patientName || "Patient"}, your appointment with ${doctorName || "the doctor"} has been confirmed. Please review the details below.`,
+    bodyHtml: `
+      ${buildAppointmentMainCard({
+        appointmentId,
+        patientName,
+        doctorName,
+        appointmentType,
+        date,
+        startTime,
+        endTime,
+        hospitalName,
+        address,
+        city,
+      })}
+
+      <div style="height:18px;"></div>
+
+      ${buildTwoColumnCard({
+        leftTitle: "What to Bring",
+        rightTitle: "Need Help?",
+        leftContent: `
+          <div style="font-size:15px; color:${BRAND_TEXT}; line-height:1.9;">
+            1. Photo ID or NIC<br/>
+            2. Medical reports if available<br/>
+            3. Current medication list
+          </div>
+        `,
+        rightContent: `
+          <div style="font-size:15px; color:${BRAND_TEXT}; line-height:1.9;">
+            Contact your hospital or doctor if you need to change or confirm any details before the visit.
+          </div>
+        `,
+      })}
+    `,
+    footerNote: `${BRAND_NAME} • ${BRAND_TAGLINE}`,
+  });
+
   return {
     to: uniqueRecipients(patientEmail, doctorEmail),
-    subject: "Appointment Booking Confirmed",
-    html: `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937;">
-        <h2>Appointment Booking Confirmed</h2>
-        <p>Hello,</p>
-        <p>An appointment has been successfully confirmed.</p>
-        <ul>
-          <li><strong>Appointment ID:</strong> ${appointmentId || "-"}</li>
-          <li><strong>Patient:</strong> ${patientName || "-"}</li>
-          <li><strong>Doctor:</strong> ${doctorName || "-"}</li>
-          <li><strong>Type:</strong> ${appointmentType || "-"}</li>
-          <li><strong>Date:</strong> ${date || "-"}</li>
-          <li><strong>Time:</strong> ${startTime || "-"} - ${endTime || "-"}</li>
-          <li><strong>Hospital:</strong> ${hospitalName || "-"}</li>
-          <li><strong>Location:</strong> ${address || "-"}, ${city || "-"}</li>
-        </ul>
-        <p>Thank you,<br/>Smart Healthcare Team</p>
-      </div>
-    `,
-    text: `Appointment Booking Confirmed
+    subject: "MediSync | Your Appointment is Confirmed",
+    html,
+    text: `Your Appointment is Confirmed
+
+Hello ${patientName || "Patient"},
+Your appointment with ${doctorName || "the doctor"} has been confirmed.
 
 Appointment ID: ${appointmentId || "-"}
 Patient: ${patientName || "-"}
@@ -117,7 +350,7 @@ Hospital: ${hospitalName || "-"}
 Location: ${address || "-"}, ${city || "-"}
 
 Thank you,
-Smart Healthcare Team`
+MediSync`
   };
 };
 
@@ -136,26 +369,27 @@ const buildAppointmentCancelledTemplate = (payload) => {
     statusReason
   } = payload;
 
+  const html = buildEmailShell({
+    title: "Appointment Cancelled",
+    preheader: "A MediSync appointment has been cancelled.",
+    intro: `The following appointment has been cancelled. Please review the details below.`,
+    bodyHtml: buildInfoCard([
+      { label: "Appointment ID", value: appointmentId || "-" },
+      { label: "Patient", value: patientName || "-" },
+      { label: "Doctor", value: doctorName || "-" },
+      { label: "Date", value: date || "-" },
+      { label: "Time", value: `${startTime || "-"} - ${endTime || "-"}` },
+      { label: "Hospital", value: hospitalName || "-" },
+      { label: "Cancelled By", value: cancelledBy || "-" },
+      { label: "Reason", value: statusReason || "Not provided" },
+    ]),
+    footerNote: `${BRAND_NAME} • ${BRAND_TAGLINE}`,
+  });
+
   return {
     to: uniqueRecipients(patientEmail, doctorEmail),
-    subject: "Appointment Cancelled",
-    html: `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937;">
-        <h2>Appointment Cancelled</h2>
-        <p>The following appointment has been cancelled.</p>
-        <ul>
-          <li><strong>Appointment ID:</strong> ${appointmentId || "-"}</li>
-          <li><strong>Patient:</strong> ${patientName || "-"}</li>
-          <li><strong>Doctor:</strong> ${doctorName || "-"}</li>
-          <li><strong>Date:</strong> ${date || "-"}</li>
-          <li><strong>Time:</strong> ${startTime || "-"} - ${endTime || "-"}</li>
-          <li><strong>Hospital:</strong> ${hospitalName || "-"}</li>
-          <li><strong>Cancelled By:</strong> ${cancelledBy || "-"}</li>
-          <li><strong>Reason:</strong> ${statusReason || "Not provided"}</li>
-        </ul>
-        <p>Thank you,<br/>Smart Healthcare Team</p>
-      </div>
-    `,
+    subject: "MediSync | Appointment Cancelled",
+    html,
     text: `Appointment Cancelled
 
 Appointment ID: ${appointmentId || "-"}
@@ -168,7 +402,7 @@ Cancelled By: ${cancelledBy || "-"}
 Reason: ${statusReason || "Not provided"}
 
 Thank you,
-Smart Healthcare Team`
+MediSync`
   };
 };
 
@@ -185,24 +419,25 @@ const buildAppointmentRescheduledTemplate = (payload) => {
     appointmentId
   } = payload;
 
+  const html = buildEmailShell({
+    title: "Appointment Rescheduled",
+    preheader: "Your MediSync appointment has been rescheduled.",
+    intro: `Your appointment has been rescheduled. Please review the updated details below.`,
+    bodyHtml: buildInfoCard([
+      { label: "Appointment ID", value: appointmentId || "-" },
+      { label: "Patient", value: patientName || "-" },
+      { label: "Doctor", value: doctorName || "-" },
+      { label: "Date", value: date || "-" },
+      { label: "Time", value: `${startTime || "-"} - ${endTime || "-"}` },
+      { label: "Hospital", value: hospitalName || "-" },
+    ]),
+    footerNote: `${BRAND_NAME} • ${BRAND_TAGLINE}`,
+  });
+
   return {
     to: uniqueRecipients(patientEmail, doctorEmail),
-    subject: "Appointment Rescheduled",
-    html: `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937;">
-        <h2>Appointment Rescheduled</h2>
-        <p>Your appointment has been rescheduled.</p>
-        <ul>
-          <li><strong>Appointment ID:</strong> ${appointmentId || "-"}</li>
-          <li><strong>Patient:</strong> ${patientName || "-"}</li>
-          <li><strong>Doctor:</strong> ${doctorName || "-"}</li>
-          <li><strong>Date:</strong> ${date || "-"}</li>
-          <li><strong>Time:</strong> ${startTime || "-"} - ${endTime || "-"}</li>
-          <li><strong>Hospital:</strong> ${hospitalName || "-"}</li>
-        </ul>
-        <p>Thank you,<br/>Smart Healthcare Team</p>
-      </div>
-    `,
+    subject: "MediSync | Appointment Rescheduled",
+    html,
     text: `Appointment Rescheduled
 
 Appointment ID: ${appointmentId || "-"}
@@ -213,7 +448,7 @@ Time: ${startTime || "-"} - ${endTime || "-"}
 Hospital: ${hospitalName || "-"}
 
 Thank you,
-Smart Healthcare Team`
+MediSync`
   };
 };
 
@@ -229,27 +464,28 @@ const buildAppointmentAcceptedTemplate = (payload) => {
     appointmentId
   } = payload;
 
+  const html = buildEmailShell({
+    title: "Appointment Accepted",
+    preheader: "Your MediSync appointment has been accepted by the doctor.",
+    intro: `Hello ${patientName || "Patient"}, your appointment has been accepted by ${doctorName || "the doctor"}.`,
+    bodyHtml: buildInfoCard([
+      { label: "Appointment ID", value: appointmentId || "-" },
+      { label: "Doctor", value: doctorName || "-" },
+      { label: "Date", value: date || "-" },
+      { label: "Time", value: `${startTime || "-"} - ${endTime || "-"}` },
+      { label: "Hospital", value: hospitalName || "-" },
+    ]),
+    footerNote: `${BRAND_NAME} • ${BRAND_TAGLINE}`,
+  });
+
   return {
     to: uniqueRecipients(patientEmail),
-    subject: "Appointment Accepted by Doctor",
-    html: `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937;">
-        <h2>Appointment Accepted</h2>
-        <p>Hello ${patientName || "Patient"},</p>
-        <p>Your appointment has been accepted by Dr. ${doctorName || "Doctor"}.</p>
-        <ul>
-          <li><strong>Appointment ID:</strong> ${appointmentId || "-"}</li>
-          <li><strong>Date:</strong> ${date || "-"}</li>
-          <li><strong>Time:</strong> ${startTime || "-"} - ${endTime || "-"}</li>
-          <li><strong>Hospital:</strong> ${hospitalName || "-"}</li>
-        </ul>
-        <p>Thank you,<br/>Smart Healthcare Team</p>
-      </div>
-    `,
+    subject: "MediSync | Appointment Accepted",
+    html,
     text: `Appointment Accepted
 
 Hello ${patientName || "Patient"},
-Your appointment has been accepted by Dr. ${doctorName || "Doctor"}.
+Your appointment has been accepted by ${doctorName || "the doctor"}.
 
 Appointment ID: ${appointmentId || "-"}
 Date: ${date || "-"}
@@ -257,7 +493,7 @@ Time: ${startTime || "-"} - ${endTime || "-"}
 Hospital: ${hospitalName || "-"}
 
 Thank you,
-Smart Healthcare Team`
+MediSync`
   };
 };
 
@@ -274,28 +510,29 @@ const buildAppointmentRejectedTemplate = (payload) => {
     statusReason
   } = payload;
 
+  const html = buildEmailShell({
+    title: "Appointment Rejected",
+    preheader: "Your MediSync appointment has been rejected.",
+    intro: `Hello ${patientName || "Patient"}, your appointment has been rejected by ${doctorName || "the doctor"}.`,
+    bodyHtml: buildInfoCard([
+      { label: "Appointment ID", value: appointmentId || "-" },
+      { label: "Doctor", value: doctorName || "-" },
+      { label: "Date", value: date || "-" },
+      { label: "Time", value: `${startTime || "-"} - ${endTime || "-"}` },
+      { label: "Hospital", value: hospitalName || "-" },
+      { label: "Reason", value: statusReason || "Not provided" },
+    ]),
+    footerNote: `${BRAND_NAME} • ${BRAND_TAGLINE}`,
+  });
+
   return {
     to: uniqueRecipients(patientEmail),
-    subject: "Appointment Rejected",
-    html: `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937;">
-        <h2>Appointment Rejected</h2>
-        <p>Hello ${patientName || "Patient"},</p>
-        <p>Your appointment has been rejected by Dr. ${doctorName || "Doctor"}.</p>
-        <ul>
-          <li><strong>Appointment ID:</strong> ${appointmentId || "-"}</li>
-          <li><strong>Date:</strong> ${date || "-"}</li>
-          <li><strong>Time:</strong> ${startTime || "-"} - ${endTime || "-"}</li>
-          <li><strong>Hospital:</strong> ${hospitalName || "-"}</li>
-          <li><strong>Reason:</strong> ${statusReason || "Not provided"}</li>
-        </ul>
-        <p>Thank you,<br/>Smart Healthcare Team</p>
-      </div>
-    `,
+    subject: "MediSync | Appointment Rejected",
+    html,
     text: `Appointment Rejected
 
 Hello ${patientName || "Patient"},
-Your appointment has been rejected by Dr. ${doctorName || "Doctor"}.
+Your appointment has been rejected by ${doctorName || "the doctor"}.
 
 Appointment ID: ${appointmentId || "-"}
 Date: ${date || "-"}
@@ -304,7 +541,7 @@ Hospital: ${hospitalName || "-"}
 Reason: ${statusReason || "Not provided"}
 
 Thank you,
-Smart Healthcare Team`
+MediSync`
   };
 };
 
@@ -320,27 +557,28 @@ const buildAppointmentCompletedTemplate = (payload) => {
     appointmentId
   } = payload;
 
+  const html = buildEmailShell({
+    title: "Appointment Completed",
+    preheader: "Your MediSync consultation has been marked as completed.",
+    intro: `Hello ${patientName || "Patient"}, your consultation with ${doctorName || "the doctor"} has been marked as completed.`,
+    bodyHtml: buildInfoCard([
+      { label: "Appointment ID", value: appointmentId || "-" },
+      { label: "Doctor", value: doctorName || "-" },
+      { label: "Date", value: date || "-" },
+      { label: "Time", value: `${startTime || "-"} - ${endTime || "-"}` },
+      { label: "Hospital", value: hospitalName || "-" },
+    ]),
+    footerNote: `${BRAND_NAME} • ${BRAND_TAGLINE}`,
+  });
+
   return {
     to: uniqueRecipients(patientEmail),
-    subject: "Appointment Completed",
-    html: `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937;">
-        <h2>Appointment Completed</h2>
-        <p>Hello ${patientName || "Patient"},</p>
-        <p>Your consultation with Dr. ${doctorName || "Doctor"} has been marked as completed.</p>
-        <ul>
-          <li><strong>Appointment ID:</strong> ${appointmentId || "-"}</li>
-          <li><strong>Date:</strong> ${date || "-"}</li>
-          <li><strong>Time:</strong> ${startTime || "-"} - ${endTime || "-"}</li>
-          <li><strong>Hospital:</strong> ${hospitalName || "-"}</li>
-        </ul>
-        <p>Thank you,<br/>Smart Healthcare Team</p>
-      </div>
-    `,
+    subject: "MediSync | Appointment Completed",
+    html,
     text: `Appointment Completed
 
 Hello ${patientName || "Patient"},
-Your consultation with Dr. ${doctorName || "Doctor"} has been marked as completed.
+Your consultation with ${doctorName || "the doctor"} has been marked as completed.
 
 Appointment ID: ${appointmentId || "-"}
 Date: ${date || "-"}
@@ -348,7 +586,7 @@ Time: ${startTime || "-"} - ${endTime || "-"}
 Hospital: ${hospitalName || "-"}
 
 Thank you,
-Smart Healthcare Team`
+MediSync`
   };
 };
 
