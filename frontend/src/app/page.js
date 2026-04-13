@@ -353,7 +353,7 @@ export default function Home() {
             </span>
             <h2 className="text-4xl font-bold dark:text-white">Built for every healthcare role</h2>
             <p className="text-slate-500 mt-3 max-w-2xl mx-auto">
-              SmartHealth supports patients, doctors, and administrators with focused tools for each workflow.
+              MediSync supports patients, doctors, and administrators with focused tools for each workflow.
             </p>
           </div>
 
@@ -439,7 +439,7 @@ export default function Home() {
                 Healthcare in <br /> your pocket.
               </h2>
               <p className="text-xl text-white/80">
-                Download the MediFlow app to manage appointments and consult with doctors on the go.
+                Download the MediSync app to manage appointments and consult with doctors on the go.
               </p>
               <div className="flex flex-wrap gap-4">
                 <button className="px-8 py-4 bg-white text-[#74B49B] rounded-2xl font-bold flex items-center gap-3 hover:scale-105 transition-all">
@@ -469,7 +469,7 @@ export default function Home() {
           <div className="bg-[#74B49B] dark:bg-[#5C8D7A] p-12 md:p-20 rounded-[60px] text-center text-white relative overflow-hidden">
             <h2 className="text-4xl md:text-6xl font-black mb-6">Start Your Digital Clinic</h2>
             <p className="text-lg text-white/85 max-w-2xl mx-auto mb-8">
-              Improve care delivery, reduce admin workload, and create a better patient experience with SmartHealth.
+              Improve care delivery, reduce admin workload, and create a better patient experience with MediSync.
             </p>
             <Link
               href="/register"

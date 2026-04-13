@@ -1,11 +1,11 @@
 "use client";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Settings, User, Mail, Lock, CheckCircle, Eye, EyeOff } from "lucide-react";
+import { Settings, User, Mail, Lock, CheckCircle, Eye, EyeOff, Camera } from "lucide-react";
 import { API_URL } from "@/utils/api";
 
 export default function SettingsPage() {
-  const { user, login } = useAuth();
+  const { user, login, updateUser } = useAuth();
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
   const [password, setPassword] = useState("");
@@ -15,6 +15,57 @@ export default function SettingsPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        setError("Image size must be less than 2MB");
+        return;
+      }
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleUploadImage = async () => {
+    if (!selectedImage) return;
+
+    setIsUploadingImage(true);
+    setError("");
+    setMessage("");
+
+    const formData = new FormData();
+    formData.append("image", selectedImage);
+
+    try {
+      const res = await fetch(`${API_URL}/users/profile/picture`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to upload image");
+
+      updateUser({ profilePicture: data.profilePicture });
+      setMessage("Profile picture updated!");
+      setSelectedImage(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,7 +96,7 @@ export default function SettingsPage() {
       if (!res.ok) throw new Error(data.message || "Failed to update profile");
 
       // Update AuthContext if successful
-      login({ ...user, name: data.name, email: data.email });
+      updateUser({ name: data.name, email: data.email });
       setMessage("Profile updated successfully!");
       setPassword("");
       setConfirmPassword("");
@@ -60,7 +111,7 @@ export default function SettingsPage() {
     <div className="animate-[fadeIn_0.5s_ease-out] w-full max-w-2xl mx-auto">
       <header className="mb-8">
         <h2 className="text-4xl font-extrabold text-slate-800 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-white dark:to-slate-400 mb-1">
-          Account Settings
+          Account Settings [UPDATED]
         </h2>
         <p className="text-slate-600 dark:text-slate-400 text-sm">Update your profile parameters and security presets.</p>
       </header>
@@ -78,13 +129,41 @@ export default function SettingsPage() {
       )}
 
       <div className="glass-panel p-6 md:p-8 flex flex-col gap-6">
-        <div className="flex items-center gap-4 border-b border-slate-200 dark:border-white/5 pb-6">
-          <div className="w-16 h-16 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-xl font-bold uppercase border border-indigo-500/20">
-            {user?.name[0]}
+        <div className="flex flex-col md:flex-row items-center gap-6 border-b border-slate-200 dark:border-white/5 pb-8 mb-4">
+          <div className="relative w-24 h-24">
+            <div className="w-24 h-24 rounded-full overflow-hidden bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-3xl font-bold border-2 border-slate-200 dark:border-white/10 transition-all duration-300">
+              {imagePreview || user?.profilePicture ? (
+                <img 
+                  src={imagePreview || `${API_URL}${user.profilePicture}`} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                user?.name?.[0] || "?"
+              )}
+            </div>
+            <label className="absolute -bottom-1 -right-1 w-9 h-9 bg-indigo-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-indigo-600 transition-all shadow-xl border-2 border-white dark:border-slate-900 z-20 hover:scale-110 active:scale-95">
+              <Camera size={18} className="text-white" />
+              <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+            </label>
           </div>
-          <div>
-            <h4 className="text-lg font-bold text-white">{user?.name}</h4>
-            <p className="text-xs text-slate-600 dark:text-slate-400 capitalize">{user?.role} Account</p>
+
+          <div className="flex-1 text-center md:text-left">
+            <h4 className="text-xl font-bold text-slate-800 dark:text-white mb-1">{user?.name}</h4>
+            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+              <span className="text-xs text-slate-500 dark:text-slate-400 capitalize bg-slate-100 dark:bg-white/5 px-2.5 py-1 rounded-full border border-slate-200 dark:border-white/5 inline-block">
+                {user?.role} Account
+              </span>
+              {selectedImage && (
+                <button 
+                  onClick={handleUploadImage}
+                  disabled={isUploadingImage}
+                  className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center justify-center md:justify-start gap-1 transition-colors"
+                >
+                  {isUploadingImage ? "Uploading..." : "Click to Save New Photo"}
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

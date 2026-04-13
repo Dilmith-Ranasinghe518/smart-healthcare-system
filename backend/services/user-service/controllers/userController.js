@@ -1,4 +1,31 @@
 const User = require('../models/User');
+const multer = require('multer');
+const path = require('path');
+
+// Multer Config
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/profile/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, `profile-${req.user._id}-${Date.now()}${path.extname(file.originalname)}`);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png|webp/;
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype);
+    if (extname && mimetype) {
+      return cb(null, true);
+    } else {
+      cb('Error: Images Only!');
+    }
+  }
+});
 
 // @desc    Get all users
 // @route   GET /api/users
@@ -105,10 +132,42 @@ const getUserByIdInternal = async (req, res) => {
   }
 };
 
+// @desc    Update user profile picture
+// @route   PUT /api/users/profile/picture
+// @access  Private
+const updateProfilePicture = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'Please upload a file' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (user) {
+      // Construct the relative path accessible via Gateway
+      user.profilePicture = `/users/uploads/profile/${req.file.filename}`;
+      const updatedUser = await user.save();
+      
+      res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        profilePicture: updatedUser.profilePicture
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getAllUsers,
   updateUser,
   deleteUser,
   updateProfile,
-  getUserByIdInternal
+  getUserByIdInternal,
+  updateProfilePicture,
+  upload
 };
