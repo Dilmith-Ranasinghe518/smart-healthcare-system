@@ -107,6 +107,10 @@ const appointmentSchema = new mongoose.Schema({
       message: '{VALUE} is not a valid payment status'
     },
     default: 'PENDING'
+  },
+  isChatEnabled: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

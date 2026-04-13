@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { Calendar, Clock, MapPin, XCircle, CheckCircle, Clock3, AlertCircle, Check, X, CheckSquare } from "lucide-react";
+import { Calendar, Clock, MapPin, XCircle, CheckCircle, Clock3, AlertCircle, Check, X, CheckSquare, MessageSquare } from "lucide-react";
 import toast from "react-hot-toast";
 import Sel from "@/components/Sel";
 import ConfirmModal from "@/components/ConfirmModal";
@@ -358,7 +358,14 @@ export default function DoctorAppointmentsPage() {
                     }`} />
 
                   <div className="flex items-start justify-between mb-4 pl-2">
-                    {getStatusBadge(app.status)}
+                    <div className="flex flex-col gap-2 items-start">
+                      {getStatusBadge(app.status)}
+                      {app.isChatEnabled && (
+                        <span className="flex items-center gap-1.5 px-2 py-0.5 bg-indigo-500/10 text-indigo-500 rounded-lg text-[10px] font-bold border border-indigo-500/20">
+                          <MessageSquare size={10} /> CHAT ENABLED
+                        </span>
+                      )}
+                    </div>
                     <div className="flex flex-col items-end gap-1">
                       <span className="text-[10px] font-mono text-slate-400 tracking-wider bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
                         ID: {app.appointmentId || app._id.slice(-6)}

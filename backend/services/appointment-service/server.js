@@ -3,11 +3,15 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const appointmentRoutes = require('./routes/appointmentRoutes');
+const path = require('path');
 const globalErrorHandler = require('./middleware/errorHandler');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+// Static folder for chat uploads
+app.use('/api/appointments/uploads', express.static(path.join(__dirname, 'uploads')));
 
 require('dotenv').config();
 

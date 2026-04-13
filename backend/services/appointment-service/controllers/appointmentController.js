@@ -1,5 +1,6 @@
 const axios = require('axios');
 const Appointment = require('../models/Appointment');
+const Message = require('../models/Message');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
@@ -444,6 +445,139 @@ exports.toggleMeeting = catchAsync(async (req, res, next) => {
   });
 });
 
+// CHAT & MESSAGING
+
+// PATCH /appointments/:id/toggle-chat
+exports.toggleChat = catchAsync(async (req, res, next) => {
+  const appointment = await Appointment.findById(req.params.id);
+  if (!appointment) return next(new AppError('No appointment found with that ID', 404));
+
+  // Auth check: only doctor of this appointment or admin
+  if (req.user.role === 'doctor') {
+    try {
+      const doctor = await fetchDoctor(appointment.doctorId);
+      if (!doctor || doctor.userId !== req.user.id) {
+        return next(new AppError('You can only manage chat for your own appointments', 403));
+      }
+    } catch (err) {
+      return next(new AppError('Doctor verification failed', 503));
+    }
+  } else if (req.user.role !== 'admin') {
+    return next(new AppError('You do not have permission to toggle chat', 403));
+  }
+
+  appointment.isChatEnabled = !appointment.isChatEnabled;
+  await appointment.save();
+
+  res.status(200).json({
+    status: 'success',
+    isChatEnabled: appointment.isChatEnabled,
+    appointment
+  });
+});
+
+// GET /appointments/:id/messages
+exports.getMessages = catchAsync(async (req, res, next) => {
+  const appointment = await Appointment.findById(req.params.id);
+  if (!appointment) return next(new AppError('No appointment found with that ID', 404));
+
+  // Auth check: only patient, doctor of the appointment, or admin
+  const isPatient = appointment.patientId === req.user.id;
+  const isDoctor = req.user.role === 'doctor'; // doctor sees via /doctor/:id route
+  const isAdmin = req.user.role === 'admin';
+
+  // For doctor, further check if it's THEIR appointment
+  if (isDoctor && !isAdmin) {
+    try {
+      const doctor = await fetchDoctor(appointment.doctorId);
+      if (!doctor || doctor.userId !== req.user.id) {
+        return next(new AppError('You can only view messages for your own appointments', 403));
+      }
+    } catch (err) {
+      return next(new AppError('Doctor verification failed', 503));
+    }
+  } else if (!isPatient && !isAdmin && !isDoctor) {
+    return next(new AppError('You do not have permission to view these messages', 403));
+  }
+
+  const messages = await Message.find({ appointmentId: req.params.id }).sort('createdAt');
+
+  res.status(200).json({
+    status: 'success',
+    results: messages.length,
+    messages
+  });
+});
+
+// POST /appointments/:id/messages
+exports.sendMessage = catchAsync(async (req, res, next) => {
+  const appointment = await Appointment.findById(req.params.id);
+  if (!appointment) return next(new AppError('No appointment found with that ID', 404));
+
+  // If chat is disabled, only doctor can still send messages (to initiate) or toggle it back
+  if (!appointment.isChatEnabled && req.user.role === 'user') {
+    return next(new AppError('Chat is currently disabled for this appointment', 403));
+  }
+
+  const { content } = req.body;
+  
+  const messageData = {
+    appointmentId: req.params.id,
+    senderId: req.user.id,
+    senderRole: req.user.role,
+    content: content || ''
+  };
+
+  if (req.file) {
+    // Save relative to the service root
+    messageData.fileUrl = `uploads/${req.file.filename}`;
+    messageData.fileName = req.file.originalname;
+  }
+
+  if (!messageData.content && !messageData.fileUrl) {
+    return next(new AppError('Message must have content or a file', 400));
+  }
+
+  const message = await Message.create(messageData);
+
+  res.status(201).json({
+    status: 'success',
+    message
+  });
+});
+
+// POST /appointments/:id/send-email
+exports.sendDoctorEmail = catchAsync(async (req, res, next) => {
+  const appointment = await Appointment.findById(req.params.id);
+  if (!appointment) return next(new AppError('No appointment found with that ID', 404));
+
+  // Only doctor or admin
+  if (req.user.role !== 'doctor' && req.user.role !== 'admin') {
+    return next(new AppError('Only doctors or admins can send direct emails', 403));
+  }
+
+  const { subject, body } = req.body;
+  if (!subject || !body) {
+    return next(new AppError('Please provide both subject and body for the email', 400));
+  }
+
+  try {
+    const payload = await buildAppointmentNotificationPayload(appointment, {
+      customSubject: subject,
+      customBody: body
+    });
+
+    await safeSendNotification("DOCTOR_DIRECT_MESSAGE", payload);
+  } catch (err) {
+    return next(new AppError('Failed to send email via notification service', 500));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Email sent successfully'
+  });
+});
+
 // QUERIES
 
 // GET /appointments/my  — patient's own appointments
@@ -510,9 +644,23 @@ exports.getAppointmentById = catchAsync(async (req, res, next) => {
     return next(new AppError('You do not have permission to view this appointment', 403));
   }
 
+  // To help the frontend, we can optionally attach names/emails
+  const appointmentObj = appointment.toObject();
+  
+  try {
+    const patient = await fetchUserById(appointment.patientId);
+    appointmentObj.patientName = patient?.name || "Patient";
+    appointmentObj.patientEmail = patient?.email || "";
+    
+    const doctor = await fetchDoctor(appointment.doctorId);
+    appointmentObj.doctorName = doctor?.name || "Doctor";
+  } catch (err) {
+    console.warn("Failed to populate names for appointment detail:", err.message);
+  }
+
   res.status(200).json({
     message: 'Appointment retrieved successfully',
-    appointment
+    appointment: appointmentObj
   });
 });
 

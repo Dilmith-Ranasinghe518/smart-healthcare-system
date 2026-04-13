@@ -590,6 +590,50 @@ MediSync`
   };
 };
 
+const buildDoctorDirectMessageTemplate = (payload) => {
+  const {
+    patientEmail,
+    patientName,
+    doctorName,
+    customSubject,
+    customBody,
+    appointmentId
+  } = payload;
+
+  const html = buildEmailShell({
+    title: customSubject || `Message from Dr. ${doctorName}`,
+    preheader: `You have received a new message from Dr. ${doctorName}.`,
+    intro: `Hello ${patientName || "Patient"}, Dr. ${doctorName || "your doctor"} has sent you a message regarding appointment #${appointmentId || ""}.`,
+    bodyHtml: `
+      <div style="background:${BRAND_BG}; padding:20px; border-radius:12px; border-left:4px solid ${BRAND_PRIMARY}; margin-bottom:20px;">
+        <p style="margin:0; font-size:16px; line-height:1.7; color:${BRAND_TEXT}; white-space: pre-wrap;">
+          ${customBody || ""}
+        </p>
+      </div>
+      ${buildInfoCard([
+        { label: "Doctor", value: doctorName || "-" },
+        { label: "Appointment ID", value: appointmentId || "-" },
+      ])}
+    `,
+    footerNote: `${BRAND_NAME} • ${BRAND_TAGLINE}`,
+  });
+
+  return {
+    to: uniqueRecipients(patientEmail),
+    subject: customSubject || `MediSync | Message from Dr. ${doctorName}`,
+    html,
+    text: `Message from Dr. ${doctorName}
+    
+Hello ${patientName || "Patient"},
+Dr. ${doctorName || "your doctor"} has sent you a message regarding appointment #${appointmentId || ""}:
+
+${customBody || ""}
+
+Thank you,
+MediSync`
+  };
+};
+
 const buildTemplateByEvent = (eventType, payload) => {
   switch (eventType) {
     case "WELCOME_USER":
@@ -608,6 +652,8 @@ const buildTemplateByEvent = (eventType, payload) => {
       return buildAppointmentRejectedTemplate(payload);
     case "APPOINTMENT_COMPLETED":
       return buildAppointmentCompletedTemplate(payload);
+    case "DOCTOR_DIRECT_MESSAGE":
+      return buildDoctorDirectMessageTemplate(payload);
     default:
       throw new Error(`Unsupported eventType: ${eventType}`);
   }
