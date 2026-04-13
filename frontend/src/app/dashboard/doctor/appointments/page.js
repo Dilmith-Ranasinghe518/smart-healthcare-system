@@ -29,6 +29,7 @@ export default function DoctorAppointmentsPage() {
   const [filterHospital, setFilterHospital] = useState("all");
   const [filterDate, setFilterDate] = useState("");
   const [filterTimeSlot, setFilterTimeSlot] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
   const [bulkLoading, setBulkLoading] = useState(false);
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
@@ -85,11 +86,9 @@ export default function DoctorAppointmentsPage() {
 
       const appts = apptData.appointments || [];
 
-      // Sort: upcoming logic (Pending and Confirmed first, then past)
+      // Sort: latest appointment first based on createdAt
       appts.sort((a, b) => {
-        const dateTimeA = new Date(`${a.date}T${a.timeSlot.startTime}`);
-        const dateTimeB = new Date(`${b.date}T${b.timeSlot.startTime}`);
-        return dateTimeA - dateTimeB;
+        return new Date(b.createdAt) - new Date(a.createdAt);
       });
 
       setAppointments(appts);
@@ -159,7 +158,6 @@ export default function DoctorAppointmentsPage() {
         return <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full text-xs font-bold tracking-wide border border-emerald-500/20"><CheckCircle size={14} /> CONFIRMED</span>;
       case 'CANCELLED':
         return <span className="flex items-center gap-1.5 px-3 py-1 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-full text-xs font-bold tracking-wide border border-rose-500/20"><XCircle size={14} /> CANCELLED</span>;
-
       case 'COMPLETED':
         return <span className="flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-full text-xs font-bold tracking-wide border border-indigo-500/20"><CheckSquare size={14} /> COMPLETED</span>;
       default:
@@ -176,8 +174,9 @@ export default function DoctorAppointmentsPage() {
     const matchDate = !filterDate || app.date === filterDate;
     const timeSlotStr = app.timeSlot ? `${app.timeSlot.startTime} - ${app.timeSlot.endTime}` : "";
     const matchTimeSlot = filterTimeSlot === "all" || timeSlotStr === filterTimeSlot;
+    const matchStatus = filterStatus === "all" || app.status === filterStatus;
 
-    return matchSearch && matchHospital && matchDate && matchTimeSlot;
+    return matchSearch && matchHospital && matchDate && matchTimeSlot && matchStatus;
   });
 
   // Calculate Pagination
@@ -187,10 +186,11 @@ export default function DoctorAppointmentsPage() {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, filterHospital, filterDate, filterTimeSlot]);
+  }, [search, filterHospital, filterDate, filterTimeSlot, filterStatus]);
 
   const uniqueHospitals = [...new Set(appointments.map(a => a.location.hospitalName))];
   const uniqueTimeSlots = [...new Set(appointments.map(a => a.timeSlot ? `${a.timeSlot.startTime} - ${a.timeSlot.endTime}` : ""))].filter(Boolean);
+  const uniqueStatuses = ["PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"];
   const pendingFiltered = filteredAppointments.filter(a => a.status === 'PENDING');
 
   const handleBulkAccept = async () => {
@@ -291,6 +291,16 @@ export default function DoctorAppointmentsPage() {
               </Sel>
               <Sel
                 className="w-full md:w-auto flex-1 min-w-[150px]"
+                value={filterStatus}
+                onChange={e => setFilterStatus(e.target.value)}
+              >
+                <option value="all">All Statuses</option>
+                {uniqueStatuses.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </Sel>
+              <Sel
+                className="w-full md:w-auto flex-1 min-w-[150px]"
                 value={filterHospital}
                 onChange={e => setFilterHospital(e.target.value)}
               >
@@ -306,6 +316,7 @@ export default function DoctorAppointmentsPage() {
                   setFilterHospital("all");
                   setFilterDate("");
                   setFilterTimeSlot("all");
+                  setFilterStatus("all");
                 }}
               >
                 <X size={14} /> Reset
