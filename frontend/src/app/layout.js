@@ -5,8 +5,11 @@ import AiSymptomProvider from "@/components/ai/AiSymptomProvider";
 import "./globals.css";
 
 export const metadata = {
-  title: "Smart Healthcare System",
-  description: "Advanced healthcare management platform",
+  title: "MediSync",
+  description: "Connected Health Solutions",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({ children }) {

@@ -13,18 +13,9 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-[#96D7C6]/40 dark:border-white/10 bg-white/85 dark:bg-slate-950/80 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <nav className="flex items-center justify-between h-20">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-[#5AA7A7] flex items-center justify-center shadow-lg shadow-[#5AA7A7]/30">
-              <Activity size={22} className="text-white" />
-            </div>
-
-            <div className="leading-tight">
-              <h1 className="text-xl font-extrabold tracking-tight text-slate-800 dark:text-white">
-                SmartHealth
-              </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Modern Healthcare Platform
-              </p>
+          <Link href="/" className="flex items-center">
+            <div className="h-16 w-auto overflow-hidden">
+              <img src="/logo.png" alt="MediSync Logo" className="h-full w-auto object-contain" />
             </div>
           </Link>
 

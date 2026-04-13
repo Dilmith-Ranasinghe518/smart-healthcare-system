@@ -41,8 +41,8 @@ export default function Register() {
       <div className="flex-1 flex items-center justify-center py-12 px-4">
         <div className="glass-panel w-full max-w-[480px] animate-[fadeIn_0.5s_ease-out]">
           <div className="text-center mb-8">
-            <div className="mx-auto mb-4 w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-              <Activity size={24} className="text-emerald-400" />
+            <div className="mx-auto mb-4 h-20 w-auto flex items-center justify-center overflow-hidden">
+              <img src="/logo.png" alt="MediSync Logo" className="h-full w-auto object-contain" />
             </div>
             <h2 className="text-3xl font-bold bg-gradient-to-br from-slate-800 dark:from-white to-slate-500 dark:to-slate-400 bg-clip-text text-transparent mb-2">
               Create Account

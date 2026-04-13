@@ -89,9 +89,10 @@ export default function DashboardLayout({ children }) {
       <aside className={`fixed md:sticky top-0 h-screen z-50 bg-white dark:bg-slate-900 border-r border-slate-200  dark:border-white/5 flex flex-col p-6 transition-all duration-300 ease-in-out md:translate-x-0 ${isCollapsed ? 'w-20 p-4' : 'w-64'
         } ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-between pb-6 border-b border-slate-200  dark:border-white/5 mb-6">
-          <Link href="/" className="flex items-center gap-2 text-xl font-bold hover:text-indigo-400 transition-all duration-200 text-slate-800 dark:text-white">
-            <Activity size={24} className="text-indigo-400 flex-shrink-0" />
-            {!isCollapsed && <span className="animate-[fadeIn_0.2s_ease-out]">SmartHealth</span>}
+          <Link href="/" className={`flex items-center transition-all duration-200 ${isCollapsed ? 'justify-center' : ''}`}>
+            <div className={`${isCollapsed ? 'w-10 h-10' : 'h-12 w-auto'} overflow-hidden`}>
+              <img src="/logo.png" alt="MediSync" className={`h-full w-auto object-contain ${isCollapsed ? 'object-left' : ''}`} />
+            </div>
           </Link>
           <button className="md:hidden text-slate-600 dark:text-slate-400 hover:text-white" onClick={() => setIsSidebarOpen(false)}>
             <X size={20} />
@@ -154,9 +155,10 @@ export default function DashboardLayout({ children }) {
       <main className="flex-1 overflow-y-auto bg-[radial-gradient(circle_at_top_right,rgba(79,70,229,0.05),transparent_30%)] flex flex-col bg-slate-50 dark:bg-slate-950">
         {/* Top Navbar Header */}
         <header className="flex items-center justify-between p-4 md:px-10 md:py-5 border-b border-slate-200  dark:border-white/5 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md z-30 w-full">
-          <Link href="/" className="flex items-center gap-2 font-bold md:hidden hover:text-indigo-400 transition-all duration-200">
-            <Activity size={20} className="text-indigo-400" />
-            <span>SmartHealth</span>
+          <Link href="/" className="flex items-center md:hidden">
+            <div className="h-16 w-auto overflow-hidden">
+              <img src="/logo.png" alt="MediSync" className="h-full w-auto object-contain" />
+            </div>
           </Link>
 
           <div className="hidden md:block">
