@@ -11,6 +11,8 @@ import {
   Sun, Moon, ChevronLeft, ChevronRight, Building2, Search, CreditCard, Undo
 } from 'lucide-react';
 
+import { API_URL } from '@/utils/api';
+import ActivityDetailModal from '@/components/ActivityDetailModal';
 import Footer from '@/components/Footer';
 
 export default function DashboardLayout({ children }) {
@@ -182,8 +184,12 @@ export default function DashboardLayout({ children }) {
             )}
 
             <div className="hidden md:flex items-center gap-2 bg-slate-100 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-slate-200  dark:border-white/5">
-              <div className="w-6 h-6 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-500 dark:text-indigo-400 font-bold text-xs uppercase">
-                {user.name[0]}
+              <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-500 dark:text-indigo-400 font-bold text-xs uppercase overflow-hidden border border-slate-200 dark:border-white/10">
+                {user?.profilePicture ? (
+                  <img src={`${API_URL}${user.profilePicture}`} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  user?.name[0]
+                )}
               </div>
               <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{user.name}</span>
             </div>

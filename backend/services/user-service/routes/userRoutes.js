@@ -5,7 +5,9 @@ const {
   updateUser,
   deleteUser,
   updateProfile,
-  getUserByIdInternal
+  getUserByIdInternal,
+  updateProfilePicture,
+  upload
 } = require('../controllers/userController');
 const { protect, restrictTo } = require('../middleware/authMiddleware');
 const { protectInternal } = require('../middleware/internalMiddleware');
@@ -17,6 +19,7 @@ router.use(protect);
 
 // Allow any logged-in user to update their own profile
 router.put('/profile', updateProfile);
+router.put('/profile/picture', upload.single('image'), updateProfilePicture);
 
 // Admin & Doctor can view user list (for name resolution)
 router.get('/', restrictTo('admin', 'doctor'), getAllUsers);

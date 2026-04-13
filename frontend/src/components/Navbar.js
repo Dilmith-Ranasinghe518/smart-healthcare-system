@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Activity, Sun, Moon } from "lucide-react";
+import { API_URL } from "@/utils/api";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -74,8 +75,12 @@ export default function Navbar() {
                 href={`/dashboard/${user.role}`}
                 className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-[#96D7C6]/40 dark:border-white/10 bg-[#96D7C6]/20 dark:bg-slate-900 hover:bg-[#96D7C6]/30 dark:hover:bg-slate-800 transition-all"
               >
-                <div className="w-8 h-8 rounded-full bg-[#6C8CBF] flex items-center justify-center text-white text-xs font-bold uppercase">
-                  {user?.name?.[0] || "U"}
+                <div className="w-8 h-8 rounded-full bg-[#6C8CBF] flex items-center justify-center text-white text-xs font-bold uppercase overflow-hidden border border-white/20">
+                  {user?.profilePicture ? (
+                    <img src={`${API_URL}${user.profilePicture}`} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    user?.name?.[0] || "U"
+                  )}
                 </div>
                 <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                   {user.name}
