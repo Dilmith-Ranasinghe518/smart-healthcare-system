@@ -11,7 +11,12 @@ app.use(express.json());
 app.use(cors());
 
 // Static folder for chat uploads
-app.use('/api/appointments/uploads', express.static(path.join(__dirname, 'uploads')));
+const fs = require('fs');
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+app.use('/api/appointments/uploads', express.static(uploadDir));
 
 require('dotenv').config();
 
