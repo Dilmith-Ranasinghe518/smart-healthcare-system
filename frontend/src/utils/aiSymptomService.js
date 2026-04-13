@@ -1,12 +1,13 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5005/api";
 
-export async function checkSymptoms(symptoms) {
+export async function checkSymptoms({ symptoms, role }) {
   const response = await fetch(`${API_BASE_URL}/ai-symptoms/check`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({ symptoms })
+    body: JSON.stringify({ symptoms, role })
   });
 
   const data = await response.json();
