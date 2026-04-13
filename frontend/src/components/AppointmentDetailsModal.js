@@ -20,7 +20,8 @@ import {
   RotateCw,
   Mail,
   FileIcon,
-  Download
+  Download,
+  Check
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -413,13 +414,21 @@ export default function AppointmentDetailsModal({
                     </div>
                   ) : (
                     messages.map((msg) => {
-                      const isMe = msg.senderId === user.id;
+                      const userId = user.id || user._id;
+                      const isMe = msg.senderId === userId;
+                      const senderLabel = msg.senderRole === 'doctor' ? 'Doctor' : 'Patient';
+                      
                       return (
-                        <div key={msg._id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                        <div key={msg._id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                          {!isMe && (
+                            <span className="text-[10px] font-bold text-slate-400 ml-2 mb-1 uppercase tracking-wider">
+                              {senderLabel}
+                            </span>
+                          )}
                           <div className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${
                             isMe 
-                              ? 'bg-indigo-500 text-white rounded-tr-none' 
-                              : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-white/10 rounded-tl-none'
+                              ? 'bg-indigo-600 text-white rounded-tr-none' 
+                              : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10 rounded-tl-none'
                           }`}>
                             {msg.content && <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>}
                             {msg.fileUrl && (
@@ -439,9 +448,12 @@ export default function AppointmentDetailsModal({
                                 </div>
                               </div>
                             )}
-                            <p className={`text-[9px] mt-1.5 opacity-60 ${isMe ? 'text-white' : 'text-slate-400'}`}>
-                              {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </p>
+                            <div className={`flex items-center gap-2 mt-1.5 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                              <p className={`text-[9px] opacity-60 ${isMe ? 'text-white' : 'text-slate-400'}`}>
+                                {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                              {isMe && <Check size={10} className="text-white/60" />}
+                            </div>
                           </div>
                         </div>
                       );
