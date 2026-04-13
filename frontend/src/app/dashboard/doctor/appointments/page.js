@@ -201,7 +201,7 @@ export default function DoctorAppointmentsPage() {
 
     for (const app of pendingFiltered) {
       try {
-        const res = await fetch(`${APPOINTMENT_API}/api/appointments/${app._id}/accept`, {
+        const res = await fetch(`${APPOINTMENT_API}/appointments/${app._id}/accept`, {
           method: "PATCH",
           headers: { Authorization: `Bearer ${user.token}` }
         });
