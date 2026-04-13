@@ -56,7 +56,7 @@ exports.createPayment = async (req, res) => {
     }
 
     // The 'amount' coming from body is the consultationFee (before tax) in actual units (e.g. 1000 Rs)
-    const baseFee = amount; 
+    const baseFee = amount;
     const taxAmount = (baseFee * taxSetting.percentage) / 100;
     const totalAmount = baseFee + taxAmount;
 
@@ -79,8 +79,8 @@ exports.createPayment = async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: `${frontendUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${frontendUrl}/payment/cancel?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.STRIPE_SUCCESS_URL}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.STRIPE_CANCEL_URL}?session_id={CHECKOUT_SESSION_ID}`,
     });
 
     const payment = new Payment({
