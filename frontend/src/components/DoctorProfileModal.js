@@ -51,6 +51,9 @@ export default function DoctorProfileModal({
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  
+  const [deletedLocations, setDeletedLocations] = useState([]);
+  const [deletedSlots, setDeletedSlots] = useState([]);
 
   /* ── hydrate on edit ── */
   useEffect(() => {
@@ -105,6 +108,10 @@ export default function DoctorProfileModal({
   };
 
   const removeLocation = (idx) => {
+    const loc = locations[idx];
+    if (loc && loc.hospitalId) {
+      setDeletedLocations(prev => [...prev, loc.hospitalId]);
+    }
     setLocations(ls => ls.filter((_, i) => i !== idx));
     setActiveLocIdx(prev => Math.max(0, prev > idx ? prev - 1 : prev));
   };
@@ -123,8 +130,15 @@ export default function DoctorProfileModal({
   };
 
   const removeSlot = (locIdx, slotIdx) => {
-    setLocations(ls => ls.map((loc, i) =>
-      i === locIdx ? { ...loc, availability: loc.availability.filter((_, si) => si !== slotIdx) } : loc
+    const loc = locations[locIdx];
+    if (loc && loc._id) {
+      const slot = loc.availability[slotIdx];
+      if (slot && slot._id) {
+        setDeletedSlots(prev => [...prev, { locationId: loc._id, slotId: slot._id }]);
+      }
+    }
+    setLocations(ls => ls.map((l, i) =>
+      i === locIdx ? { ...l, availability: l.availability.filter((_, si) => si !== slotIdx) } : l
     ));
   };
 
@@ -194,6 +208,31 @@ export default function DoctorProfileModal({
               currentDocState = availData.doctor;
             }
           }
+        }
+      }
+
+      // Cleanup deleted slots
+      for (const ds of deletedSlots) {
+        try {
+          await fetch(`${doctorApiUrl}/doctors/${currentDocState._id}/locations/${ds.locationId}/availability/${ds.slotId}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        } catch (err) {
+          console.warn("Failed to delete slot:", err);
+        }
+      }
+
+      // Cleanup deleted locations
+      for (const dl of deletedLocations) {
+        try {
+          await fetch(`${doctorApiUrl}/doctors/${currentDocState._id}/locations`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ hospitalId: dl })
+          });
+        } catch (err) {
+          console.warn("Failed to delete location:", err);
         }
       }
 

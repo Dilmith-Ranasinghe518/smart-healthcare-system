@@ -63,19 +63,6 @@ exports.getAllHospitals = catchAsync(async (req, res, next) => {
   });
 });
 
-// Get hospital by ID
-exports.getHospital = catchAsync(async (req, res, next) => {
-  const hospital = await Hospital.findById(req.params.id);
-
-  if (!hospital) {
-    return next(new AppError('No hospital found with that ID', 404));
-  }
-
-  res.status(200).json({
-    message: 'Hospital retrieved successfully',
-    hospital
-  });
-});
 
 // Update hospital by ID (Admin only)
 exports.updateHospital = catchAsync(async (req, res, next) => {

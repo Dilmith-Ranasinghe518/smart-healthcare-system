@@ -9,7 +9,6 @@ router.route('/')
   .post(protect, restrictTo('admin'), hospitalController.createHospital);
 
 router.route('/:id')
-  .get(hospitalController.getHospital)
   .put(protect, restrictTo('admin'), hospitalController.updateHospital);
 
 // Toggle hospital active/inactive
