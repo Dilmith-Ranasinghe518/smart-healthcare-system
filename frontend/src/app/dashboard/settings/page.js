@@ -130,8 +130,8 @@ export default function SettingsPage() {
 
       <div className="glass-panel p-6 md:p-8 flex flex-col gap-6">
         <div className="flex flex-col md:flex-row items-center gap-6 border-b border-slate-200 dark:border-white/5 pb-8 mb-4">
-          <div className="relative group">
-            <div className="w-24 h-24 rounded-full overflow-hidden bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-3xl font-bold border-2 border-slate-200 dark:border-white/10 group-hover:border-indigo-500/50 transition-all duration-300">
+          <div className="relative w-24 h-24">
+            <div className="w-24 h-24 rounded-full overflow-hidden bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-3xl font-bold border-2 border-slate-200 dark:border-white/10 transition-all duration-300">
               {imagePreview || user?.profilePicture ? (
                 <img 
                   src={imagePreview || `${API_URL}${user.profilePicture}`} 
@@ -139,11 +139,11 @@ export default function SettingsPage() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                user?.name[0]
+                user?.name?.[0] || "?"
               )}
             </div>
-            <label className="absolute bottom-0 right-0 w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-indigo-600 transition-colors shadow-lg border-2 border-white dark:border-slate-900">
-              <Camera size={16} className="text-white" />
+            <label className="absolute -bottom-1 -right-1 w-9 h-9 bg-indigo-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-indigo-600 transition-all shadow-xl border-2 border-white dark:border-slate-900 z-20 hover:scale-110 active:scale-95">
+              <Camera size={18} className="text-white" />
               <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
             </label>
           </div>
