@@ -111,7 +111,7 @@ export default function SettingsPage() {
     <div className="animate-[fadeIn_0.5s_ease-out] w-full max-w-2xl mx-auto">
       <header className="mb-8">
         <h2 className="text-4xl font-extrabold text-slate-800 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-white dark:to-slate-400 mb-1">
-          Account Settings
+          Account Settings [UPDATED]
         </h2>
         <p className="text-slate-600 dark:text-slate-400 text-sm">Update your profile parameters and security presets.</p>
       </header>
