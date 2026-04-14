@@ -6,5 +6,3 @@ JWT_SECRET=c95ce41a2bb72713142294cceb75d1a8c166960332e93fe0d0821d97e593a3b9
 
 To start the project:
 navigate to root folder and run the command: docker-compose up --build
-
-//test
