@@ -634,8 +634,62 @@ MediSync`
   };
 };
 
+const buildRegistrationOtpTemplate = (payload) => {
+  const { email, otp } = payload;
+
+  const html = buildEmailShell({
+    title: "Verify Your Email",
+    preheader: "Your MediSync registration verification code.",
+    intro: `Hello, thank you for joining MediSync. To complete your registration, please use the following one-time password (OTP) to verify your email address.`,
+    bodyHtml: `
+      <div style="text-align:center; padding: 20px 0;">
+        <div style="
+          display:inline-block;
+          background:${BRAND_BG};
+          border: 2px dashed ${BRAND_PRIMARY};
+          border-radius:12px;
+          padding: 20px 40px;
+          margin: 10px 0;
+        ">
+          <span style="
+            font-size:36px;
+            font-weight:800;
+            letter-spacing:8px;
+            color:${BRAND_PRIMARY};
+          ">
+            ${otp}
+          </span>
+        </div>
+        <p style="font-size:14px; color:${BRAND_MUTED}; margin-top:20px;">
+          This code is valid for 10 minutes. If you did not request this, please ignore this email.
+        </p>
+      </div>
+    `,
+    footerNote: `${BRAND_NAME} • ${BRAND_TAGLINE}`,
+  });
+
+  return {
+    to: uniqueRecipients(email),
+    subject: `MediSync | ${otp} is your verification code`,
+    html,
+    text: `Verify Your Email
+    
+Hello,
+To complete your registration in MediSync, please use the following one-time password (OTP):
+
+${otp}
+
+This code is valid for 10 minutes.
+
+Thank you,
+MediSync`
+  };
+};
+
 const buildTemplateByEvent = (eventType, payload) => {
   switch (eventType) {
+    case "REGISTRATION_OTP":
+      return buildRegistrationOtpTemplate(payload);
     case "WELCOME_USER":
       return buildWelcomeUserTemplate(payload);
     case "DOCTOR_VERIFIED":

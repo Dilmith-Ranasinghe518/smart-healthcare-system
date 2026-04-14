@@ -6,6 +6,7 @@ import { ShieldAlert, Users, Grid, RefreshCw, Power, Plus, ShieldCheck } from "l
 import { API_URL } from "@/utils/api";
 
 import TaxSettingModal from "@/components/TaxSettingModal";
+import RegistrationSettingsModal from "@/components/RegistrationSettingsModal";
 
 export default function AdminDashboard() {
   const { user, loading } = useAuth();
@@ -13,6 +14,7 @@ export default function AdminDashboard() {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [isTaxModalOpen, setIsTaxModalOpen] = useState(false);
+  const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "admin")) {
@@ -114,6 +116,12 @@ export default function AdminDashboard() {
                 >
                   <RefreshCw size={20} /> Manage Global Tax Settings
                 </button>
+                <button 
+                  className="btn bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 w-full justify-start gap-2 text-sm py-3 px-4 hover:bg-emerald-200 dark:hover:bg-emerald-500/20 border-none transition-all font-bold"
+                  onClick={() => setIsRegistrationModalOpen(true)}
+                >
+                  <ShieldCheck size={20} /> Registration Security
+                </button>
                 <button className="btn btn-primary w-full justify-start gap-2 text-sm py-3 px-4">
                   <Plus size={20} /> Provision Doctor Node
                 </button>
@@ -138,6 +146,11 @@ export default function AdminDashboard() {
         isOpen={isTaxModalOpen} 
         onClose={() => setIsTaxModalOpen(false)} 
         user={user} 
+      />
+      <RegistrationSettingsModal
+        isOpen={isRegistrationModalOpen}
+        onClose={() => setIsRegistrationModalOpen(false)}
+        user={user}
       />
     </div>
   );
