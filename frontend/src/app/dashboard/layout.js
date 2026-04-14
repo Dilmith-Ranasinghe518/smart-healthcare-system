@@ -121,17 +121,7 @@ export default function DashboardLayout({ children }) {
         </nav>
 
         <div className="pt-4 border-t border-slate-200  dark:border-white/5 flex flex-col gap-2">
-          {/* Theme Toggle */}
-          <div
-            className="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-slate-600  dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
-            onClick={toggleTheme}
-            title={isCollapsed ? (theme === 'dark' ? 'Light Mode' : 'Dark Mode') : ""}
-          >
-            <div className="flex-shrink-0">
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-            </div>
-            {!isCollapsed && <span className="animate-[fadeIn_0.2s_ease-out]">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>}
-          </div>
+         
 
           <div
             className="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-slate-600  dark:text-slate-400 hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 transition-all cursor-pointer"

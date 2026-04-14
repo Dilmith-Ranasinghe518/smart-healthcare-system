@@ -26,17 +26,17 @@ export default function RootLayout({ children }) {
               toastOptions={{
                 duration: 3500,
                 style: {
-                  background: 'var(--toast-bg, #1e293b)',
-                  color: 'var(--toast-color, #f8fafc)',
-                  borderRadius: '14px',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
-                  fontSize: '13px',
-                  padding: '12px 16px',
-                  maxWidth: '380px',
+                  background: "#1e293b",
+                  color: "#f8fafc",
+                  borderRadius: "14px",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
+                  fontSize: "13px",
+                  padding: "12px 16px",
+                  maxWidth: "380px",
                 },
-                success: { iconTheme: { primary: '#22c55e', secondary: '#fff' } },
-                error: { iconTheme: { primary: '#f43f5e', secondary: '#fff' } },
+                success: { iconTheme: { primary: "#22c55e", secondary: "#fff" } },
+                error: { iconTheme: { primary: "#f43f5e", secondary: "#fff" } },
               }}
             />
             <main className="main-content">
