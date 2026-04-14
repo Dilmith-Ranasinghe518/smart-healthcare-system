@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -232,19 +232,6 @@ export default function Register() {
               </button>
             </form>
           )}
-
-          <p className="text-center mt-6 text-slate-400 text-sm">
-            Already have an account?{" "}
-            <Link href="/login" className="text-emerald-400 font-semibold hover:underline">
-              Login here
-            </Link>
-          </p>
-        </div>
-      </div>
-      <Footer />
-    </div>
-  );
-}
 
           <p className="text-center mt-6 text-slate-400 text-sm">
             Already have an account?{" "}
