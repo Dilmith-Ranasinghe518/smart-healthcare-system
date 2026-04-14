@@ -111,7 +111,7 @@ export default function SettingsPage() {
     <div className="animate-[fadeIn_0.5s_ease-out] w-full max-w-2xl mx-auto">
       <header className="mb-8">
         <h2 className="text-4xl font-extrabold text-slate-800 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-white dark:to-slate-400 mb-1">
-          Account Settings [UPDATED]
+          Account Settings
         </h2>
         <p className="text-slate-600 dark:text-slate-400 text-sm">Update your profile parameters and security presets.</p>
       </header>
@@ -133,9 +133,9 @@ export default function SettingsPage() {
           <div className="relative w-24 h-24">
             <div className="w-24 h-24 rounded-full overflow-hidden bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-3xl font-bold border-2 border-slate-200 dark:border-white/10 transition-all duration-300">
               {imagePreview || user?.profilePicture ? (
-                <img 
-                  src={imagePreview || `${API_URL}${user.profilePicture}`} 
-                  alt="Profile" 
+                <img
+                  src={imagePreview || `${API_URL}${user.profilePicture}`}
+                  alt="Profile"
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -155,7 +155,7 @@ export default function SettingsPage() {
                 {user?.role} Account
               </span>
               {selectedImage && (
-                <button 
+                <button
                   onClick={handleUploadImage}
                   disabled={isUploadingImage}
                   className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center justify-center md:justify-start gap-1 transition-colors"
@@ -173,12 +173,12 @@ export default function SettingsPage() {
               <label className="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">Full Name</label>
               <div className="relative">
                 <User size={16} className="absolute left-3 top-3 text-slate-500" />
-                <input 
-                  type="text" 
-                  className="input-field pl-10 mb-0 text-sm" 
-                  value={name} 
-                  onChange={(e) => setName(e.target.value)} 
-                  required 
+                <input
+                  type="text"
+                  className="input-field pl-10 mb-0 text-sm"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
                 />
               </div>
             </div>
@@ -187,12 +187,12 @@ export default function SettingsPage() {
               <label className="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block font-medium">Email Address</label>
               <div className="relative">
                 <Mail size={16} className="absolute left-3 top-3 text-slate-500" />
-                <input 
-                  type="email" 
-                  className="input-field pl-10 mb-0 text-sm" 
-                  value={email} 
-                  onChange={(e) => setEmail(e.target.value)} 
-                  required 
+                <input
+                  type="email"
+                  className="input-field pl-10 mb-0 text-sm"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
               </div>
             </div>
@@ -202,20 +202,20 @@ export default function SettingsPage() {
             <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
               <Lock size={16} className="text-indigo-400" /> Security Preset
             </h4>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block">New Password</label>
                 <div className="relative">
-                  <input 
-                    type={showPassword ? "text" : "password"} 
-                    className="input-field mb-0 pr-10 text-sm" 
-                    placeholder="••••••••" 
-                    value={password} 
-                    onChange={(e) => setPassword(e.target.value)} 
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    className="input-field mb-0 pr-10 text-sm"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="absolute right-3 top-2.5 text-slate-500 hover:text-white transition-colors"
                     onClick={() => setShowPassword(!showPassword)}
                   >
@@ -227,15 +227,15 @@ export default function SettingsPage() {
               <div>
                 <label className="text-xs text-slate-600 dark:text-slate-400 mb-1.5 block">Confirm New Password</label>
                 <div className="relative">
-                  <input 
-                    type={showConfirmPassword ? "text" : "password"} 
-                    className="input-field mb-0 pr-10 text-sm" 
-                    placeholder="••••••••" 
-                    value={confirmPassword} 
-                    onChange={(e) => setConfirmPassword(e.target.value)} 
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    className="input-field mb-0 pr-10 text-sm"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                   />
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="absolute right-3 top-2.5 text-slate-500 hover:text-white transition-colors"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
@@ -247,8 +247,8 @@ export default function SettingsPage() {
             <p className="text-[11px] text-slate-500 mt-2">Leave blank if you don't intend to change your password.</p>
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="btn btn-primary w-full md:w-fit md:px-6 py-2.5 mt-2 text-sm justify-center gap-2"
             disabled={isSubmitting}
           >
