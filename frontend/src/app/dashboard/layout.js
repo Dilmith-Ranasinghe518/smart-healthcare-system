@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 
 import { API_URL } from '@/utils/api';
-import ActivityDetailModal from '@/components/ActivityDetailModal';
 import Footer from '@/components/Footer';
 
 export default function DashboardLayout({ children }) {
