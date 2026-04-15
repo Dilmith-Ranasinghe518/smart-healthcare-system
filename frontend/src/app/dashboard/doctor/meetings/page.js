@@ -1,9 +1,25 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Video, Plus, CheckCircle, AlertTriangle } from "lucide-react";
+import {
+  Video,
+  Plus,
+  AlertTriangle,
+  Sparkles,
+  ShieldCheck,
+  Radio,
+  PhoneCall,
+} from "lucide-react";
 import { API_URL } from "@/utils/api";
-import { StreamVideoClient, StreamVideo, StreamCall, SpeakerLayout, CallControls, StreamTheme } from "@stream-io/video-react-sdk";
+import {
+  StreamVideoClient,
+  StreamVideo,
+  StreamCall,
+  SpeakerLayout,
+  CallControls,
+  StreamTheme,
+} from "@stream-io/video-react-sdk";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 
@@ -22,48 +38,47 @@ export default function MeetingsPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      // 1. Fetch Appointment if ID is present to check status
       if (initialCallId) {
         fetch(`${API_URL}/appointments/${initialCallId}`, {
-          headers: { Authorization: `Bearer ${user.token}` }
+          headers: { Authorization: `Bearer ${user.token}` },
         })
-        .then(res => res.json())
-        .then(data => {
-          if (data.appointment) {
-            setAppointment(data.appointment);
-            // Doctor can always rejoin, even if status is COMPLETED
-          }
-        })
-        .catch(err => console.error("Error fetching appointment:", err));
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.appointment) {
+              setAppointment(data.appointment);
+            }
+          })
+          .catch((err) => console.error("Error fetching appointment:", err));
       }
 
-      // 2. Fetch Stream Token from Backend
       fetch(`${API_URL}/telemedicine/stream-token`, {
-        headers: { Authorization: `Bearer ${user.token}` }
+        headers: { Authorization: `Bearer ${user.token}` },
       })
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to authenticate stream");
-        return res.json();
-      })
-      .then(data => {
-        if (!data.token) throw new Error("Token generation failed");
-        
-        const videoClient = new StreamVideoClient({
-          apiKey: data.apiKey,
-          user: { 
-            id: user._id.toString(), 
-            name: user.name,
-            image: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.name)}` 
-          },
-          token: data.token
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to authenticate stream");
+          return res.json();
+        })
+        .then((data) => {
+          if (!data.token) throw new Error("Token generation failed");
+
+          const videoClient = new StreamVideoClient({
+            apiKey: data.apiKey,
+            user: {
+              id: user._id.toString(),
+              name: user.name,
+              image: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
+                user.name
+              )}`,
+            },
+            token: data.token,
+          });
+
+          setClient(videoClient);
+        })
+        .catch((err) => {
+          console.error("Stream initialization error:", err);
+          setError("Could not authorize video consultation access.");
         });
-        
-        setClient(videoClient);
-      })
-      .catch(err => {
-        console.error("Stream initialization error:", err);
-        setError("Could not authorize Video consult nodes.");
-      });
     }
 
     return () => {
@@ -71,7 +86,6 @@ export default function MeetingsPage() {
     };
   }, [user, loading]);
 
-  // Auto-join if callId is provided in URL
   useEffect(() => {
     if (client && initialCallId && !call) {
       joinCall(initialCallId);
@@ -80,8 +94,9 @@ export default function MeetingsPage() {
 
   const joinCall = async (id) => {
     if (!client || !id) return;
+
     try {
-      const activeCall = client.call('default', id);
+      const activeCall = client.call("default", id);
       await activeCall.join({ create: true });
       setCall(activeCall);
     } catch (err) {
@@ -91,22 +106,23 @@ export default function MeetingsPage() {
 
   const handleEndConsultation = async () => {
     if (!call || !user) return;
-    
-    const confirmEnd = window.confirm("Are you sure you want to end this consultation? This will disconnect the patient and mark the appointment as completed.");
+
+    const confirmEnd = window.confirm(
+      "Are you sure you want to end this consultation? This will disconnect the patient and mark the appointment as completed."
+    );
     if (!confirmEnd) return;
 
     setIsEnding(true);
+
     try {
-      // 1. End the call for everyone
       await call.endCall();
-      
-      // 2. Update status in database
+
       const res = await fetch(`${API_URL}/appointments/${initialCallId}/complete`, {
-        method: 'PATCH',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`
-        }
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
       });
 
       if (!res.ok) {
@@ -116,7 +132,7 @@ export default function MeetingsPage() {
 
       toast.success("Consultation ended successfully");
       setCall(null);
-      router.push('/dashboard/doctor/appointments');
+      router.push("/dashboard/doctor/appointments");
     } catch (err) {
       console.error("Error ending consultation:", err);
       toast.error(err.message || "Failed to end consultation");
@@ -131,73 +147,183 @@ export default function MeetingsPage() {
     joinCall(newId);
   };
 
-  if (loading || !user) return <div className="text-slate-600 dark:text-slate-400 p-10">Loading consultations...</div>;
+  if (loading || !user) {
+    return (
+      <div className="flex h-64 items-center justify-center text-slate-500">
+        Loading consultations...
+      </div>
+    );
+  }
 
   return (
-    <div className="animate-[fadeIn_0.5s_ease-out] w-full max-w-5xl mx-auto">
-      <header className="mb-8">
-        <h2 className="text-4xl font-extrabold text-slate-800 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-white dark:to-slate-400 mb-1">
-          Video Consultations
-        </h2>
-        <p className="text-slate-600 dark:text-slate-400 text-sm">Host or join HIPAA compliant stream consultation nodes.</p>
-      </header>
+    <div className="w-full animate-[fadeIn_0.5s_ease-out] pb-12">
+      <div className="mb-8 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <section className="relative overflow-hidden rounded-[32px] border border-[#74B49B]/15 bg-[linear-gradient(135deg,#ffffff_0%,#f8fbf9_45%,#eef7f4_100%)] p-8 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+          <div className="absolute -right-16 -top-10 h-40 w-40 rounded-full bg-[#74B49B]/10 blur-3xl" />
+          <div className="absolute bottom-0 left-0 h-36 w-36 rounded-full bg-[#BAC94A]/10 blur-3xl" />
 
-      {error && (
-        <div className="text-rose-400 mb-6 bg-rose-500/10 p-4 rounded-xl border border-rose-500/20 text-sm">
-          {error}
-        </div>
-      )}
+          <div className="relative z-10">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#74B49B]/20 bg-white/80 px-4 py-2 text-xs font-semibold text-[#5C8D7A] shadow-sm backdrop-blur-md">
+              <Sparkles size={14} />
+              Telemedicine Workspace
+            </div>
 
-      {client && !call && (
-        <div className="glass-panel p-6 flex flex-col gap-5 max-w-md mx-auto animate-[scaleIn_0.3s_ease-out]">
-          <h3 className="text-lg font-bold flex items-center gap-2 text-indigo-400">
-            <Video size={20} /> Telemedicine Portal
-          </h3>
-          
-          <button className="btn btn-primary w-full justify-center gap-2 py-3" onClick={createCall}>
-            <Plus size={18} /> Create Instant Meeting
-          </button>
-          
-          <div className="flex items-center gap-2 text-xs text-slate-500 my-1 justify-center">
-            <div className="h-px bg-white/5 flex-1" />
-            <span>OR JOIN BY ID</span>
-            <div className="h-px bg-white/5 flex-1" />
+            <h1 className="text-3xl font-black tracking-tight text-slate-800 md:text-5xl">
+              Video Consultations
+            </h1>
+
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 md:text-base">
+              Host or join secure consultation sessions for remote patient care and
+              follow-up appointments.
+            </p>
+
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white/60 bg-white/80 p-4 shadow-sm">
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EAF7F1] text-[#2F8F68]">
+                  <Video size={20} />
+                </div>
+                <p className="text-sm font-bold text-slate-800">Virtual Care</p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  Meet patients remotely through live video sessions.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-white/60 bg-white/80 p-4 shadow-sm">
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F3F7E8] text-[#7C9440]">
+                  <ShieldCheck size={20} />
+                </div>
+                <p className="text-sm font-bold text-slate-800">Secure Access</p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  Use authenticated video nodes for protected consultations.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-white/60 bg-white/80 p-4 shadow-sm">
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EAF3F8] text-[#4F7EA8]">
+                  <Radio size={20} />
+                </div>
+                <p className="text-sm font-bold text-slate-800">Live Sessions</p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  Start, join, and control active consultation rooms.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_20px_50px_rgba(15,23,42,0.06)]">
+          <div className="mb-5 flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F1F7F4] text-[#5C8D7A]">
+              <PhoneCall size={24} />
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-slate-800">Session Access</h2>
+              <p className="text-xs text-slate-500">Create or join your meeting room</p>
+            </div>
           </div>
 
-          <div className="flex gap-2">
-            <input 
-              type="text" 
-              className="input-field mb-0 text-sm flex-1" 
-              placeholder="Enter Call ID"
-              value={callId}
-              onChange={(e) => setCallId(e.target.value)}
-            />
-            <button className="btn btn-secondary text-sm px-4" onClick={() => joinCall(callId)}>
-              Join
-            </button>
-          </div>
-        </div>
-      )}
+          {error && (
+            <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-600">
+              {error}
+            </div>
+          )}
+
+          {client && !call && (
+            <div className="space-y-4">
+              <button
+                className="w-full rounded-2xl bg-gradient-to-r from-[#5AA7A7] to-[#74B49B] px-5 py-3.5 text-sm font-bold text-white shadow-[0_14px_30px_rgba(92,141,122,0.24)] transition hover:-translate-y-0.5"
+                onClick={createCall}
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <Plus size={18} /> Create Instant Meeting
+                </span>
+              </button>
+
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <div className="h-px flex-1 bg-slate-200" />
+                <span>Or join by ID</span>
+                <div className="h-px flex-1 bg-slate-200" />
+              </div>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#74B49B] focus:ring-4 focus:ring-[#74B49B]/10"
+                  placeholder="Enter Call ID"
+                  value={callId}
+                  onChange={(e) => setCallId(e.target.value)}
+                />
+                <button
+                  className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-100"
+                  onClick={() => joinCall(callId)}
+                >
+                  Join
+                </button>
+              </div>
+
+              {appointment && (
+                <div className="rounded-2xl bg-[#F8FBF9] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Linked Appointment
+                  </p>
+                  <p className="mt-1 text-sm font-bold text-slate-800">
+                    Consultation session available
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {!client && !error && (
+            <div className="rounded-2xl bg-[#F8FBF9] p-5 text-sm text-slate-500">
+              Authorizing secure video access...
+            </div>
+          )}
+        </section>
+      </div>
 
       {client && call && (
-        <div className="rounded-2xl overflow-hidden shadow-2xl bg-slate-950 border border-slate-200 dark:border-white/5 animate-[scaleIn_0.3s_ease-out] h-[600px] w-full flex flex-col relative">
-          <StreamVideo client={client}>
-            <StreamCall call={call}>
-              <StreamTheme>
-                <SpeakerLayout />
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center gap-4">
-                  <CallControls onLeave={() => setCall(null)} />
-                  <button 
-                    onClick={handleEndConsultation}
-                    disabled={isEnding}
-                    className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg transition-all flex items-center gap-2"
-                  >
-                    {isEnding ? "Ending..." : "End Consultation"}
-                  </button>
-                </div>
-              </StreamTheme>
-            </StreamCall>
-          </StreamVideo>
+        <div className="overflow-hidden rounded-[32px] border border-slate-200 bg-white p-4 shadow-[0_20px_50px_rgba(15,23,42,0.06)]">
+          <div className="mb-4 flex items-center justify-between gap-4 rounded-2xl bg-[linear-gradient(135deg,#f8fbf9_0%,#eef7f4_100%)] px-5 py-4">
+            <div>
+              <h3 className="text-lg font-black text-slate-800">Active Consultation</h3>
+              <p className="text-sm text-slate-500">
+                Live doctor-patient session is currently connected
+              </p>
+            </div>
+
+            <button
+              onClick={handleEndConsultation}
+              disabled={isEnding}
+              className="rounded-2xl bg-rose-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-rose-700 disabled:opacity-70"
+            >
+              {isEnding ? "Ending..." : "End Consultation"}
+            </button>
+          </div>
+
+          <div className="relative flex h-[680px] w-full flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-slate-950">
+            <StreamVideo client={client}>
+              <StreamCall call={call}>
+                <StreamTheme>
+                  <SpeakerLayout />
+                  <div className="absolute bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4">
+                    <CallControls onLeave={() => setCall(null)} />
+                  </div>
+                </StreamTheme>
+              </StreamCall>
+            </StreamVideo>
+          </div>
+        </div>
+      )}
+
+      {!client && error && (
+        <div className="rounded-[28px] border border-rose-200 bg-rose-50 p-8 text-center shadow-sm">
+          <AlertTriangle size={34} className="mx-auto mb-3 text-rose-500" />
+          <h3 className="text-lg font-black text-rose-700">Video Access Failed</h3>
+          <p className="mx-auto mt-2 max-w-md text-sm text-rose-600">
+            The system could not initialize your video consultation session. Please
+            refresh the page or try again later.
+          </p>
         </div>
       )}
     </div>

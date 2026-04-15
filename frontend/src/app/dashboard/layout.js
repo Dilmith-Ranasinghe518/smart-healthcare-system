@@ -8,7 +8,7 @@ import Link from 'next/link';
 import {
   Heart, Calendar, User, LogOut, Settings,
   Activity, ShieldCheck, ClipboardList, Users, Menu, X, Video,
-  Sun, Moon, ChevronLeft, ChevronRight, Building2, Search, CreditCard, Undo
+  ChevronLeft, ChevronRight, Building2, Search, CreditCard, Undo
 } from 'lucide-react';
 
 import { API_URL } from '@/utils/api';
@@ -16,7 +16,7 @@ import Footer from '@/components/Footer';
 
 export default function DashboardLayout({ children }) {
   const { user, logout, loading } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const [currentTime, setCurrentTime] = useState(null);
@@ -26,6 +26,7 @@ export default function DashboardLayout({ children }) {
     const interval = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -34,13 +35,12 @@ export default function DashboardLayout({ children }) {
     if (!loading && !user) {
       router.push('/login');
     }
-    // Close sidebar on page change for mobile
     setIsSidebarOpen(false);
   }, [user, loading, router, pathname]);
 
   if (loading || !user) {
     return (
-      <div className="flex items-center justify-center h-screen bg-slate-950 text-slate-600 dark:text-slate-400">
+      <div className="flex items-center justify-center h-screen bg-[#F5FBF7] text-slate-600">
         <div className="text-lg">Loading session...</div>
       </div>
     );
@@ -77,54 +77,68 @@ export default function DashboardLayout({ children }) {
   const menu = roleMenus[user.role] || [];
 
   return (
-    <div className="flex min-h-screen w-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white relative transition-colors duration-300">
-      {/* Mobile Backdrop Overlay */}
+    <div className="flex min-h-screen w-screen bg-[#F6FAF8] text-slate-900 relative transition-colors duration-300">
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-[fadeIn_0.2s_ease-out]"
+          className="fixed inset-0 bg-black/35 backdrop-blur-sm z-40 md:hidden animate-[fadeIn_0.2s_ease-out]"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar Navigation */}
-      <aside className={`fixed md:sticky top-0 h-screen z-50 bg-white dark:bg-slate-900 border-r border-slate-200  dark:border-white/5 flex flex-col p-6 transition-all duration-300 ease-in-out md:translate-x-0 ${isCollapsed ? 'w-20 p-4' : 'w-64'
-        } ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex items-center justify-between pb-6 border-b border-slate-200  dark:border-white/5 mb-6">
-          <Link href="/" className={`flex items-center transition-all duration-200 ${isCollapsed ? 'justify-center' : ''}`}>
+      <aside
+        className={`fixed md:sticky top-0 h-screen z-50 bg-[#EEF7F1] border-r border-[#D7EBDD] flex flex-col transition-all duration-300 ease-in-out shadow-[8px_0_30px_rgba(116,180,155,0.08)] md:translate-x-0 ${
+          isCollapsed ? 'w-20 p-4' : 'w-64 p-6'
+        } ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      >
+        <div className="flex items-center justify-between pb-6 border-b border-[#D7EBDD] mb-6">
+          <Link
+            href="/"
+            className={`flex items-center transition-all duration-200 ${isCollapsed ? 'justify-center' : ''}`}
+          >
             <div className={`${isCollapsed ? 'w-10 h-10' : 'h-12 w-auto'} overflow-hidden`}>
-              <img src="/logo.png" alt="MediSync" className={`h-full w-auto object-contain ${isCollapsed ? 'object-left' : ''}`} />
+              <img
+                src="/logo.png"
+                alt="MediSync"
+                className={`h-full w-auto object-contain ${isCollapsed ? 'object-left' : ''}`}
+              />
             </div>
           </Link>
-          <button className="md:hidden text-slate-600 dark:text-slate-400 hover:text-white" onClick={() => setIsSidebarOpen(false)}>
+
+          <button
+            className="md:hidden text-[#5C8D7A] hover:text-[#2F8F68]"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <X size={20} />
           </button>
         </div>
 
-        <nav className="flex-1 flex flex-col gap-1">
+        <nav className="flex-1 flex flex-col gap-1.5">
           {menu.map((item, idx) => {
             const isActive = pathname === item.path;
+
             return (
               <Link
                 key={idx}
                 href={item.path}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 cursor-pointer ${isActive
-                  ? 'bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 border-l-2 border-indigo-500'
-                  : 'text-slate-600  dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
-                  } ${isCollapsed ? 'justify-center px-2' : ''}`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all duration-200 cursor-pointer ${
+                  isActive
+                    ? 'bg-[#DDF2E8] text-[#2F8F68] border border-[#BFE3CC] shadow-sm'
+                    : 'text-[#5F6F68] hover:bg-[#E4F3EA] hover:text-[#2F8F68]'
+                } ${isCollapsed ? 'justify-center px-2' : ''}`}
                 title={isCollapsed ? item.name : ""}
               >
                 <div className="flex-shrink-0">{item.icon}</div>
-                {!isCollapsed && <span className="animate-[fadeIn_0.2s_ease-out]">{item.name}</span>}
+                {!isCollapsed && (
+                  <span className="animate-[fadeIn_0.2s_ease-out]">{item.name}</span>
+                )}
               </Link>
             );
           })}
         </nav>
 
-        <div className="pt-4 border-t border-slate-200  dark:border-white/5 flex flex-col gap-2">
-         
-
+        <div className="pt-4 border-t border-[#D7EBDD] flex flex-col gap-2">
           <div
-            className="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-slate-600  dark:text-slate-400 hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 transition-all cursor-pointer"
+            className="flex items-center gap-3 px-4 py-3 rounded-2xl font-medium text-[#5F6F68] hover:bg-rose-50 hover:text-rose-600 transition-all cursor-pointer"
             onClick={() => setShowLogoutConfirm(true)}
             title={isCollapsed ? "Logout" : ""}
           >
@@ -132,20 +146,17 @@ export default function DashboardLayout({ children }) {
             {!isCollapsed && <span className="animate-[fadeIn_0.2s_ease-out]">Logout</span>}
           </div>
 
-          {/* Collapse Toggle desktop only */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden md:flex items-center justify-center p-2 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 mt-1 text-slate-500  dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all duration-200"
+            className="hidden md:flex items-center justify-center p-2 rounded-2xl bg-[#DDF2E8] hover:bg-[#CFE9DB] mt-1 text-[#5C8D7A] hover:text-[#2F8F68] transition-all duration-200"
           >
             {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>
         </div>
       </aside>
 
-      {/* Main Content Pane */}
-      <main className="flex-1 overflow-y-auto bg-[radial-gradient(circle_at_top_right,rgba(79,70,229,0.05),transparent_30%)] flex flex-col bg-slate-50 dark:bg-slate-950">
-        {/* Top Navbar Header */}
-        <header className="flex items-center justify-between p-4 md:px-10 md:py-5 border-b border-slate-200  dark:border-white/5 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md z-30 w-full">
+      <main className="flex-1 overflow-y-auto flex flex-col bg-[#F6FAF8]">
+        <header className="flex items-center justify-between p-4 md:px-10 md:py-5 border-b border-[#E3EEE7] sticky top-0 bg-white/85 backdrop-blur-md z-30 w-full">
           <Link href="/" className="flex items-center md:hidden">
             <div className="h-16 w-auto overflow-hidden">
               <img src="/logo.png" alt="MediSync" className="h-full w-auto object-contain" />
@@ -154,36 +165,49 @@ export default function DashboardLayout({ children }) {
 
           <div className="hidden md:block">
             <span className="text-xs uppercase tracking-wider text-slate-500 font-semibold">
-              <Link href="/" className="hover:text-slate-300 transition-all">Home</Link> / <span className="text-slate-800 dark:text-slate-200 capitalize">{pathname.split('/').pop() || 'Overview'}</span>
+              <Link href="/" className="hover:text-slate-700 transition-all">Home</Link> /{' '}
+              <span className="text-slate-800 capitalize">
+                {pathname.split('/').pop() || 'Overview'}
+              </span>
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Live Clock Component */}
             {currentTime && (
-              <div className="hidden md:flex items-center gap-2 bg-slate-100 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-400 font-semibold text-xs transition-all duration-300">
+              <div className="hidden md:flex items-center gap-2 bg-[#F3F8F5] px-3 py-1.5 rounded-xl border border-[#DDE8E1] text-slate-600 font-semibold text-xs transition-all duration-300">
                 <span className="opacity-80">
-                  {currentTime.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                  {currentTime.toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
                 </span>
                 <span className="w-1 h-1 rounded-full bg-slate-400 opacity-60"></span>
-                <span className="tabular-nums text-indigo-600 dark:text-indigo-400">
-                  {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                <span className="tabular-nums text-[#4F7EA8]">
+                  {currentTime.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                  })}
                 </span>
               </div>
             )}
 
-            <div className="hidden md:flex items-center gap-2 bg-slate-100 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-slate-200  dark:border-white/5">
-              <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-500 dark:text-indigo-400 font-bold text-xs uppercase overflow-hidden border border-slate-200 dark:border-white/10">
+            <div className="hidden md:flex items-center gap-2 bg-[#F3F8F5] px-3 py-1.5 rounded-xl border border-[#DDE8E1]">
+              <div className="w-8 h-8 rounded-full bg-[#EAF3F8] flex items-center justify-center text-[#4F7EA8] font-bold text-xs uppercase overflow-hidden border border-[#DDE8E1]">
                 {user?.profilePicture ? (
                   <img src={`${API_URL}${user.profilePicture}`} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
                   user?.name[0]
                 )}
               </div>
-              <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{user.name}</span>
+              <span className="text-sm font-medium text-slate-800">{user.name}</span>
             </div>
 
-            <button className="md:hidden p-2 bg-slate-800 rounded-lg text-slate-800 dark:text-slate-100" onClick={() => setIsSidebarOpen(true)}>
+            <button
+              className="md:hidden p-2 bg-[#EAF7F1] rounded-lg text-[#2F8F68]"
+              onClick={() => setIsSidebarOpen(true)}
+            >
               <Menu size={20} />
             </button>
           </div>
@@ -192,31 +216,38 @@ export default function DashboardLayout({ children }) {
         <div className="flex-1 p-6 md:p-10">
           {children}
         </div>
+
         <Footer />
       </main>
 
-      {/* Logout Confirmation Modal Overlay */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-[fadeIn_0.2s_ease-out]">
-          <div className="glass-panel w-full max-w-sm p-6 text-center flex flex-col items-center gap-4 bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shadow-2xl">
-            <div className="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-500">
+        <div className="fixed inset-0 bg-black/35 backdrop-blur-sm z-50 flex items-center justify-center animate-[fadeIn_0.2s_ease-out]">
+          <div className="w-full max-w-sm p-6 text-center flex flex-col items-center gap-4 bg-white border border-slate-200 rounded-[28px] shadow-2xl">
+            <div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
               <LogOut size={22} className="relative left-0.5" />
             </div>
+
             <div>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1">Ending Session</h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm">Are you sure you want to log out from the dashboard?</p>
+              <h3 className="text-lg font-bold text-slate-800 mb-1">Ending Session</h3>
+              <p className="text-slate-500 text-sm">
+                Are you sure you want to log out from the dashboard?
+              </p>
             </div>
 
             <div className="flex gap-3 w-full mt-2">
               <button
-                className="btn btn-secondary flex-1 text-xs py-2.5 px-0"
+                className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
                 onClick={() => setShowLogoutConfirm(false)}
               >
                 Cancel
               </button>
+
               <button
-                className="btn btn-primary flex-1 bg-gradient-to-r from-rose-600 to-rose-500 shadow-[0_4px_14px_0_rgba(244,63,94,0.3)] text-xs py-2.5 px-0"
-                onClick={() => { logout(); router.push('/login'); }}
+                className="flex-1 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-500 px-4 py-3 text-xs font-semibold text-white shadow-lg hover:-translate-y-0.5 transition"
+                onClick={() => {
+                  logout();
+                  router.push('/login');
+                }}
               >
                 Logout
               </button>
