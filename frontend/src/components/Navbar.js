@@ -142,7 +142,7 @@ export default function Navbar() {
       </div>
     </header>
 
-    {/* Mobile Bottom Sheet (Moved outside header for stacking context) */}
+    {/* Mobile Side Drawer (Moved outside header for stacking context) */}
     <>
       {/* Mobile Drawer Backdrop */}
       {isOpen && (
@@ -152,52 +152,55 @@ export default function Navbar() {
         />
       )}
 
-      {/* Mobile Bottom Sheet Content */}
+      {/* Mobile Side Drawer Content */}
       <div
-        className={`fixed bottom-0 left-0 right-0 z-[999] w-full bg-white transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] md:hidden shadow-[0_-30px_70px_rgba(0,0,0,0.2)] flex flex-col rounded-t-[40px] border-t border-slate-100 ${
-          isOpen ? "translate-y-0" : "translate-y-full"
+        className={`fixed top-0 right-0 z-[999] h-screen w-[280px] bg-white transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] md:hidden shadow-[-20px_0_60px_rgba(0,0,0,0.15)] flex flex-col ${
+          isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex flex-col max-h-[85vh] overflow-hidden">
-          {/* Sheet Handle */}
-          <div className="flex flex-col items-center pt-3 pb-2 shrink-0" onClick={() => setIsOpen(false)}>
-            <div className="w-12 h-1.5 bg-slate-200 rounded-full mb-4" />
-          </div>
-
-          <div className="flex items-center justify-between px-8 pb-4 border-b border-slate-50 shrink-0">
-             <h3 className="text-xl font-black text-slate-800">Menu</h3>
+        <div className="flex flex-col h-full overflow-hidden">
+          {/* Drawer Header */}
+          <div className="flex items-center justify-between p-6 border-b border-slate-50 shrink-0">
+             <div className="flex items-center gap-3">
+               <div className="p-2 bg-[#EEF7F1] rounded-lg">
+                 <Activity size={20} className="text-[#2F8F68]" />
+               </div>
+               <h3 className="text-lg font-black text-slate-800">MediSync</h3>
+             </div>
              <button
                onClick={() => setIsOpen(false)}
-               className="p-2 bg-slate-100 text-slate-400 hover:text-slate-600 rounded-full"
+               className="p-2 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-full"
              >
                <X size={20} />
              </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-6 py-6 space-y-2">
+          <div className="flex-1 overflow-y-auto px-4 py-8 space-y-2">
+            <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Navigation</p>
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsOpen(false)}
-                className="flex items-center justify-between p-4 rounded-2xl text-base font-bold text-slate-700 bg-slate-50 hover:bg-[#F0F7F4] hover:text-[#2F8F68] transition-all"
+                className="flex items-center justify-between p-4 rounded-2xl text-base font-bold text-slate-700 hover:bg-[#F0F7F4] hover:text-[#2F8F68] transition-all group"
               >
                 <div className="flex items-center gap-4">
-                   <div className="text-slate-400">
+                   <div className="text-slate-400 group-hover:text-[#2F8F68] transition-colors">
                      {link.icon}
                    </div>
                    {link.name}
                 </div>
-                <ChevronRight size={18} className="text-slate-300" />
+                <ChevronRight size={18} className="text-slate-300 group-hover:translate-x-1 transition-all" />
               </Link>
             ))}
 
-            <div className="mt-4 pt-4 border-t border-slate-100">
+            <div className="mt-8 pt-8 border-t border-slate-100">
+               <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Workspace</p>
                {user ? (
                  <Link
                    href={`/dashboard/${user.role}`}
                    onClick={() => setIsOpen(false)}
-                   className="flex items-center gap-4 p-5 rounded-3xl bg-[#EAF7F1] border border-[#D7EBDD]"
+                   className="flex items-center gap-4 p-4 rounded-3xl bg-[#EAF7F1] border border-[#D7EBDD]"
                  >
                    <div className="w-12 h-12 rounded-full bg-[#6C8CBF] flex items-center justify-center text-white text-xs font-bold uppercase overflow-hidden border-2 border-white shadow-sm shrink-0">
                      {user?.profilePicture ? (
@@ -207,12 +210,12 @@ export default function Navbar() {
                      )}
                    </div>
                    <div className="flex-1">
-                      <p className="text-sm font-black text-slate-800">Personal Dashboard</p>
-                      <p className="text-xs text-[#2F8F68] font-bold">Access {user.role} workspace</p>
+                      <p className="text-sm font-black text-slate-800 truncate">{user.name}</p>
+                      <p className="text-[10px] text-[#2F8F68] font-bold uppercase">Dashboard Access</p>
                    </div>
                  </Link>
                ) : (
-                 <div className="grid grid-cols-2 gap-4">
+                 <div className="flex flex-col gap-3">
                     <Link
                       href="/login"
                       onClick={() => setIsOpen(false)}
@@ -225,18 +228,20 @@ export default function Navbar() {
                       onClick={() => setIsOpen(false)}
                       className="flex items-center justify-center p-5 rounded-3xl bg-[#5AA7A7] text-white text-sm font-black shadow-lg"
                     >
-                      Join Now
+                      Sign Up Free
                     </Link>
                  </div>
                )}
             </div>
           </div>
 
-          <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 shrink-0 pb-safe">
-             <p className="text-[10px] text-slate-400 text-center uppercase tracking-widest font-bold opacity-60">MediSync Platform • 2026</p>
+          <div className="px-6 py-6 bg-slate-50 border-t border-slate-100 shrink-0 pb-safe">
+             <p className="text-[10px] text-slate-400 text-center uppercase tracking-widest font-black opacity-30 italic">Connected Health Solutions</p>
           </div>
         </div>
       </div>
     </>
   );
+}
+
 }
