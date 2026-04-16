@@ -8,7 +8,8 @@ import Link from 'next/link';
 import {
   Heart, Calendar, User, LogOut, Settings,
   Activity, ShieldCheck, ClipboardList, Users, Menu, X, Video,
-  ChevronLeft, ChevronRight, Building2, Search, CreditCard, Undo
+  ChevronLeft, ChevronRight, Building2, Search, CreditCard, Undo,
+  Zap, CalendarPlus, SearchIcon, Scan, FileText, UserCircle, BarChart3, Plus
 } from 'lucide-react';
 
 import { API_URL } from '@/utils/api';
@@ -28,6 +29,7 @@ export default function DashboardLayout({ children }) {
   }, []);
 
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isQuickActionsOpen, setIsQuickActionsOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
@@ -35,6 +37,18 @@ export default function DashboardLayout({ children }) {
       router.push('/login');
     }
   }, [user, loading, router, pathname]);
+
+  // Prevent scrolling when quick actions are open
+  useEffect(() => {
+    if (isQuickActionsOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isQuickActionsOpen]);
 
   if (loading || !user) {
     return (
@@ -73,10 +87,26 @@ export default function DashboardLayout({ children }) {
     ]
   };
 
+  const quickActions = {
+    user: [
+      { name: 'Book Appointment', icon: <CalendarPlus size={20} />, path: '/dashboard/user/find-doctors', color: 'bg-emerald-50 text-emerald-600' },
+      { name: 'Find Doctors', icon: <SearchIcon size={20} />, path: '/dashboard/user/find-doctors', color: 'bg-blue-50 text-blue-600' },
+      { name: 'Scan Prescription', icon: <Scan size={20} />, path: '/dashboard/user/prescription', color: 'bg-purple-50 text-purple-600' },
+      { name: 'Medical Records', icon: <FileText size={20} />, path: '/dashboard/user', color: 'bg-amber-50 text-amber-600' },
+    ],
+    doctor: [
+      { name: 'Start Meeting', icon: <Video size={20} />, path: '/dashboard/doctor/meetings', color: 'bg-emerald-50 text-emerald-600' },
+      { name: 'Patient Lookup', icon: <Users size={20} />, path: '/dashboard/doctor/patients', color: 'bg-blue-50 text-blue-600' },
+      { name: 'Today\'s Schedule', icon: <Calendar size={20} />, path: '/dashboard/doctor/appointments', color: 'bg-purple-50 text-purple-600' },
+      { name: 'View Profile', icon: <UserCircle size={20} />, path: '/dashboard/doctor/profile', color: 'bg-amber-50 text-amber-600' },
+    ]
+  };
+
   const menu = roleMenus[user.role] || [];
+  const actions = quickActions[user.role] || [];
 
   return (
-    <div className="flex min-h-screen w-screen bg-[#F6FAF8] text-slate-900 relative transition-colors duration-300">
+    <div className="flex h-screen w-screen bg-[#F6FAF8] text-slate-900 relative transition-colors duration-300 overflow-hidden">
 
       <aside
         className={`hidden md:flex fixed md:sticky top-0 h-screen z-50 bg-[#EEF7F1] border-r border-[#D7EBDD] flex-col transition-all duration-300 ease-in-out shadow-[8px_0_30px_rgba(116,180,155,0.08)] ${
@@ -189,6 +219,16 @@ export default function DashboardLayout({ children }) {
               </div>
               <span className="text-sm font-medium text-slate-800">{user.name}</span>
             </div>
+
+            {/* Mobile Quick Action Trigger */}
+            {(user.role === 'user' || user.role === 'doctor') && (
+              <button
+                onClick={() => setIsQuickActionsOpen(true)}
+                className="md:hidden p-2 bg-[#EEF7F1] text-[#2F8F68] rounded-xl active:scale-95 transition-all shadow-sm"
+              >
+                <Zap size={22} fill="currentColor" className="opacity-80" />
+              </button>
+            )}
           </div>
         </header>
 
@@ -225,41 +265,52 @@ export default function DashboardLayout({ children }) {
         })}
       </nav>
 
-      {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black/35 backdrop-blur-sm z-50 flex items-center justify-center animate-[fadeIn_0.2s_ease-out]">
-          <div className="w-full max-w-sm p-6 text-center flex flex-col items-center gap-4 bg-white border border-slate-200 rounded-[28px] shadow-2xl">
-            <div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
-              <LogOut size={22} className="relative left-0.5" />
-            </div>
-
-            <div>
-              <h3 className="text-lg font-bold text-slate-800 mb-1">Ending Session</h3>
-              <p className="text-slate-500 text-sm">
-                Are you sure you want to log out from the dashboard?
-              </p>
-            </div>
-
-            <div className="flex gap-3 w-full mt-2">
-              <button
-                className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
-                onClick={() => setShowLogoutConfirm(false)}
-              >
-                Cancel
-              </button>
-
-              <button
-                className="flex-1 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-500 px-4 py-3 text-xs font-semibold text-white shadow-lg hover:-translate-y-0.5 transition"
-                onClick={() => {
-                  logout();
-                  router.push('/login');
-                }}
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Mobile Quick Actions Side Drawer */}
+      {isQuickActionsOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[110] md:hidden"
+          onClick={() => setIsQuickActionsOpen(false)}
+        />
       )}
+
+      <div
+        className={`fixed top-0 right-0 h-full w-[280px] bg-white z-[120] md:hidden transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col shadow-[-20px_0_60px_rgba(0,0,0,0.1)] ${
+          isQuickActionsOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="p-6 border-b border-slate-50 flex items-center justify-between">
+           <div>
+              <h3 className="font-black text-slate-800">Quick Actions</h3>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{user.role} workspace</p>
+           </div>
+           <button
+             onClick={() => setIsQuickActionsOpen(false)}
+             className="p-2 bg-slate-50 text-slate-400 rounded-full"
+           >
+             <X size={20} />
+           </button>
+        </div>
+
+        <div className="flex-1 p-6 space-y-3">
+          {actions.map((action, idx) => (
+             <Link
+               key={idx}
+               href={action.path}
+               onClick={() => setIsQuickActionsOpen(false)}
+               className="flex items-center gap-4 p-4 rounded-2xl bg-[#F8FBF9] hover:bg-[#EEF7F1] border border-[#ECF4F0] transition-all group"
+             >
+                <div className={`p-2.5 rounded-xl ${action.color} group-hover:scale-110 transition-transform`}>
+                   {action.icon}
+                </div>
+                <span className="font-bold text-slate-700 text-sm">{action.name}</span>
+             </Link>
+          ))}
+        </div>
+
+        <div className="p-6 bg-slate-50 border-t border-slate-100 italic">
+           <p className="text-[10px] text-slate-400 text-center uppercase tracking-widest font-black opacity-40">Powered by MediSync AI</p>
+        </div>
+      </div>
     </div>
   );
 }
