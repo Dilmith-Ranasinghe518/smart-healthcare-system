@@ -37,113 +37,110 @@ export default function Navbar() {
   }, [isOpen]);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[#96D7C6]/40 bg-white/90 backdrop-blur-xl shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <nav className="flex items-center justify-between h-20">
-          <Link href="/" className="flex items-center">
-            <div className="h-16 w-auto overflow-hidden">
-              <img
-                src="/logo.png"
-                alt="MediSync Logo"
-                className="h-full w-auto object-contain"
-              />
-            </div>
-          </Link>
-
-          <div className="hidden md:flex items-center gap-8">
-            <Link
-              href="/"
-              className="text-sm font-medium text-slate-700 hover:text-[#5AA7A7] transition-colors"
-            >
-              Home
-            </Link>
-            <Link
-              href="/doctors"
-              className="text-sm font-medium text-slate-700 hover:text-[#5AA7A7] transition-colors"
-            >
-              Find Doctors
-            </Link>
-            <Link
-              href="#services"
-              className="text-sm font-medium text-slate-700 hover:text-[#5AA7A7] transition-colors"
-            >
-              Services
-            </Link>
-            <Link
-              href="#features"
-              className="text-sm font-medium text-slate-700 hover:text-[#BAC94A] transition-colors"
-            >
-              Features
-            </Link>
-            <Link
-              href="#roles"
-              className="text-sm font-medium text-slate-700 hover:text-[#6C8CBF] transition-colors"
-            >
-              Roles
-            </Link>
-            <Link
-              href="#contact"
-              className="text-sm font-medium text-slate-700 hover:text-[#E2D36B] transition-colors"
-            >
-              Contact
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {loading ? (
-              <div className="text-sm text-slate-500">Loading...</div>
-            ) : user ? (
-              <Link
-                href={`/dashboard/${user.role}`}
-                className="hidden sm:flex items-center gap-3 px-4 py-2.5 rounded-xl border border-[#96D7C6]/40 bg-[#96D7C6]/20 hover:bg-[#96D7C6]/30 transition-all"
-              >
-                <div className="w-8 h-8 rounded-full bg-[#6C8CBF] flex items-center justify-center text-white text-xs font-bold uppercase overflow-hidden border border-white/20">
-                  {user?.profilePicture ? (
-                    <img
-                      src={`${API_URL}${user.profilePicture}`}
-                      alt="Avatar"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    user?.name?.[0] || "U"
-                  )}
-                </div>
-                <span className="text-sm font-semibold text-slate-800">
-                  {user.name}
-                </span>
-              </Link>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/login"
-                  className="hidden sm:inline-flex px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-all"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/register"
-                  className="inline-flex px-5 py-2.5 rounded-xl bg-[#5AA7A7] hover:bg-[#4c9999] text-white text-sm font-semibold shadow-lg shadow-[#5AA7A7]/30 transition-all"
-                >
-                  Get Started
-                </Link>
-              </div>
-            )}
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="p-2 md:hidden text-slate-600 hover:bg-slate-100 rounded-xl transition-all"
-            >
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-          </div>
-        </nav>
-      </div>
-    </header>
-
-    {/* Mobile Side Drawer (Moved outside header for stacking context) */}
     <>
+      <header className="sticky top-0 z-50 w-full border-b border-[#96D7C6]/40 bg-white/90 backdrop-blur-xl shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <nav className="flex items-center justify-between h-20">
+            <Link href="/" className="flex items-center">
+              <div className="h-16 w-auto overflow-hidden">
+                <img
+                  src="/logo.png"
+                  alt="MediSync Logo"
+                  className="h-full w-auto object-contain"
+                />
+              </div>
+            </Link>
+
+            <div className="hidden md:flex items-center gap-8">
+              <Link
+                href="/"
+                className="text-sm font-medium text-slate-700 hover:text-[#5AA7A7] transition-colors"
+              >
+                Home
+              </Link>
+              <Link
+                href="/doctors"
+                className="text-sm font-medium text-slate-700 hover:text-[#5AA7A7] transition-colors"
+              >
+                Find Doctors
+              </Link>
+              <Link
+                href="#services"
+                className="text-sm font-medium text-slate-700 hover:text-[#5AA7A7] transition-colors"
+              >
+                Services
+              </Link>
+              <Link
+                href="#features"
+                className="text-sm font-medium text-slate-700 hover:text-[#BAC94A] transition-colors"
+              >
+                Features
+              </Link>
+              <Link
+                href="#roles"
+                className="text-sm font-medium text-slate-700 hover:text-[#6C8CBF] transition-colors"
+              >
+                Roles
+              </Link>
+              <Link
+                href="#contact"
+                className="text-sm font-medium text-slate-700 hover:text-[#E2D36B] transition-colors"
+              >
+                Contact
+              </Link>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {loading ? (
+                <div className="text-sm text-slate-500">Loading...</div>
+              ) : user ? (
+                <Link
+                  href={`/dashboard/${user.role}`}
+                  className="hidden sm:flex items-center gap-3 px-4 py-2.5 rounded-xl border border-[#96D7C6]/40 bg-[#96D7C6]/20 hover:bg-[#96D7C6]/30 transition-all"
+                >
+                  <div className="w-8 h-8 rounded-full bg-[#6C8CBF] flex items-center justify-center text-white text-xs font-bold uppercase overflow-hidden border border-white/20">
+                    {user?.profilePicture ? (
+                      <img
+                        src={`${API_URL}${user.profilePicture}`}
+                        alt="Avatar"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      user?.name?.[0] || "U"
+                    )}
+                  </div>
+                  <span className="text-sm font-semibold text-slate-800">
+                    {user.name}
+                  </span>
+                </Link>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/login"
+                    className="hidden sm:inline-flex px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-all"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="inline-flex px-5 py-2.5 rounded-xl bg-[#5AA7A7] hover:bg-[#4c9999] text-white text-sm font-semibold shadow-lg shadow-[#5AA7A7]/30 transition-all"
+                  >
+                    Get Started
+                  </Link>
+                </div>
+              )}
+
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="p-2 md:hidden text-slate-600 hover:bg-slate-100 rounded-xl transition-all"
+              >
+                {isOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
+          </nav>
+        </div>
+      </header>
       {/* Mobile Drawer Backdrop */}
       {isOpen && (
         <div
@@ -154,25 +151,24 @@ export default function Navbar() {
 
       {/* Mobile Side Drawer Content */}
       <div
-        className={`fixed top-0 right-0 z-[999] h-screen w-[280px] bg-white transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] md:hidden shadow-[-20px_0_60px_rgba(0,0,0,0.15)] flex flex-col ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 z-[999] h-screen w-[280px] bg-white transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] md:hidden shadow-[-20px_0_60px_rgba(0,0,0,0.15)] flex flex-col ${isOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         <div className="flex flex-col h-full overflow-hidden">
           {/* Drawer Header */}
           <div className="flex items-center justify-between p-6 border-b border-slate-50 shrink-0">
-             <div className="flex items-center gap-3">
-               <div className="p-2 bg-[#EEF7F1] rounded-lg">
-                 <Activity size={20} className="text-[#2F8F68]" />
-               </div>
-               <h3 className="text-lg font-black text-slate-800">MediSync</h3>
-             </div>
-             <button
-               onClick={() => setIsOpen(false)}
-               className="p-2 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-full"
-             >
-               <X size={20} />
-             </button>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-[#EEF7F1] rounded-lg">
+                <Activity size={20} className="text-[#2F8F68]" />
+              </div>
+              <h3 className="text-lg font-black text-slate-800">MediSync</h3>
+            </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="p-2 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-full"
+            >
+              <X size={20} />
+            </button>
           </div>
 
           <div className="flex-1 overflow-y-auto px-4 py-8 space-y-2">
@@ -185,63 +181,61 @@ export default function Navbar() {
                 className="flex items-center justify-between p-4 rounded-2xl text-base font-bold text-slate-700 hover:bg-[#F0F7F4] hover:text-[#2F8F68] transition-all group"
               >
                 <div className="flex items-center gap-4">
-                   <div className="text-slate-400 group-hover:text-[#2F8F68] transition-colors">
-                     {link.icon}
-                   </div>
-                   {link.name}
+                  <div className="text-slate-400 group-hover:text-[#2F8F68] transition-colors">
+                    {link.icon}
+                  </div>
+                  {link.name}
                 </div>
                 <ChevronRight size={18} className="text-slate-300 group-hover:translate-x-1 transition-all" />
               </Link>
             ))}
 
             <div className="mt-8 pt-8 border-t border-slate-100">
-               <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Workspace</p>
-               {user ? (
-                 <Link
-                   href={`/dashboard/${user.role}`}
-                   onClick={() => setIsOpen(false)}
-                   className="flex items-center gap-4 p-4 rounded-3xl bg-[#EAF7F1] border border-[#D7EBDD]"
-                 >
-                   <div className="w-12 h-12 rounded-full bg-[#6C8CBF] flex items-center justify-center text-white text-xs font-bold uppercase overflow-hidden border-2 border-white shadow-sm shrink-0">
-                     {user?.profilePicture ? (
-                       <img src={`${API_URL}${user.profilePicture}`} className="w-full h-full object-cover" />
-                     ) : (
-                       user?.name?.[0] || "U"
-                     )}
-                   </div>
-                   <div className="flex-1">
-                      <p className="text-sm font-black text-slate-800 truncate">{user.name}</p>
-                      <p className="text-[10px] text-[#2F8F68] font-bold uppercase">Dashboard Access</p>
-                   </div>
-                 </Link>
-               ) : (
-                 <div className="flex flex-col gap-3">
-                    <Link
-                      href="/login"
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-center justify-center p-5 rounded-3xl bg-slate-100 text-slate-700 text-sm font-black"
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      href="/register"
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-center justify-center p-5 rounded-3xl bg-[#5AA7A7] text-white text-sm font-black shadow-lg"
-                    >
-                      Sign Up Free
-                    </Link>
-                 </div>
-               )}
+              <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Workspace</p>
+              {user ? (
+                <Link
+                  href={`/dashboard/${user.role}`}
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-4 p-4 rounded-3xl bg-[#EAF7F1] border border-[#D7EBDD]"
+                >
+                  <div className="w-12 h-12 rounded-full bg-[#6C8CBF] flex items-center justify-center text-white text-xs font-bold uppercase overflow-hidden border-2 border-white shadow-sm shrink-0">
+                    {user?.profilePicture ? (
+                      <img src={`${API_URL}${user.profilePicture}`} className="w-full h-full object-cover" />
+                    ) : (
+                      user?.name?.[0] || "U"
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-black text-slate-800 truncate">{user.name}</p>
+                    <p className="text-[10px] text-[#2F8F68] font-bold uppercase">Dashboard Access</p>
+                  </div>
+                </Link>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <Link
+                    href="/login"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center justify-center p-5 rounded-3xl bg-slate-100 text-slate-700 text-sm font-black"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center justify-center p-5 rounded-3xl bg-[#5AA7A7] text-white text-sm font-black shadow-lg"
+                  >
+                    Sign Up Free
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
 
           <div className="px-6 py-6 bg-slate-50 border-t border-slate-100 shrink-0 pb-safe">
-             <p className="text-[10px] text-slate-400 text-center uppercase tracking-widest font-black opacity-30 italic">Connected Health Solutions</p>
+            <p className="text-[10px] text-slate-400 text-center uppercase tracking-widest font-black opacity-30 italic">Connected Health Solutions</p>
           </div>
         </div>
       </div>
     </>
   );
-}
-
 }
