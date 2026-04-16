@@ -137,20 +137,24 @@ export default function Navbar() {
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
+          </div>
         </nav>
       </div>
+    </header>
 
+    {/* Mobile Bottom Sheet (Moved outside header for stacking context) */}
+    <>
       {/* Mobile Drawer Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm md:hidden animate-[fadeIn_0.2s_ease-out]"
+          className="fixed inset-0 z-[998] bg-black/40 backdrop-blur-sm md:hidden animate-[fadeIn_0.2s_ease-out]"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       {/* Mobile Bottom Sheet Content */}
       <div
-        className={`fixed bottom-0 left-0 right-0 z-[100] w-full bg-white transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] md:hidden shadow-[0_-20px_60px_rgba(0,0,0,0.15)] flex flex-col rounded-t-[40px] ${
+        className={`fixed bottom-0 left-0 right-0 z-[999] w-full bg-white transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] md:hidden shadow-[0_-30px_70px_rgba(0,0,0,0.2)] flex flex-col rounded-t-[40px] border-t border-slate-100 ${
           isOpen ? "translate-y-0" : "translate-y-full"
         }`}
       >
@@ -233,6 +237,6 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-    </header>
+    </>
   );
 }
