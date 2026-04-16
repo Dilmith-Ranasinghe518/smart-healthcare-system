@@ -307,10 +307,56 @@ export default function DashboardLayout({ children }) {
           ))}
         </div>
 
-        <div className="p-6 bg-slate-50 border-t border-slate-100 italic">
+        <div className="p-6 bg-slate-50 border-t border-slate-100 flex flex-col gap-4">
+           <button
+             onClick={() => {
+               setIsQuickActionsOpen(false);
+               setShowLogoutConfirm(true);
+             }}
+             className="flex items-center justify-center gap-3 p-4 rounded-2xl bg-rose-50 text-rose-600 font-bold border border-rose-100 active:scale-95 transition-all"
+           >
+             <LogOut size={18} />
+             <span>Sign Out</span>
+           </button>
            <p className="text-[10px] text-slate-400 text-center uppercase tracking-widest font-black opacity-40">Powered by MediSync AI</p>
         </div>
       </div>
+
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black/35 backdrop-blur-sm z-[200] flex items-center justify-center animate-[fadeIn_0.2s_ease-out]">
+          <div className="w-full max-w-sm p-6 text-center flex flex-col items-center gap-4 bg-white border border-slate-200 rounded-[28px] shadow-2xl">
+            <div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
+              <LogOut size={22} className="relative left-0.5" />
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-slate-800 mb-1">Ending Session</h3>
+              <p className="text-slate-500 text-sm">
+                Are you sure you want to log out from the dashboard?
+              </p>
+            </div>
+
+            <div className="flex gap-3 w-full mt-2">
+              <button
+                className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+                onClick={() => setShowLogoutConfirm(false)}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="flex-1 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-500 px-4 py-3 text-xs font-semibold text-white shadow-lg hover:-translate-y-0.5 transition"
+                onClick={() => {
+                  logout();
+                  router.push('/login');
+                }}
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
