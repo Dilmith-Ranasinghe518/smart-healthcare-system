@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   FileScan,
   AlertCircle,
+  Camera,
 } from "lucide-react";
 import Tesseract from "tesseract.js";
 
@@ -50,6 +51,14 @@ export default function PrescriptionReader() {
     }
   };
 
+  const triggerGallery = () => {
+    document.getElementById("galleryInput").click();
+  };
+ 
+  const triggerCamera = () => {
+    document.getElementById("cameraInput").click();
+  };
+ 
   const runOCR = async () => {
     if (!image) return;
     setIsProcessing(true);
@@ -193,28 +202,74 @@ export default function PrescriptionReader() {
             Upload Image
           </h3>
 
-          <div className="relative flex h-80 flex-col items-center justify-center overflow-hidden rounded-[28px] border-2 border-dashed border-slate-200 bg-[#FCFDFC] text-center transition-colors hover:border-[#74B49B]/40">
+          <div className="relative flex h-80 flex-col items-center justify-center overflow-hidden rounded-[28px] border-2 border-dashed border-slate-200 bg-[#FCFDFC] text-center transition-all hover:border-[#74B49B]/40">
+            {/* Hidden Inputs */}
             <input
+              id="galleryInput"
               type="file"
               accept="image/*"
-              className="absolute inset-0 cursor-pointer opacity-0"
+              className="hidden"
               onChange={handleFileChange}
               disabled={isProcessing}
             />
-
+            <input
+              id="cameraInput"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={handleFileChange}
+              disabled={isProcessing}
+            />
+ 
             {previewUrl ? (
-              <img
-                src={previewUrl}
-                alt="Prescription preview"
-                className="max-h-full max-w-full rounded-2xl object-contain shadow-md"
-              />
+              <div className="group relative h-full w-full p-4">
+                <img
+                  src={previewUrl}
+                  alt="Prescription preview"
+                  className="h-full w-full rounded-2xl object-contain shadow-md transition group-hover:opacity-90"
+                />
+                <button
+                  onClick={() => {
+                    setPreviewUrl(null);
+                    setImage(null);
+                  }}
+                  className="absolute right-6 top-6 rounded-full bg-white/90 p-2 text-rose-500 shadow-lg backdrop-blur hover:bg-white"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             ) : (
-              <div className="flex flex-col items-center gap-3 px-6 text-slate-500">
-                <FileText size={48} className="text-slate-400" />
-                <p className="text-sm font-semibold text-slate-700">
-                  Click or drag and drop prescription notes
-                </p>
-                <p className="text-xs text-slate-500">Supports JPG and PNG files</p>
+              <div className="flex flex-col items-center gap-6 px-6">
+                <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-[#EEF7F1] text-[#2F8F68]">
+                  <FileText size={40} />
+                </div>
+                <div>
+                  <p className="text-base font-black text-slate-800">
+                    Add prescription document
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Supports JPG and PNG files
+                  </p>
+                </div>
+ 
+                <div className="flex gap-4">
+                  <button
+                    onClick={triggerGallery}
+                    className="flex flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-[#74B49B] hover:shadow-md"
+                  >
+                    <Upload size={20} className="text-[#4F7EA8]" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Gallery</span>
+                  </button>
+ 
+                  <button
+                    onClick={triggerCamera}
+                    className="flex flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-[#74B49B] hover:shadow-md"
+                  >
+                    <Camera size={20} className="text-[#2F8F68]" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Camera</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
