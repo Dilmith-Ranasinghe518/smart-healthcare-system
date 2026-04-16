@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { Activity, Menu, X, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Activity, Menu, X, ChevronRight, Home, Search, Heart, Shield, MessageSquare, Briefcase } from "lucide-react";
 import { API_URL } from "@/utils/api";
 import { useAuth } from "@/context/AuthContext";
 
@@ -11,13 +11,22 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Find Doctors", href: "/doctors" },
-    { name: "Services", href: "#services" },
-    { name: "Features", href: "#features" },
-    { name: "Roles", href: "#roles" },
-    { name: "Contact", href: "#contact" },
+    { name: "Home", href: "/", icon: <Home size={18} /> },
+    { name: "Find Doctors", href: "/doctors", icon: <Search size={18} /> },
+    { name: "Services", href: "#services", icon: <Briefcase size={18} /> },
+    { name: "Features", href: "#features", icon: <Shield size={18} /> },
+    { name: "Roles", href: "#roles", icon: <Heart size={18} /> },
+    { name: "Contact", href: "#contact", icon: <MessageSquare size={18} /> },
   ];
+
+  // Prevent scrolling when menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+  }, [isOpen]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#96D7C6]/40 bg-white/90 backdrop-blur-xl shadow-sm">
@@ -123,41 +132,99 @@ export default function Navbar() {
         </nav>
       </div>
 
-      {/* Mobile Menu Content */}
+      {/* Mobile Drawer Backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm md:hidden animate-[fadeIn_0.2s_ease-out]"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Mobile Side Drawer Content */}
       <div
-        className={`fixed inset-0 top-20 z-[100] bg-white transition-all duration-300 md:hidden ${
-          isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full pointer-events-none"
+        className={`fixed top-0 right-0 z-[100] h-full w-[300px] bg-white transition-all duration-300 ease-in-out md:hidden shadow-[-10px_0_30px_rgba(0,0,0,0.1)] ${
+          isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex flex-col p-6 gap-2">
-          {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              onClick={() => setIsOpen(false)}
-              className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 text-base font-bold text-slate-700 active:bg-slate-100 border border-slate-100 shadow-sm"
-            >
-              {link.name}
-              <ChevronRight size={18} className="text-slate-400" />
+        <div className="flex flex-col h-full">
+          {/* Drawer Header */}
+          <div className="flex items-center justify-between p-6 border-b border-slate-100">
+            <Link href="/" onClick={() => setIsOpen(false)}>
+               <img src="/logo.png" alt="MediSync" className="h-10 w-auto" />
             </Link>
-          ))}
-          {user ? (
-            <Link
-              href={`/dashboard/${user.role}`}
+            <button
               onClick={() => setIsOpen(false)}
-              className="mt-4 flex items-center justify-center gap-3 p-5 rounded-3xl bg-[#96D7C6]/20 text-[#2F8F68] font-black border-2 border-[#96D7C6]/40"
+              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all"
             >
-              Go to Dashboard
-            </Link>
-          ) : (
-            <Link
-              href="/login"
-              onClick={() => setIsOpen(false)}
-              className="mt-4 flex items-center justify-center p-5 rounded-3xl bg-slate-100 text-slate-700 font-black"
-            >
-              Sign In
-            </Link>
-          )}
+              <X size={24} />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-2">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Navigation</p>
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                onClick={() => setIsOpen(false)}
+                className="flex items-center justify-between p-4 rounded-2xl text-base font-bold text-slate-700 hover:bg-[#F0F7F4] hover:text-[#2F8F68] transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                   <div className="text-slate-400 group-hover:text-[#2F8F68] transition-colors">
+                     {link.icon}
+                   </div>
+                   {link.name}
+                </div>
+                <ChevronRight size={18} className="text-slate-300 group-hover:translate-x-1 transition-all" />
+              </Link>
+            ))}
+
+            <div className="mt-6 pt-6 border-t border-slate-100">
+               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 px-1">Account & Support</p>
+               {user ? (
+                 <div className="flex flex-col gap-3">
+                    <Link
+                      href={`/dashboard/${user.role}`}
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-4 p-4 rounded-2xl bg-[#EAF7F1] border border-[#D7EBDD]"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-[#6C8CBF] flex items-center justify-center text-white text-xs font-bold uppercase overflow-hidden border-2 border-white shadow-sm">
+                        {user?.profilePicture ? (
+                          <img src={`${API_URL}${user.profilePicture}`} className="w-full h-full object-cover" />
+                        ) : (
+                          user?.name?.[0] || "U"
+                        )}
+                      </div>
+                      <div className="flex-1">
+                         <p className="text-sm font-black text-slate-800 truncate">{user.name}</p>
+                         <p className="text-[10px] text-[#2F8F68] font-bold uppercase">View Profile</p>
+                      </div>
+                    </Link>
+                 </div>
+               ) : (
+                 <div className="grid grid-cols-2 gap-3">
+                   <Link
+                     href="/login"
+                     onClick={() => setIsOpen(false)}
+                     className="flex items-center justify-center p-4 rounded-2xl bg-slate-100 text-slate-700 text-sm font-black"
+                   >
+                     Login
+                   </Link>
+                   <Link
+                     href="/register"
+                     onClick={() => setIsOpen(false)}
+                     className="flex items-center justify-center p-4 rounded-2xl bg-[#5AA7A7] text-white text-sm font-black shadow-lg shadow-[#5AA7A7]/20"
+                   >
+                     Join
+                   </Link>
+                 </div>
+               )}
+            </div>
+          </div>
+
+          <div className="p-6 bg-slate-50 border-t border-slate-100 italic">
+             <p className="text-[10px] text-slate-400 text-center">MediSync Platform v1.2.0 • 2024</p>
+          </div>
         </div>
       </div>
     </header>
