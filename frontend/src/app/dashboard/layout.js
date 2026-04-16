@@ -27,7 +27,6 @@ export default function DashboardLayout({ children }) {
     return () => clearInterval(interval);
   }, []);
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
@@ -35,7 +34,6 @@ export default function DashboardLayout({ children }) {
     if (!loading && !user) {
       router.push('/login');
     }
-    setIsSidebarOpen(false);
   }, [user, loading, router, pathname]);
 
   if (loading || !user) {
@@ -79,12 +77,6 @@ export default function DashboardLayout({ children }) {
 
   return (
     <div className="flex min-h-screen w-screen bg-[#F6FAF8] text-slate-900 relative transition-colors duration-300">
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/35 backdrop-blur-sm z-40 md:hidden animate-[fadeIn_0.2s_ease-out]"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
 
       <aside
         className={`hidden md:flex fixed md:sticky top-0 h-screen z-50 bg-[#EEF7F1] border-r border-[#D7EBDD] flex-col transition-all duration-300 ease-in-out shadow-[8px_0_30px_rgba(116,180,155,0.08)] ${
@@ -104,13 +96,6 @@ export default function DashboardLayout({ children }) {
               />
             </div>
           </Link>
-
-          <button
-            className="md:hidden text-[#5C8D7A] hover:text-[#2F8F68]"
-            onClick={() => setIsSidebarOpen(false)}
-          >
-            <X size={20} />
-          </button>
         </div>
 
         <nav className="flex-1 flex flex-col gap-1.5">
@@ -204,13 +189,6 @@ export default function DashboardLayout({ children }) {
               </div>
               <span className="text-sm font-medium text-slate-800">{user.name}</span>
             </div>
-
-            <button
-              className="md:hidden p-2 bg-[#EAF7F1] rounded-lg text-[#2F8F68]"
-              onClick={() => setIsSidebarOpen(true)}
-            >
-              <Menu size={20} />
-            </button>
           </div>
         </header>
 
