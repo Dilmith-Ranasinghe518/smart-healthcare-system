@@ -300,7 +300,7 @@ function MeetingsContent() {
           
           <StreamVideo client={client}>
             <StreamCall call={call}>
-              <StreamTheme>
+              <StreamTheme theme="dark">
                 <SpeakerLayout />
                 <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-50">
                   <CallControls onLeave={() => setCall(null)} />

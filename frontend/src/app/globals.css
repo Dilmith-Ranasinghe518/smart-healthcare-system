@@ -62,3 +62,30 @@
 
 .float-up { animation: floatUp 4s ease-in-out infinite; }
 .float-down { animation: floatDown 5s ease-in-out infinite; }
+
+/* Stream Video SDK Overrides for High Contrast */
+.str-video__theme-dark, .str-video__theme-light {
+  --str-video__primary-color: #4f46e5;
+}
+
+.str-video__menu-container, 
+.str-video__notification,
+.str-video__call-controls,
+.str-video__participant-view {
+  color: #ffffff !important;
+}
+
+.str-video__menu-item,
+.str-video__menu-item__label,
+.str-video__notification__content,
+.str-video__participant-details__name {
+  color: #ffffff !important;
+}
+
+.str-video__menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.str-video__icon {
+  fill: #ffffff !important;
+}

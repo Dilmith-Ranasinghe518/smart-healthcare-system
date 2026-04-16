@@ -332,7 +332,7 @@ export default function MeetingsPage() {
           <div className="relative flex h-[680px] w-full flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-slate-950">
             <StreamVideo client={client}>
               <StreamCall call={call}>
-                <StreamTheme>
+                <StreamTheme theme="dark">
                   <SpeakerLayout />
                   <div className="absolute bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4">
                     <CallControls onLeave={() => setCall(null)} />
