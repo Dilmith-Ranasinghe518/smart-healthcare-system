@@ -227,7 +227,7 @@ export default function DoctorDashboard() {
         </div>
       ) : (
         <>
-          <div className="mb-8 grid gap-6 md:grid-cols-3">
+          <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
             <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_40px_rgba(15,23,42,0.05)]">
               <div className="mb-4 flex items-center justify-between">
                 <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">

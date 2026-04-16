@@ -293,13 +293,13 @@ export default function Home() {
                 <Sparkles size={16} /> AI-Powered Health Management
               </span>
 
-              <h1 className="text-5xl md:text-7xl xl:text-8xl font-black text-white leading-[0.95] tracking-tight">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl xl:text-8xl font-black text-white leading-[0.95] tracking-tight">
                 Care Beyond
                 <br />
                 <span className="text-[#74B49B]">Boundaries.</span>
               </h1>
 
-              <p className="text-lg md:text-xl text-slate-200 max-w-xl leading-relaxed font-medium">
+              <p className="text-base sm:text-lg md:text-xl text-slate-200 max-w-xl leading-relaxed font-medium">
                 Transforming healthcare delivery with an intuitive, elegant
                 platform designed for hospitals, doctors, and patients in one
                 connected experience.
@@ -452,7 +452,7 @@ export default function Home() {
 
       <section
         id="services"
-        className="py-24 bg-white scroll-mt-24 reveal-section"
+        className="py-12 md:py-24 bg-white scroll-mt-24 reveal-section"
       >
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-end mb-12">
@@ -548,7 +548,7 @@ export default function Home() {
 
       <section
         id="features"
-        className="py-24 bg-[#F0F7F4] scroll-mt-24 reveal-section"
+        className="py-12 md:py-24 bg-[#F0F7F4] scroll-mt-24 reveal-section"
       >
         <div className="max-w-7xl mx-auto px-6">
           <div className="bg-white rounded-[60px] p-8 md:p-16 shadow-2xl border border-[#74B49B]/20 flex flex-col lg:flex-row gap-16 items-center">

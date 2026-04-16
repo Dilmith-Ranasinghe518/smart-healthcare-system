@@ -87,9 +87,9 @@ export default function DashboardLayout({ children }) {
       )}
 
       <aside
-        className={`fixed md:sticky top-0 h-screen z-50 bg-[#EEF7F1] border-r border-[#D7EBDD] flex flex-col transition-all duration-300 ease-in-out shadow-[8px_0_30px_rgba(116,180,155,0.08)] md:translate-x-0 ${
+        className={`hidden md:flex fixed md:sticky top-0 h-screen z-50 bg-[#EEF7F1] border-r border-[#D7EBDD] flex-col transition-all duration-300 ease-in-out shadow-[8px_0_30px_rgba(116,180,155,0.08)] ${
           isCollapsed ? 'w-20 p-4' : 'w-64 p-6'
-        } ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        }`}
       >
         <div className="flex items-center justify-between pb-6 border-b border-[#D7EBDD] mb-6">
           <Link
@@ -157,9 +157,9 @@ export default function DashboardLayout({ children }) {
       </aside>
 
       <main className="flex-1 overflow-y-auto flex flex-col bg-[#F6FAF8]">
-        <header className="flex items-center justify-between p-4 md:px-10 md:py-5 border-b border-[#E3EEE7] sticky top-0 bg-white/85 backdrop-blur-md z-30 w-full">
-          <Link href="/" className="flex items-center md:hidden">
-            <div className="h-16 w-auto overflow-hidden">
+        <header className="flex items-center justify-between p-3 md:px-10 md:py-5 border-b border-[#E3EEE7] sticky top-0 bg-white/85 backdrop-blur-md z-30 w-full">
+          <Link href="/" className="flex items-center">
+            <div className="h-10 md:h-16 w-auto overflow-hidden">
               <img src="/logo.png" alt="MediSync" className="h-full w-auto object-contain" />
             </div>
           </Link>
@@ -214,12 +214,38 @@ export default function DashboardLayout({ children }) {
           </div>
         </header>
 
-        <div className="flex-1 p-6 md:p-10">
+        <div className="flex-1 p-4 md:p-10 pb-24 md:pb-10">
           {children}
         </div>
 
-        <Footer />
+        <Footer className="hidden md:block" />
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-[100] grid grid-cols-5 border-t border-[#D7EBDD] bg-white/95 pb-safe pt-1 backdrop-blur-md md:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.04)]">
+        {menu.slice(0, 5).map((item, idx) => {
+          const isActive = pathname === item.path;
+          return (
+            <Link
+              key={idx}
+              href={item.path}
+              className={`flex flex-col items-center justify-center py-2 transition-colors ${
+                isActive ? 'text-[#2F8F68]' : 'text-[#5F6F68]'
+              }`}
+            >
+              <div className={`${isActive ? 'scale-110' : 'scale-100'} transition-transform`}>
+                {item.icon}
+              </div>
+              <span className={`mt-1 text-[10px] font-bold ${isActive ? 'opacity-100' : 'opacity-70'}`}>
+                {item.name.split(' ')[0]}
+              </span>
+              {isActive && (
+                <div className="absolute top-0 h-0.5 w-8 rounded-full bg-[#2F8F68]" />
+              )}
+            </Link>
+          );
+        })}
+      </nav>
 
       {showLogoutConfirm && (
         <div className="fixed inset-0 bg-black/35 backdrop-blur-sm z-50 flex items-center justify-center animate-[fadeIn_0.2s_ease-out]">

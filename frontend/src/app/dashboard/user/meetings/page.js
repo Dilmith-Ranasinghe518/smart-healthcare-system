@@ -288,7 +288,7 @@ function MeetingsContent() {
           </div>
         </div>
       ) : (
-        <div className="rounded-[32px] overflow-hidden shadow-2xl bg-slate-950 border border-slate-200 dark:border-white/10 animate-[scaleIn_0.3s_ease-out] h-[750px] w-full flex flex-col relative">
+        <div className="rounded-[32px] overflow-hidden shadow-2xl bg-slate-950 border border-slate-200 dark:border-white/10 animate-[scaleIn_0.3s_ease-out] aspect-video md:h-[750px] w-full flex flex-col relative">
           <div className="absolute top-4 left-4 z-[60]">
              <button 
                onClick={() => { setCall(null); window.location.reload(); }}

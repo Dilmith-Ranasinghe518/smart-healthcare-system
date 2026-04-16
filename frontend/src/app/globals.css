@@ -10,6 +10,15 @@
   }
 }
 
+@layer utilities {
+  .mobile-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 24px);
+  }
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
 @layer components {
   .glass-panel {
     @apply bg-white/85 backdrop-blur-md border border-slate-200 rounded-2xl p-8 shadow-md;
