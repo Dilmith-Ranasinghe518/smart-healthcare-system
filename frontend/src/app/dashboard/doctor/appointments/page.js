@@ -48,8 +48,9 @@ export default function DoctorAppointmentsPage() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [bulkLoading, setBulkLoading] = useState(false);
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [apptToCancel, setApptToCancel] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
@@ -654,7 +655,8 @@ export default function DoctorAppointmentsPage() {
                           className="flex-1 rounded-2xl border border-rose-100 bg-rose-50 py-2.5 text-xs font-bold text-rose-600 transition hover:bg-rose-100 disabled:opacity-50"
                           onClick={(e) => {
                             e.stopPropagation();
-                            updateStatus(app._id, "cancel");
+                            setApptToCancel(app);
+                            setShowCancelConfirm(true);
                           }}
                           disabled={processing === `${app._id}-cancel`}
                         >
@@ -699,6 +701,26 @@ export default function DoctorAppointmentsPage() {
         message={`Are you sure you want to accept ${pendingFiltered.length} pending appointment(s)? This will notify the patients immediately.`}
         confirmText="Accept All"
         isLoading={bulkLoading}
+      />
+
+      <ConfirmModal
+        isOpen={showCancelConfirm}
+        onClose={() => {
+          setShowCancelConfirm(false);
+          setApptToCancel(null);
+        }}
+        onConfirm={() => {
+          if (apptToCancel) {
+            updateStatus(apptToCancel._id, "cancel");
+            setShowCancelConfirm(false);
+            setApptToCancel(null);
+          }
+        }}
+        title="Cancel Appointment"
+        message={`Are you sure you want to cancel the appointment with ${patientMap[apptToCancel?.patientId] || 'this patient'}? This action cannot be undone.`}
+        confirmText="Yes, Cancel"
+        isDestructive={true}
+        isLoading={processing === `${apptToCancel?._id}-cancel`}
       />
     </div>
   );

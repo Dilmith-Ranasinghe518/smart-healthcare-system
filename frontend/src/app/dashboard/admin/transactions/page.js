@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export default function TransactionsPage() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showRefundConfirm, setShowRefundConfirm] = useState(false);
+  const [transactionToRefund, setTransactionToRefund] = useState(null);
+  const [refundLoading, setRefundLoading] = useState(false);
 
   const API_URL =  process.env.NEXT_PUBLIC_API_URL;
 
@@ -33,14 +37,22 @@ export default function TransactionsPage() {
     fetchData();
   }, []);
 
-  const handleRefund = async (id) => {
-    if (!confirm("Are you sure you want to refund this transaction?")) return;
+  const handleRefund = (transaction) => {
+    setTransactionToRefund(transaction);
+    setShowRefundConfirm(true);
+  };
+
+  const confirmRefund = async () => {
+    if (!transactionToRefund) return;
+    
+    setRefundLoading(true);
     try {
-      const res = await fetch(`${API_URL}/payment/refund/${id}`, {
+      const res = await fetch(`${API_URL}/payment/refund/${transactionToRefund._id}`, {
         method: "PUT",
       });
       if (res.ok) {
-        alert("Refund successful");
+        setShowRefundConfirm(false);
+        setTransactionToRefund(null);
         fetchData();
       } else {
         alert("Refund failed");
@@ -48,6 +60,8 @@ export default function TransactionsPage() {
     } catch (err) {
       console.error(err);
       alert("Error processing refund");
+    } finally {
+      setRefundLoading(false);
     }
   };
 
@@ -101,7 +115,7 @@ export default function TransactionsPage() {
                   <td className="px-4 py-3">
                     {item.status === "Doctor Cancelled" ? (
                       <button
-                        onClick={() => handleRefund(item._id)}
+                        onClick={() => handleRefund(item)}
                         className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-xs shadow"
                       >
                         Refund
@@ -118,6 +132,20 @@ export default function TransactionsPage() {
           </table>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={showRefundConfirm}
+        onClose={() => {
+          setShowRefundConfirm(false);
+          setTransactionToRefund(null);
+        }}
+        onConfirm={confirmRefund}
+        title="Confirm Refund"
+        message={`Are you sure you want to refund Rs. ${transactionToRefund?.amount / 100} to this user? This action will update the transaction status to refunded.`}
+        confirmText="Confirm Refund"
+        isDestructive={true}
+        isLoading={refundLoading}
+      />
     </div>
   );
 }
