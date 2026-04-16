@@ -51,6 +51,7 @@ export default function DashboardLayout({ children }) {
       { name: 'Health Vitals', icon: <Heart size={20} />, path: '/dashboard/user' },
       { name: 'Find Doctors', icon: <Search size={20} />, path: '/dashboard/user/find-doctors' },
       { name: 'Appointments', icon: <Calendar size={20} />, path: '/dashboard/user/appointments' },
+      { name: 'Telemedicine', icon: <Video size={20} />, path: '/dashboard/user/meetings' },
       { name: 'Prescription Scan', icon: <ClipboardList size={20} />, path: '/dashboard/user/prescription' },
       { name: 'Settings', icon: <Settings size={20} />, path: '/dashboard/settings' },
     ],
