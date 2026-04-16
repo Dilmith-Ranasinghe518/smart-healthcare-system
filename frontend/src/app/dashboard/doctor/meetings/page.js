@@ -10,6 +10,8 @@ import {
   ShieldCheck,
   Radio,
   PhoneCall,
+  Copy,
+  Check
 } from "lucide-react";
 import { API_URL } from "@/utils/api";
 import {
@@ -35,6 +37,18 @@ export default function MeetingsPage() {
   const [appointment, setAppointment] = useState(null);
   const [error, setError] = useState("");
   const [isEnding, setIsEnding] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const shareLink = typeof window !== 'undefined' 
+    ? `${window.location.origin}/dashboard/user/meetings?callId=${call?.id}` 
+    : '';
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareLink);
+    setCopied(true);
+    toast.success("Meeting link copied!");
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     if (!loading && user) {
@@ -285,20 +299,35 @@ export default function MeetingsPage() {
       {client && call && (
         <div className="overflow-hidden rounded-[32px] border border-slate-200 bg-white p-4 shadow-[0_20px_50px_rgba(15,23,42,0.06)]">
           <div className="mb-4 flex items-center justify-between gap-4 rounded-2xl bg-[linear-gradient(135deg,#f8fbf9_0%,#eef7f4_100%)] px-5 py-4">
-            <div>
+            <div className="flex-1">
               <h3 className="text-lg font-black text-slate-800">Active Consultation</h3>
-              <p className="text-sm text-slate-500">
-                Live doctor-patient session is currently connected
-              </p>
+              <div className="mt-1 flex flex-wrap items-center gap-3">
+                <span className="text-xs text-slate-500">
+                  {appointment ? "Linked to appointment" : "Instant Meeting"}
+                </span>
+                <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5 shadow-sm">
+                  <span className="text-[10px] font-mono font-bold text-slate-400">SHARE LINK:</span>
+                  <p className="max-w-[150px] truncate text-[10px] font-mono text-slate-600">{shareLink}</p>
+                  <button 
+                    onClick={handleCopyLink}
+                    className="text-[#74B49B] hover:text-[#2F8F68] transition-colors"
+                    title="Copy Link"
+                  >
+                    {copied ? <Check size={14} /> : <Copy size={14} />}
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <button
-              onClick={handleEndConsultation}
-              disabled={isEnding}
-              className="rounded-2xl bg-rose-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-rose-700 disabled:opacity-70"
-            >
-              {isEnding ? "Ending..." : "End Consultation"}
-            </button>
+            {appointment && (
+              <button
+                onClick={handleEndConsultation}
+                disabled={isEnding}
+                className="rounded-2xl bg-rose-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-rose-700 disabled:opacity-70"
+              >
+                {isEnding ? "Ending..." : "End Consultation"}
+              </button>
+            )}
           </div>
 
           <div className="relative flex h-[680px] w-full flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-slate-950">

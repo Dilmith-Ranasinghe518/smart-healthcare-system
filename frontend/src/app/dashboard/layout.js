@@ -57,7 +57,7 @@ export default function DashboardLayout({ children }) {
     doctor: [
       { name: 'Overview', icon: <Activity size={20} />, path: '/dashboard/doctor' },
       { name: 'Doctor Profile', icon: <User size={20} />, path: '/dashboard/doctor/profile' },
-      { name: 'Patients', icon: <Users size={20} />, path: '#' },
+      { name: 'Patients', icon: <Users size={20} />, path: '/dashboard/doctor/patients' },
       { name: 'Appointments', icon: <Calendar size={20} />, path: '/dashboard/doctor/appointments' },
       { name: 'Meetings', icon: <Video size={20} />, path: '/dashboard/doctor/meetings' },
       { name: 'Settings', icon: <Settings size={20} />, path: '/dashboard/settings' },
