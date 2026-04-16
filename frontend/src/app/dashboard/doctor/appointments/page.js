@@ -48,6 +48,7 @@ export default function DoctorAppointmentsPage() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [bulkLoading, setBulkLoading] = useState(false);
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [apptToCancel, setApptToCancel] = useState(null);
