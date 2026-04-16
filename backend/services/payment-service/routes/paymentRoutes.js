@@ -3,6 +3,7 @@ const router = express.Router();
 
 const {
   createPayment,
+  createNativePayment,
   getAllPayments,
   markAsPaid,
   refundPayment,
@@ -13,6 +14,7 @@ const {
 } = require("../controllers/paymentController");
 
 router.post("/create", createPayment);
+router.post("/create-native", createNativePayment);
 router.get("/", getAllPayments);
 router.put("/success/:sessionId", markAsPaid);
 router.put("/refund/:id", refundPayment);

@@ -342,7 +342,7 @@ export default function DoctorPatientsPage() {
                   History
                 </button>
                 <button
-                  onClick={() => router.push(`/dashboard/doctor/appointments?search=${p.details.name}`)}
+                  onClick={() => router.push(`/dashboard/doctor/appointments?appId=${p.lastAppointment._id}&tab=chat`)}
                   className="flex items-center justify-center gap-2 rounded-xl bg-[#2F8F68] py-2.5 text-xs font-bold text-white transition hover:bg-[#257354] shadow-md shadow-[#2F8F68]/10"
                 >
                   Contact <ChevronRight size={14} />

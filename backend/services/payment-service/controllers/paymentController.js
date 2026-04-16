@@ -105,6 +105,60 @@ exports.createPayment = async (req, res) => {
   }
 };
 
+exports.createNativePayment = async (req, res) => {
+  try {
+    const { userId, appointmentId, amount, currency, title } = req.body;
+
+    if (!appointmentId) {
+      return res.status(400).json({ message: "appointmentId is required" });
+    }
+
+    let taxSetting = await TaxSetting.findOne();
+    if (!taxSetting) {
+      taxSetting = await TaxSetting.create({ percentage: 5 });
+    }
+
+    const baseFee = amount;
+    const taxAmount = (baseFee * taxSetting.percentage) / 100;
+    const totalAmount = baseFee + taxAmount;
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+    // Create a PaymentIntent for native checkout
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(totalAmount),
+      currency: currency || "usd",
+      metadata: {
+        userId,
+        appointmentId,
+        title: title || "Doctor Consultation",
+      },
+    });
+
+    const payment = new Payment({
+      userId,
+      appointmentId,
+      consultationFee: baseFee,
+      taxAmount: taxAmount,
+      amount: totalAmount,
+      status: "pending",
+      stripeSessionId: paymentIntent.id, // Store Intent ID as Session ID for tracking
+    });
+
+    await payment.save();
+
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+      amount: totalAmount,
+    });
+
+  } catch (error) {
+    console.error("Stripe Native Error:", error);
+    res.status(500).json({ message: "Payment intent creation failed", error: error.message });
+  }
+};
+
 exports.getAllPayments = async (req, res) => {
   try {
     const payments = await Payment.find();

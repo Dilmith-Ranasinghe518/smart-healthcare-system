@@ -33,10 +33,11 @@ export default function AppointmentDetailsModal({
   appointment, 
   user,
   onStatusUpdate,
-  onToggleMeeting
+  onToggleMeeting,
+  initialTab = "info"
 }) {
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("info"); // info, chat, email
+  const [activeTab, setActiveTab] = useState(initialTab); // info, chat, email
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
@@ -52,12 +53,12 @@ export default function AppointmentDetailsModal({
   useEffect(() => {
     if (isOpen && appointment) {
       setIsChatEnabled(appointment.isChatEnabled);
-      setActiveTab("info");
+      setActiveTab(initialTab || "info");
       if (appointment.isChatEnabled || user.role === 'doctor') {
         fetchMessages();
       }
     }
-  }, [isOpen, appointment]);
+  }, [isOpen, appointment, initialTab]);
 
   if (!isOpen || !appointment) return null;
 

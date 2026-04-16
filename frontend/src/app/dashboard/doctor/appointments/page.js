@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   Calendar,
   Clock,
@@ -32,6 +32,7 @@ const DOCTOR_API = API_BASE;
 export default function DoctorAppointmentsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [doctor, setDoctor] = useState(null);
   const [appointments, setAppointments] = useState([]);
@@ -62,6 +63,25 @@ export default function DoctorAppointmentsPage() {
   useEffect(() => {
     if (user?.role === "doctor") fetchDoctorAndAppointments();
   }, [user]);
+
+  // Handle URL params for auto-open modal
+  useEffect(() => {
+    if (!fetching && appointments.length > 0) {
+      const appId = searchParams.get("appId");
+      const tab = searchParams.get("tab");
+      const searchVal = searchParams.get("search");
+
+      if (searchVal) setSearch(searchVal);
+
+      if (appId) {
+        const targetApp = appointments.find(a => a._id === appId || a.appointmentId === appId);
+        if (targetApp) {
+          setSelectedAppointment(targetApp);
+          setShowDetailsModal(true);
+        }
+      }
+    }
+  }, [searchParams, fetching, appointments]);
 
   const fetchDoctorAndAppointments = async () => {
     setFetching(true);
@@ -668,6 +688,7 @@ export default function DoctorAppointmentsPage() {
           setShowDetailsModal(false);
         }}
         onToggleMeeting={handleToggleMeeting}
+        initialTab={searchParams.get("tab") || "info"}
       />
 
       <ConfirmModal
