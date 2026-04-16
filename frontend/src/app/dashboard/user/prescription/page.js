@@ -16,6 +16,7 @@ import {
   FileScan,
   AlertCircle,
   Camera,
+  X,
 } from "lucide-react";
 import Tesseract from "tesseract.js";
 
