@@ -125,7 +125,7 @@ export default function Navbar() {
 
       {/* Mobile Menu Content */}
       <div
-        className={`fixed inset-0 top-[81px] z-50 bg-white/95 backdrop-blur-xl transition-all duration-300 md:hidden ${
+        className={`fixed inset-0 top-20 z-[100] bg-white transition-all duration-300 md:hidden ${
           isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full pointer-events-none"
         }`}
       >

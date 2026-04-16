@@ -7,7 +7,7 @@ export default function Footer() {
   return (
     <footer
       id="contact"
-      className="mt-auto border-t border-[#96D7C6]/40 dark:border-white/10 bg-white dark:bg-slate-950 transition-colors duration-300"
+      className="hidden md:block mt-auto border-t border-[#96D7C6]/40 dark:border-white/10 bg-white dark:bg-slate-950 transition-colors duration-300"
     >
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-14">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">

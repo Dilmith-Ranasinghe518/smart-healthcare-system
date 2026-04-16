@@ -218,7 +218,7 @@ export default function DashboardLayout({ children }) {
           {children}
         </div>
 
-        <Footer className="hidden md:block" />
+        <Footer />
       </main>
 
       {/* Mobile Bottom Navigation */}

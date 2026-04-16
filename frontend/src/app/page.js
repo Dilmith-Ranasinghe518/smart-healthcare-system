@@ -305,36 +305,36 @@ export default function Home() {
                 connected experience.
               </p>
 
-              <div className="flex flex-wrap gap-4 pt-3">
+              <div className="flex flex-col sm:flex-row gap-4 pt-3">
                 <Link
                   href="/register"
-                  className="px-8 py-4 rounded-full bg-[#74B49B] hover:bg-[#5C8D7A] text-white font-bold shadow-2xl transition-all transform hover:-translate-y-1 flex items-center gap-2"
+                  className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#74B49B] hover:bg-[#5C8D7A] text-white font-bold shadow-2xl transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2"
                 >
                   Join Now <ArrowRight size={20} />
                 </Link>
 
                 <Link
                   href="/doctors"
-                  className="px-8 py-4 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md font-bold transition-all flex items-center gap-2"
+                  className="w-full sm:w-auto px-8 py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md font-bold transition-all flex items-center justify-center gap-2"
                 >
                   <Play size={18} /> Explore Services
                 </Link>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 pt-6 max-w-2xl">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 pt-6 max-w-2xl">
                 {[
                   { value: "450+", label: "Doctors" },
-                  { value: "98%", label: "Success Rate" },
+                  { value: "98%", label: "Success" },
                   { value: "24/7", label: "Support" },
                 ].map((item, index) => (
                   <div
                     key={index}
-                    className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 px-4 py-4 text-white"
+                    className={`rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 px-4 py-4 text-white ${index === 2 ? 'col-span-2 sm:col-span-1' : ''}`}
                   >
-                    <p className="text-2xl md:text-3xl font-black">
+                    <p className="text-xl sm:text-2xl md:text-3xl font-black">
                       {item.value}
                     </p>
-                    <p className="text-xs md:text-sm text-slate-200 mt-1">
+                    <p className="text-[10px] sm:text-xs md:text-sm text-slate-200 mt-1 uppercase tracking-wider font-bold">
                       {item.label}
                     </p>
                   </div>
