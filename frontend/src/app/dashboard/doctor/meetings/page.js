@@ -39,14 +39,11 @@ export default function MeetingsPage() {
   const [isEnding, setIsEnding] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const shareLink = typeof window !== 'undefined' 
-    ? `${window.location.origin}/dashboard/user/meetings?callId=${call?.id}` 
-    : '';
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(shareLink);
+  const handleCopyId = () => {
+    if (!call?.id) return;
+    navigator.clipboard.writeText(call.id);
     setCopied(true);
-    toast.success("Meeting link copied!");
+    toast.success("Meeting ID copied!");
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -171,7 +168,8 @@ export default function MeetingsPage() {
 
   return (
     <div className="w-full animate-[fadeIn_0.5s_ease-out] pb-12">
-      <div className="mb-8 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+      {!call && (
+        <div className="mb-8 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <section className="relative overflow-hidden rounded-[32px] border border-[#74B49B]/15 bg-[linear-gradient(135deg,#ffffff_0%,#f8fbf9_45%,#eef7f4_100%)] p-8 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
           <div className="absolute -right-16 -top-10 h-40 w-40 rounded-full bg-[#74B49B]/10 blur-3xl" />
           <div className="absolute bottom-0 left-0 h-36 w-36 rounded-full bg-[#BAC94A]/10 blur-3xl" />
@@ -294,7 +292,8 @@ export default function MeetingsPage() {
             </div>
           )}
         </section>
-      </div>
+        </div>
+      )}
 
       {client && call && (
         <div className="overflow-hidden rounded-[32px] border border-slate-200 bg-white p-4 shadow-[0_20px_50px_rgba(15,23,42,0.06)]">
@@ -306,12 +305,12 @@ export default function MeetingsPage() {
                   {appointment ? "Linked to appointment" : "Instant Meeting"}
                 </span>
                 <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5 shadow-sm">
-                  <span className="text-[10px] font-mono font-bold text-slate-400">SHARE LINK:</span>
-                  <p className="max-w-[150px] truncate text-[10px] font-mono text-slate-600">{shareLink}</p>
+                  <span className="text-[10px] font-mono font-bold text-slate-400">MEETING ID:</span>
+                  <p className="font-mono text-[10px] font-bold text-slate-800 tracking-wider uppercase">{call?.id}</p>
                   <button 
-                    onClick={handleCopyLink}
+                    onClick={handleCopyId}
                     className="text-[#74B49B] hover:text-[#2F8F68] transition-colors"
-                    title="Copy Link"
+                    title="Copy ID"
                   >
                     {copied ? <Check size={14} /> : <Copy size={14} />}
                   </button>
