@@ -1,7 +1,7 @@
 const Tesseract = require('tesseract.js');
-const { refinePrescriptionText } = require('../utils/deepseekClient');
+const { refinePrescriptionText } = require('../utils/geminiRefiner');
 
-// @desc    Scan Prescription Image (Hybrid OCR: Tesseract + DeepSeek)
+// @desc    Scan Prescription Image (Hybrid OCR: Tesseract + Gemini Refinement)
 // @route   POST /api/prescriptions/scan
 // @access  Private
 const scanPrescription = async (req, res) => {
@@ -19,7 +19,7 @@ const scanPrescription = async (req, res) => {
 
     const rawText = ocrResult.data.text;
 
-    // 2. Refine results using DeepSeek
+    // 2. Refine results using Gemini and the user's specific key
     const refinedText = await refinePrescriptionText(rawText);
 
     res.status(200).json({ 
