@@ -1,6 +1,7 @@
-const { scanPrescriptionImage } = require('../utils/geminiClient');
+const Tesseract = require('tesseract.js');
+const { refinePrescriptionText } = require('../utils/deepseekClient');
 
-// @desc    Scan Prescription Image (OCR)
+// @desc    Scan Prescription Image (Hybrid OCR: Tesseract + DeepSeek)
 // @route   POST /api/prescriptions/scan
 // @access  Private
 const scanPrescription = async (req, res) => {
@@ -9,26 +10,27 @@ const scanPrescription = async (req, res) => {
       return res.status(400).json({ message: 'No image file provided' });
     }
 
-    const mimeType = req.file.mimetype || 'image/jpeg';
-    
-    // Use Gemini for superior OCR extraction
-    const extractedText = await scanPrescriptionImage(req.file.buffer, mimeType);
+    // 1. Perform raw OCR with Tesseract
+    const ocrResult = await Tesseract.recognize(
+      req.file.buffer,
+      'eng',
+      { logger: m => console.log(m) }
+    );
+
+    const rawText = ocrResult.data.text;
+
+    // 2. Refine results using DeepSeek
+    const refinedText = await refinePrescriptionText(rawText);
 
     res.status(200).json({ 
-      text: extractedText,
-      confidence: 1.0 // Gemini doesn't return a simple confidence score, but is much more accurate
+      text: refinedText,
+      confidence: ocrResult.data.confidence 
     });
   } catch (error) {
-    console.error('OCR Error Details:', error);
-    
-    // Provide a more descriptive error message to the frontend
-    const errorMessage = error.message.includes('API_KEY') 
-      ? 'Gemini API Key is missing or invalid. Please check your .env file and RESTART your Docker containers.'
-      : `OCR Error: ${error.message}`;
-
+    console.error('Hybrid OCR Error:', error);
     res.status(500).json({ 
       message: 'Server Error during OCR scanning', 
-      details: errorMessage 
+      details: error.message 
     });
   }
 };
