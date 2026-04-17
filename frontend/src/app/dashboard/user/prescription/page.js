@@ -18,7 +18,7 @@ import {
   Camera,
   X,
 } from "lucide-react";
-import Tesseract from "tesseract.js";
+// Tesseract import removed to use Gemini backend
 
 export default function PrescriptionReader() {
   const { user, loading } = useAuth();
@@ -63,23 +63,33 @@ export default function PrescriptionReader() {
   const runOCR = async () => {
     if (!image) return;
     setIsProcessing(true);
+    setProgress(0);
     setError("");
 
     try {
-      const result = await Tesseract.recognize(image, "eng", {
-        logger: (m) => {
-          if (m.status === "recognizing text") {
-            setProgress(parseInt(m.progress * 100));
-          }
-        },
+      const formData = new FormData();
+      formData.append("image", image);
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/prescriptions/scan`, {
+        method: "POST",
+        body: formData,
+        headers: {
+          "Authorization": `Bearer ${user?.token}`
+        }
       });
-      setOcrText(result.data.text);
+
+      if (!response.ok) {
+        throw new Error("Failed to scan prescription. Please try again.");
+      }
+
+      const data = await response.json();
+      setOcrText(data.text);
     } catch (err) {
       console.error(err);
-      setError("OCR text extraction failed. Please try again with a clearer image.");
+      setError("OCR text extraction failed. Please try again with a clearer image or check your connection.");
     } finally {
       setIsProcessing(false);
-      setProgress(0);
+      setProgress(100);
     }
   };
 
