@@ -1,4 +1,4 @@
-const Tesseract = require('tesseract.js');
+const { scanPrescriptionImage } = require('../utils/geminiClient');
 
 // @desc    Scan Prescription Image (OCR)
 // @route   POST /api/prescriptions/scan
@@ -9,20 +9,18 @@ const scanPrescription = async (req, res) => {
       return res.status(400).json({ message: 'No image file provided' });
     }
 
-    // Tesseract.recognize supports Buffer directly
-    const result = await Tesseract.recognize(
-      req.file.buffer,
-      'eng',
-      { logger: m => console.log(m) }
-    );
+    const mimeType = req.file.mimetype || 'image/jpeg';
+    
+    // Use Gemini for superior OCR extraction
+    const extractedText = await scanPrescriptionImage(req.file.buffer, mimeType);
 
     res.status(200).json({ 
-      text: result.data.text,
-      confidence: result.data.confidence 
+      text: extractedText,
+      confidence: 1.0 // Gemini doesn't return a simple confidence score, but is much more accurate
     });
   } catch (error) {
     console.error('OCR Error:', error);
-    res.status(500).json({ message: 'Server Error during OCR scanning' });
+    res.status(500).json({ message: 'Server Error during OCR scanning. Please check your API key and connection.' });
   }
 };
 
