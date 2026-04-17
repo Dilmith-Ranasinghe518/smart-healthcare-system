@@ -19,8 +19,17 @@ const scanPrescription = async (req, res) => {
       confidence: 1.0 // Gemini doesn't return a simple confidence score, but is much more accurate
     });
   } catch (error) {
-    console.error('OCR Error:', error);
-    res.status(500).json({ message: 'Server Error during OCR scanning. Please check your API key and connection.' });
+    console.error('OCR Error Details:', error);
+    
+    // Provide a more descriptive error message to the frontend
+    const errorMessage = error.message.includes('API_KEY') 
+      ? 'Gemini API Key is missing or invalid. Please check your .env file and RESTART your Docker containers.'
+      : `OCR Error: ${error.message}`;
+
+    res.status(500).json({ 
+      message: 'Server Error during OCR scanning', 
+      details: errorMessage 
+    });
   }
 };
 
