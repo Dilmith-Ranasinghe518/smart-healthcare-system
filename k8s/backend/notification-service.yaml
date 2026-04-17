@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      containers:
+        - name: notification-service
+          image: smart-healthcare/notification-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5010
+          envFrom:
+            - configMapRef:
+                name: smart-healthcare-config
+            - secretRef:
+                name: smart-healthcare-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+spec:
+  ports:
+    - port: 5010
+      targetPort: 5010
+  selector:
+    app: notification-service

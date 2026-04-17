@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appointment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: appointment-service
+  template:
+    metadata:
+      labels:
+        app: appointment-service
+    spec:
+      containers:
+        - name: appointment-service
+          image: smart-healthcare/appointment-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5070
+          envFrom:
+            - configMapRef:
+                name: smart-healthcare-config
+            - secretRef:
+                name: smart-healthcare-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: appointment-service
+spec:
+  ports:
+    - port: 5070
+      targetPort: 5070
+  selector:
+    app: appointment-service
