@@ -18,7 +18,59 @@ import {
   Camera,
   X,
 } from "lucide-react";
-// Tesseract import removed to use Gemini backend
+// Custom Markdown Renderer for Premium UI
+const MarkdownRenderer = ({ text }) => {
+  if (!text) return null;
+
+  const lines = text.split('\n');
+  
+  return (
+    <div className="space-y-4 font-['Outfit'] text-slate-200">
+      {lines.map((line, index) => {
+        // Headers
+        if (line.trim().startsWith('# ')) {
+          return <h1 key={index} className="text-2xl font-black text-emerald-400 mt-6 mb-2">{line.replace('# ', '')}</h1>;
+        }
+        if (line.trim().startsWith('## ')) {
+          return <h2 key={index} className="text-xl font-bold text-sky-400 mt-5 mb-2">{line.replace('## ', '')}</h2>;
+        }
+        // Horizontal Rule
+        if (line.trim() === '---') {
+          return <hr key={index} className="border-slate-700 my-4" />;
+        }
+        // List Item
+        if (line.trim().startsWith('- ')) {
+          const content = line.trim().replace('- ', '');
+          const parts = content.split('**');
+          return (
+            <div key={index} className="flex gap-2 ml-2">
+              <span className="text-emerald-500 flex-shrink-0 mt-1.5">•</span>
+              <p className="text-sm leading-relaxed">
+                {parts.map((part, i) => (
+                  i % 2 === 1 ? <strong key={i} className="text-white font-bold">{part}</strong> : part
+                ))}
+              </p>
+            </div>
+          );
+        }
+        // Bold only line (non-list)
+        if (line.includes('**')) {
+          const parts = line.split('**');
+          return (
+            <p key={index} className="text-sm leading-relaxed">
+              {parts.map((part, i) => (
+                i % 2 === 1 ? <strong key={i} className="text-white font-bold">{part}</strong> : part
+              ))}
+            </p>
+          );
+        }
+        // Regular Paragraph
+        if (line.trim() === '') return <div key={index} className="h-2" />;
+        return <p key={index} className="text-sm leading-relaxed">{line}</p>;
+      })}
+    </div>
+  );
+};
 
 export default function PrescriptionReader() {
   const { user, loading } = useAuth();
@@ -330,10 +382,8 @@ export default function PrescriptionReader() {
           </div>
 
           {ocrText ? (
-            <div className="max-h-[420px] overflow-auto rounded-[24px] border border-slate-200 bg-[#0f172a] p-4">
-              <pre className="whitespace-pre-wrap font-['Outfit'] text-sm text-slate-200">
-                {ocrText}
-              </pre>
+            <div className="max-h-[500px] overflow-auto rounded-[24px] border border-slate-700 bg-[#0f172a] p-6 scrollbar-hide">
+              <MarkdownRenderer text={ocrText} />
             </div>
           ) : (
             <div className="flex h-80 flex-col items-center justify-center gap-3 rounded-[28px] border border-dashed border-slate-200 bg-[#FCFDFC] p-10 text-center">
