@@ -21,7 +21,7 @@ function getGenAI() {
  */
 async function scanPrescriptionImage(imageBuffer, mimeType = "image/jpeg") {
   const genAI = getGenAI();
-  const modelName = process.env.PRESCRIPTION_OCR_MODEL || "gemini-1.5-flash";
+  const modelName = process.env.PRESCRIPTION_OCR_MODEL || "models/gemini-1.5-flash";
 
   const model = genAI.getGenerativeModel({
     model: modelName,
