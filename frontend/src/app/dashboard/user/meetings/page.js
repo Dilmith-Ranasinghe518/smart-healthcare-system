@@ -55,7 +55,7 @@ function MeetingsContent() {
   const fetchUserAppointments = async () => {
     setFetchingAppts(true);
     try {
-      const res = await fetch(`${API_URL}/appointments/user/${user.id || user._id}`, {
+      const res = await fetch(`${API_URL}/appointments/my`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       const data = await res.json();
