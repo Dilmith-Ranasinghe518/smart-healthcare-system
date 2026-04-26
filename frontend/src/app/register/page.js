@@ -309,7 +309,6 @@ export default function Register() {
                     >
                       <option value="user">Patient (User)</option>
                       <option value="doctor">Doctor</option>
-                      <option value="admin">Administrator</option>
                     </select>
                   </div>
 
